@@ -3,17 +3,22 @@ package org.tud.sse.metrics
 
 import opal.{ClassStreamReader, OPALLogAdapter}
 
-import org.opalj.br.analyses.Project
 import org.slf4j.{Logger, LoggerFactory}
 import SingleFileAnalysisCliParser.batchModeSymbol
 import input.CliParser
 import input.CliParser.OptionMap
+import singlefileanalysis.SingleFileAnalysis
+
+import output.CsvFileOutput
 
 import java.io.{File, FilenameFilter}
-import java.net.URL
 import java.nio.file.{Files, Paths}
-import scala.util.{Failure, Success, Try}
+import scala.util.{Failure, Success}
 
+/**
+ * Command-Line parser for analyses that process single JAR files. Extends the base parser with
+ * support for the --batch-mode switch, that enables processing of multiple JAR files at once.
+ */
 class SingleFileAnalysisCliParser
   extends CliParser("Usage: MetricsBasedAnalysis [--batch-mode] [--out-file file] filename"){
 
@@ -28,18 +33,45 @@ object SingleFileAnalysisCliParser {
   def apply() = new SingleFileAnalysisCliParser()
 }
 
+/**
+ * Trait that provides an entrypoint for a SingleFileAnalysis. CLI arguments will be parsed and
+ * processed accordingly. Custom arguments will be forwarded to the analysis. Analysis results
+ * will be written to an output file if the corresponding CLI argument is set.
+ *
+ * Required CLI arguments:
+ *  - Path to input file or directory (always the last, unnamed argument)
+ *
+ * Optional CLI argument:
+ *  - --out-file <path> Path to output file, results will be written in CSV format
+ *  - --is-library If set, all JARs will be interpreted als libraries (important for entry-point detection)
+ *  - --opal-logging If set, OPAL logging will be output to CLI
+ *  - --batch-mode If set, the input file path must point to a directory. Analysis will be
+ *                 executed for all JAR files contained in that directory.
+ *
+ *
+ * @author Johannes Düsing
+ */
+trait SingleFileAnalysisApplication extends CsvFileOutput {
 
-trait SingleFileMetricsAnalysisApplication {
+  /**
+   * The Logger for this instance
+   */
+  private val log: Logger = LoggerFactory.getLogger(this.getClass)
 
-  protected val log: Logger = LoggerFactory.getLogger(this.getClass)
-
-  def doSingleFileAnalysis(project: Project[URL], customOptions: OptionMap): Try[Iterable[JarFileMetricValue]]
+  /**
+   * Method that builds the SingleFileAnalysis object for this application. Must be implemented
+   * by all subclasses. This method is called exactly once, right after all mandatory CLI
+   * parameters have been verified.
+   *
+   * @return Instance of type SingleFileAnalysis
+   */
+  protected def buildAnalysis(): SingleFileAnalysis
 
   private def initializeAnalysis(appOptions: OptionMap, analysisOptions: OptionMap): Unit = {
     val inputFilePath = appOptions(CliParser.inFileSymbol).toString
     val batchModeEnabled = appOptions.contains(SingleFileAnalysisCliParser.batchModeSymbol)
     val isLibraryFile = appOptions.contains(CliParser.isLibrarySymbol)
-    val outFileOption = appOptions.get(CliParser.outFileSymbol)
+    val outFileOption = appOptions.get(CliParser.outFileSymbol).map(_.toString)
     val opalLoggingEnabled = appOptions.contains(CliParser.enableOpalLoggingSymbol)
 
 
@@ -60,39 +92,55 @@ trait SingleFileMetricsAnalysisApplication {
     } else if(!batchModeEnabled && Files.isDirectory(Paths.get(inputFilePath))){
       log.error("No batch mode enabled but input file is directory")
     } else {
-      if(!batchModeEnabled){
-        val file = new File(inputFilePath)
+      val analysis = buildAnalysis()
+
+      val file = new File(inputFilePath)
+
+      analysis.initialize()
+
+      val results = if(!batchModeEnabled){
+
         log.debug(s"Initializing OPAL project for input file ${file.getName} ...")
         val opalProject = ClassStreamReader.createProject(file.toURI.toURL, isLibraryFile)
         log.info(s"Done initializing OPAL project.")
 
-        val result = doSingleFileAnalysis(opalProject, analysisOptions) match {
+        analysis.analyzeProject(opalProject, analysisOptions) match {
           case Success(values) =>
-            log.info(s"Got metrics for JAR ${file.getName}: ")
-            values.foreach(v => log.info(s"\t-${v.metricName}: ${v.value}"))
-            JarFileMetricsResult(file, success = true, values)
+            List(JarFileMetricsResult(file, success = true, values))
           case Failure(ex) =>
             log.error(s"Unexpected failure while processing JAR file", ex)
-            JarFileMetricsResult.analysisFailed(file)
+            List(JarFileMetricsResult.analysisFailed(file))
         }
-
-        log.info(s"Done processing JAR file ${file.getName}")
-
       } else {
-        val metricResults = handleBatch(new File(inputFilePath), analysisOptions, isLibraryFile)
+        handleBatch(analysis, file, analysisOptions, isLibraryFile)
+      }
 
-        metricResults.foreach{ res =>
-          log.info(s"Results for ${res.jarFile.getName}:")
-          res.metricValues.foreach{ v =>
-            log.info(s"\t-${v.metricName}: ${v.value}")
-          }
+      results.foreach{ res =>
+        log.info(s"Results for ${res.jarFile.getName}:")
+        res.metricValues.foreach{ v =>
+          log.info(s"\t-${v.metricName}: ${v.value}")
+        }
+      }
+
+      log.info(s"Done processing JAR file ${file.getName}")
+
+      if(outFileOption.isDefined){
+        log.info(s"Writing results to output file ${outFileOption.get}")
+        writeResultsToFile(outFileOption.get, results) match {
+          case Failure(ex) =>
+            log.error("Error writing results", ex)
+          case Success(_) =>
+            log.info(s"Done writing results to file")
         }
       }
     }
 
   }
 
-  private def handleBatch(inputDirectory: File, customOptions: OptionMap, loadAsLibrary: Boolean): Iterable[JarFileMetricsResult] = {
+  private def handleBatch(analysis: SingleFileAnalysis,
+                          inputDirectory: File,
+                          customOptions: OptionMap,
+                          loadAsLibrary: Boolean): List[JarFileMetricsResult] = {
 
     log.info(s"Batch mode: Processing all JAR files in ${inputDirectory.getPath}...")
     var count = 0
@@ -107,7 +155,7 @@ trait SingleFileMetricsAnalysisApplication {
 
         log.debug(s"Successfully initialized OPAL project for ${file.getName}")
 
-        doSingleFileAnalysis(project, customOptions) match {
+        analysis.analyzeProject(project, customOptions) match {
           case Success(values) =>
             JarFileMetricsResult(file, success = true, values)
           case Failure(ex) =>

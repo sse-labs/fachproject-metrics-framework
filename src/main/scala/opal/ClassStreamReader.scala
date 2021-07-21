@@ -24,7 +24,6 @@ import org.opalj.br.{BaseConfig, ClassFile}
 import org.opalj.br.analyses.Project
 import org.opalj.br.reader.Java8LibraryFramework
 
-import java.nio.file.{Files, Paths}
 import scala.concurrent.duration.DurationInt
 import scala.concurrent.{Await, Future}
 import scala.language.postfixOps
@@ -46,7 +45,7 @@ object ClassStreamReader {
   def readClassFiles(in: => JarInputStream,
                      reader: Java8LibraryFramework = Project.JavaClassFileReader(OPALLogAdapter.analysisLogContext, org.opalj.br.BaseConfig))
   : List[(ClassFile, String)] = org.opalj.io.process(in) { in =>
-    var je: JarEntry = in.getNextJarEntry()
+    var je: JarEntry = in.getNextJarEntry
 
     var futures: List[Future[List[(ClassFile, String)]]] = Nil
 
@@ -71,7 +70,7 @@ object ClassStreamReader {
           cfs map { cf => (cf, entryName) }
         }(org.opalj.concurrent.OPALUnboundedExecutionContext)
       }
-      je = in.getNextJarEntry()
+      je = in.getNextJarEntry
     }
 
     val result = futures.flatMap(f => Await.result(f, 2 minutes))
@@ -103,7 +102,7 @@ object ClassStreamReader {
     (new FileInputStream(org.opalj.bytecode.RTJar)), Project.JavaLibraryClassFileReader)
       .map { case (classFile, _) => (classFile, org.opalj.bytecode.RTJar.toURI.toURL) }
 
-    Project(projectClasses, libraryClasses, true, Iterable.empty)(config, OPALLogAdapter.getAnalysisLogger())
+    Project(projectClasses, libraryClasses, libraryClassFilesAreInterfacesOnly = true, Iterable.empty)(config, OPALLogAdapter.analysisLogger)
   }
 }
 

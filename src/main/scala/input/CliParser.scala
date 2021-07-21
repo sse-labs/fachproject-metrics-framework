@@ -6,11 +6,34 @@ import input.CliParser._
 import scala.annotation.tailrec
 import scala.util.{Failure, Try}
 
+/**
+ * Base class for all CLI Parsers, handles parsing of common input arguments. Also takes care
+ * of separating application arguments and analysis arguments.
+ *
+ * @param usage Usage string that will be output if there is an error while parsing
+ *
+ * @author Johannes Düsing
+ */
 abstract class CliParser(usage: String) {
 
+  /**
+   * List of additional options. If set, any input matching --<option> <value> will be appended to
+   * the applicationOptions while parsing.
+   */
   val additionalOptions: List[String]
+
+  /**
+   * List of additional switches. If set, any input matching --option will be appended to the
+   * applicationOptions while parsing.
+   */
   val additionalSwitches: List[String]
 
+  /**
+   * Entry point that processes a list of strings and outputs the application arguments and analysis
+   * arguments, if successful.
+   * @param argList List of CLI arguments (split at whitespaces)
+   * @return Try that, if successful, contains the tuple (applicationOptions, analysisOptions)
+   */
   def parseArguments(argList: List[String]): Try[(OptionMap, OptionMap)] = {
     if(argList.isEmpty){
       Failure(new Exception(usage))
