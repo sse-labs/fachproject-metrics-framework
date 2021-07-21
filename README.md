@@ -45,6 +45,27 @@ for a single JAR file is done with the following parameters:
 ```
 For more information on default CLI parameters, see **CLI Reference**.
 
-##Complex Analyses
+## Complex Analyses
+As seen above, a `SingleFileAnalysis` extracts metrics from JAR files independently. It is meant to
+be *stateless*, as it does not regard previous analysis results when processing a JAR file. However,
+sometimes metrics values depend on multiple JAR files (ie. all releases of a library), or are 
+calculated based on the differences between two JAR files (ie. number of *new* methods). For these
+cases, the `MultiFileAnalysis` can be used.
 
-##CLI Reference
+TODO
+
+## CLI Reference
+The general usage of all analyses is the following:
+```
+analysisApplication [<options>] <inputfile>
+```
+The table below lists all parameters that are available by default. Any additional parameters of 
+the form `--<option> <value>` or `--<switch>` are passed directly to your analysis implementation
+via the parameter `customOptions: OptionMap`, so you can customize your analysis via CLI.
+
+|Option|`SingleFileAnalysis`|`MultiFileAnalysis`|Description|
+---|---|---|---
+|`--out-file <value>`| Yes | Yes | Specifies that the analysis results should be written to the given file. The result file will be a CSV table.|
+|`--is-library` | Yes | Yes | If this switch is set, all OPAL projects will be loaded as libraries (as opposed to applications). This mainly affects analyses that depend on the entrypoints / callgraph of a project.|
+|`--opal-logging` | Yes | Yes | If set, all OPAL logging will be forwarded to the console. By default, all OPAL logging output is suppressed.|
+|`--batch-mode` | Yes | No | If set, the `<inputfile>` will be interpreted as a directory, and the `SingleFileAnalysis` will be executed for every JAR file contained in that directory.|
