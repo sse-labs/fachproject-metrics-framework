@@ -52,7 +52,43 @@ sometimes metrics values depend on multiple JAR files (ie. all releases of a lib
 calculated based on the differences between two JAR files (ie. number of *new* methods). For these
 cases, the `MultiFileAnalysis` can be used.
 
-TODO
+A `MultiFileAnalysis` first calculates intermediate results of a generic type `T` for every JAR file,
+and then processes those intermediate results to calculate one or more metric values. The example below
+shows an analysis that calculates the average increase in the number of methods for all
+analyzed JAR files. The intermediate result (the absolute increase in methods) is of type `Int`, therefore
+the analysis extends `MultiFileAnalysis[Int]`.
+```
+class AverageMethodDifferenceAnalysis(jarDir: File,
+                                      customOptions: OptionMap) 
+  extends MultiFileAnalysis[Int](jarDir, customOptions){
+
+  override def produceAnalysisResultForJAR(project: Project[URL],
+                                           lastResult: Option[Int]): Try[Int] = {
+    Try(project.methodsCount - lastResult.getOrElse(0))
+  }
+
+  override def produceMetricValues(): List[JarFileMetricsResult] = {
+
+    val allNewMethodCounts = analysisResultsPerFile.values.map(_.get).sum
+    val averageNewMethodCount = allNewMethodCounts.toDouble / analysisResultsPerFile.size
+    val averageNewMethodMetric = JarFileMetricValue("newmethodcount.average", averageNewMethodCount)
+
+    List(JarFileMetricsResult(jarDir, success = true, List(averageNewMethodMetric)))
+  }
+}
+```
+
+To make this example executable, it is sufficient to create an object that extends `MultiFileAnalysisApplication[Int]`,
+as shown below:
+```
+object AverageMethodsDifferenceAnalysisApp extends MultiFileAnalysisApplication[Int] {
+
+  override protected def buildAnalysis(directory: File,
+                                       analysisOptions: OptionMap): MultiFileAnalysis[Int] =
+    new AverageMethodDifferenceAnalysis(directory, analysisOptions)
+
+}
+```
 
 ## CLI Reference
 The general usage of all analyses is the following:
@@ -68,4 +104,4 @@ via the parameter `customOptions: OptionMap`, so you can customize your analysis
 |`--out-file <value>`| Yes | Yes | Specifies that the analysis results should be written to the given file. The result file will be a CSV table.|
 |`--is-library` | Yes | Yes | If this switch is set, all OPAL projects will be loaded as libraries (as opposed to applications). This mainly affects analyses that depend on the entrypoints / callgraph of a project.|
 |`--opal-logging` | Yes | Yes | If set, all OPAL logging will be forwarded to the console. By default, all OPAL logging output is suppressed.|
-|`--batch-mode` | Yes | No | If set, the `<inputfile>` will be interpreted as a directory, and the `SingleFileAnalysis` will be executed for every JAR file contained in that directory.|
+|`--batch-mode`| Yes | No | If set, the `<inputfile>` will be interpreted as a directory, and the `SingleFileAnalysis` will be executed for every JAR file contained in that directory.|
