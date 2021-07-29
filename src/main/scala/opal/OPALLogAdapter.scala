@@ -17,7 +17,7 @@ object OPALLogAdapter extends OPALLogger {
   final val emptyLogger = DevNullLogger
   final val consoleLogger = OPALLogAdapter
 
-  var analysisLogContext = new StandardLogContext()
+  final val analysisLogContext = new StandardLogContext()
 
   OPALLogger.register(analysisLogContext, emptyLogger)
   OPALLogger.updateLogger(GlobalLogContext, emptyLogger)
@@ -39,7 +39,7 @@ object OPALLogAdapter extends OPALLogger {
   /**
    * Logger currently used by the analysis framework
    */
-  val analysisLogger: OPALLogger = if(opalLoggingEnabled) consoleLogger else emptyLogger
+  def analysisLogger: OPALLogger = if(opalLoggingEnabled) consoleLogger else emptyLogger
 
   /**
    * Method that enables or disables OPAL logging entirely. If enabled, all log levels of OPAL will
@@ -50,6 +50,8 @@ object OPALLogAdapter extends OPALLogger {
    */
   def setOpalLoggingEnabled(enabled: Boolean): Unit = {
     opalLoggingEnabled = enabled
+
+    OPALLogger.updateLogger(GlobalLogContext, analysisLogger)
 
     if(OPALLogger.isUnregistered(analysisLogContext))
       OPALLogger.register(analysisLogContext, analysisLogger)
