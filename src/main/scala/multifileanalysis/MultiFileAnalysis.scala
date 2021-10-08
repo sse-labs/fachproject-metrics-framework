@@ -23,12 +23,7 @@ import scala.util.Try
  *
  * @author Johannes Düsing
  */
-abstract class MultiFileAnalysis[T](directory: File, customOptions: OptionMap) {
-
-  /**
-   * The logger for this instance
-   */
-  protected val log: Logger = LoggerFactory.getLogger(this.getClass)
+abstract class MultiFileAnalysis[T](directory: File, customOptions: OptionMap) extends NamedAnalysis {
 
   /**
    * Map that contains the intermediate results for each JAR file. Technically the map contains
@@ -36,15 +31,6 @@ abstract class MultiFileAnalysis[T](directory: File, customOptions: OptionMap) {
    * being filled automatically by an enclosing MultiFileAnalysisApplication.
    */
   val analysisResultsPerFile: mutable.Map[File, Try[T]] = mutable.HashMap[File, Try[T]]()
-
-  /**
-   * This method is being called by an enclosing MultiFileAnalysisApplication after this analysis
-   * is initialized, but before any JAR files are being processed. It can be used to initialize
-   * custom data structures.
-   */
-  def initialize(): Unit = {
-    log.info("Analysis initialized")
-  }
 
   /**
    * This method is called by an enclosing MultiFileAnalysisApplication for each JAR file individually.

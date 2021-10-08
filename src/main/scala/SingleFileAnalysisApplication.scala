@@ -6,9 +6,8 @@ import opal.{ClassStreamReader, OPALLogAdapter}
 import org.slf4j.{Logger, LoggerFactory}
 import SingleFileAnalysisCliParser.batchModeSymbol
 import input.CliParser
-import input.CliParser.OptionMap
+import input.CliParser.{OptionMap, includeAnalysisSymbol}
 import singlefileanalysis.SingleFileAnalysis
-
 import output.CsvFileOutput
 
 import java.io.{File, FilenameFilter}
@@ -34,9 +33,11 @@ object SingleFileAnalysisCliParser {
 }
 
 /**
- * Trait that provides an entrypoint for a SingleFileAnalysis. CLI arguments will be parsed and
- * processed accordingly. Custom arguments will be forwarded to the analysis. Analysis results
- * will be written to an output file if the corresponding CLI argument is set.
+ * Trait that provides an entrypoint for running SingleFileAnalyses. CLI arguments will be parsed and
+ * processed accordingly. Custom arguments will be forwarded to each analysis. Analysis results
+ * will be written to an output file if the corresponding CLI argument is set. Multiple Analyses implementations
+ * can be registered for a single application. Individual analysis implementations can be excluded or included via
+ * CLI.
  *
  * Required CLI arguments:
  *  - Path to input file or directory (always the last, unnamed argument)
@@ -47,6 +48,12 @@ object SingleFileAnalysisCliParser {
  *  - --opal-logging If set, OPAL logging will be output to CLI
  *  - --batch-mode If set, the input file path must point to a directory. Analysis will be
  *                 executed for all JAR files contained in that directory.
+ *  - --exclude-analysis <name> Used to specify the name of an analysis that will be excluded when running the
+ *                              application. May be specified multiple times to exclude multiple analyses.
+ *  - --include-analysis <name> Used to specify the name of an analysis that will be included when running the
+ *                              application. May be specified multiple times to include multiple analyses. Specifying
+ *                              this option will disabled all 'exclude' specifications.
+ *
  *
  *
  * @author Johannes Düsing
@@ -59,85 +66,92 @@ trait SingleFileAnalysisApplication extends CsvFileOutput {
   private val log: Logger = LoggerFactory.getLogger(this.getClass)
 
   /**
-   * Method that builds the SingleFileAnalysis object for this application. Must be implemented
-   * by all subclasses. This method is called exactly once, right after all mandatory CLI
-   * parameters have been verified.
+   * Override this method to return all analyses that this application can execute.
    *
-   * @return Instance of type SingleFileAnalysis
+   * @return Sequence of SingleFileAnalyses that can be enabled or disabled via CLI parameters
    */
-  protected def buildAnalysis(): SingleFileAnalysis
+  protected def registeredAnalyses(): Seq[SingleFileAnalysis]
 
-  private def initializeAnalysis(appOptions: OptionMap, analysisOptions: OptionMap): Unit = {
-    val inputFilePath = appOptions(CliParser.inFileSymbol).toString
-    val batchModeEnabled = appOptions.contains(SingleFileAnalysisCliParser.batchModeSymbol)
-    val isLibraryFile = appOptions.contains(CliParser.isLibrarySymbol)
-    val outFileOption = appOptions.get(CliParser.outFileSymbol).map(_.toString)
-    val opalLoggingEnabled = appOptions.contains(CliParser.enableOpalLoggingSymbol)
+  def validateApplicationOptions(appOptions: OptionMap): Option[ApplicationConfiguration] = {
+    log.info(s"The following analyses are available for execution :${registeredAnalyses().map(_.analysisName).mkString(",")}")
 
+    val appConfiguration = ApplicationConfiguration.fromOptionsSingleFile(appOptions)
 
-    log.info("Running analysis with parameters:")
-    log.info(s"\t- Input: $inputFilePath")
-    log.info(s"\t- Batch Mode Enabled: $batchModeEnabled")
-    log.info(s"\t- Output File: ${outFileOption.getOrElse("None")}")
-    log.info(s"\t- Treat JAR as Library: $isLibraryFile")
-    log.info(s"\t- OPAL Logging Enabled: $opalLoggingEnabled")
+    // Validate usage of analysis includes and exculdes
+    if(appConfiguration.excludedAnalysesNames.nonEmpty && appConfiguration.includedAnalysesNames.nonEmpty){
+      log.warn(s"Both analysis includes and analysis excludes have been specified. Only includes will be accounted for.")
+    }
 
-
-    OPALLogAdapter.setOpalLoggingEnabled(opalLoggingEnabled)
-
-    if(!Files.exists(Paths.get(inputFilePath))){
+    // Validate input file path
+    if(!Files.exists(appConfiguration.inputFile.toPath)){
       log.error("Input file does not exist")
-    } else if(batchModeEnabled && !Files.isDirectory(Paths.get(inputFilePath))){
+      None
+    } else if(appConfiguration.batchModeEnabled.get && !Files.isDirectory(appConfiguration.inputFile.toPath)){
       log.error("Batch mode enabled but input file is no directory")
-    } else if(!batchModeEnabled && Files.isDirectory(Paths.get(inputFilePath))){
+      None
+    } else if(!appConfiguration.batchModeEnabled.get && Files.isDirectory(appConfiguration.inputFile.toPath)) {
       log.error("No batch mode enabled but input file is directory")
+      None
     } else {
-      val analysis = buildAnalysis()
+      appConfiguration.logInfo(log)
+      Some(appConfiguration)
+    }
+  }
 
-      val file = new File(inputFilePath)
+  def calculateResults(appConfiguration: ApplicationConfiguration, analysisOptions: OptionMap): List[JarFileMetricsResult] = {
+    val effectiveAnalysisNames = appConfiguration.getActiveAnalysisNamesFor(registeredAnalyses())
 
-      analysis.initialize()
+    OPALLogAdapter.setOpalLoggingEnabled(appConfiguration.opalLoggingEnabled)
 
-      val results = if(!batchModeEnabled){
+    val analyses = registeredAnalyses()
+      .filter(a => effectiveAnalysisNames.contains(a.analysisName))
 
-        log.debug(s"Initializing OPAL project for input file ${file.getName} ...")
-        val opalProject = ClassStreamReader.createProject(file.toURI.toURL, isLibraryFile)
-        log.info(s"Done initializing OPAL project.")
+    analyses.foreach(_.initialize())
 
-        analysis.analyzeProject(opalProject, analysisOptions) match {
-          case Success(values) =>
-            List(JarFileMetricsResult(file, success = true, values))
-          case Failure(ex) =>
-            log.error(s"Unexpected failure while processing JAR file", ex)
-            List(JarFileMetricsResult.analysisFailed(file))
+    if(!appConfiguration.batchModeEnabled.get){
+
+      val file = appConfiguration.inputFile
+
+      log.debug(s"Initializing OPAL project for input file ${file.getName} ...")
+      val opalProject = ClassStreamReader.createProject(file.toURI.toURL, appConfiguration.treatFilesAsLibrary)
+      log.info(s"Done initializing OPAL project.")
+
+      analyses
+        .map { analysis =>
+          analysis.analyzeProject(opalProject, analysisOptions) match {
+            case Success(values) =>
+              JarFileMetricsResult(analysis.analysisName, file, success = true, values)
+            case Failure(ex) =>
+              log.error(s"Unexpected failure while processing JAR file", ex)
+              JarFileMetricsResult.analysisFailed(analysis.analysisName, file)
+          }
         }
-      } else {
-        handleBatch(analysis, file, analysisOptions, isLibraryFile)
-      }
+        .toList
+    } else {
+      handleBatch(analyses, appConfiguration.inputFile, analysisOptions, appConfiguration.treatFilesAsLibrary)
+    }
+  }
 
-      results.foreach{ res =>
-        log.info(s"Results for ${res.jarFile.getName}:")
-        res.metricValues.foreach{ v =>
-          log.info(s"\t-${v.metricName}: ${v.value}")
-        }
-      }
-
-      log.info(s"Done processing JAR file ${file.getName}")
-
-      if(outFileOption.isDefined){
-        log.info(s"Writing results to output file ${outFileOption.get}")
-        writeResultsToFile(outFileOption.get, results) match {
-          case Failure(ex) =>
-            log.error("Error writing results", ex)
-          case Success(_) =>
-            log.info(s"Done writing results to file")
-        }
+  def handleResults(results: List[JarFileMetricsResult], appConfiguration: ApplicationConfiguration): Unit = {
+    results.foreach{ res =>
+      log.info(s"Results for analysis '${res.analysisName}' on file ${res.jarFile.getName}:")
+      res.metricValues.foreach{ v =>
+        log.info(s"\t-${v.metricName}: ${v.value}")
       }
     }
 
+    if(appConfiguration.outFileOption.isDefined){
+      log.info(s"Writing results to output file ${appConfiguration.outFileOption.get}")
+      writeResultsToFile(appConfiguration.outFileOption.get, results) match {
+        case Failure(ex) =>
+          log.error("Error writing results", ex)
+        case Success(_) =>
+          log.info(s"Done writing results to file")
+      }
+    }
   }
 
-  private def handleBatch(analysis: SingleFileAnalysis,
+  private def handleBatch(analyses: Seq[SingleFileAnalysis],
                           inputDirectory: File,
                           customOptions: OptionMap,
                           loadAsLibrary: Boolean): List[JarFileMetricsResult] = {
@@ -149,19 +163,23 @@ trait SingleFileAnalysisApplication extends CsvFileOutput {
       .listFiles(new FilenameFilter {
         override def accept(dir: File, name: String): Boolean = name.toLowerCase.endsWith(".jar")
       })
-      .map{ file =>
+      .flatMap{ file =>
         count += 1
         val project = ClassStreamReader.createProject(file.toURI.toURL, loadAsLibrary)
 
         log.debug(s"Successfully initialized OPAL project for ${file.getName}")
 
-        analysis.analyzeProject(project, customOptions) match {
-          case Success(values) =>
-            JarFileMetricsResult(file, success = true, values)
-          case Failure(ex) =>
-            log.error(s"Unexpected failure while processing JAR file", ex)
-            JarFileMetricsResult.analysisFailed(file)
-        }
+        analyses
+          .map { analysis =>
+            analysis.analyzeProject(project, customOptions) match {
+              case Success(values) =>
+                JarFileMetricsResult(analysis.analysisName, file, success = true, values)
+              case Failure(ex) =>
+                log.error(s"Unexpected failure while processing JAR file", ex)
+                JarFileMetricsResult.analysisFailed(analysis.analysisName, file)
+            }
+          }
+          .toList
       }
       .toList
 
@@ -177,7 +195,13 @@ trait SingleFileAnalysisApplication extends CsvFileOutput {
         if !appOptions.contains(CliParser.inFileSymbol) =>
         log.error("Missing required parameter infile")
       case Success((appOptions, analysisOptions)) =>
-        initializeAnalysis(appOptions, analysisOptions)
+        validateApplicationOptions(appOptions) match {
+          case Some(appConfig) =>
+            val results = calculateResults(appConfig, analysisOptions)
+            handleResults(results, appConfig)
+          case None =>
+            System.exit(1)
+        }
       case Failure(ex) =>
         log.error(s"Error parsing options: ${ex.getMessage}")
     }

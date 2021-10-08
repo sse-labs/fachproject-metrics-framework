@@ -14,21 +14,7 @@ import scala.util.Try
  *
  * @author Johannes Düsing
  */
-trait SingleFileAnalysis {
-
-  /**
-   * The logger for this instance
-   */
-  protected val log: Logger = LoggerFactory.getLogger(this.getClass)
-
-  /**
-   * This method is being called by an enclosing SingleFileAnalysisApplication after this analysis
-   * is initialized, but before any JAR files are being processed. It can be used to initialize
-   * custom data structures.
-   */
-  def initialize(): Unit = {
-    log.info("Analysis initialized")
-  }
+trait SingleFileAnalysis extends NamedAnalysis {
 
   /**
    * This method is called by an enclosing SingleFileAnalysisApplication for an individual JAR file.

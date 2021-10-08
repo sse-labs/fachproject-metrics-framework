@@ -8,11 +8,9 @@ import singlefileanalysis.SingleFileAnalysis
 import java.net.URL
 import scala.util.Try
 
-object NumberOfMethodsAnalysis extends SingleFileAnalysisApplication with SingleFileAnalysis {
+class NumberOfMethodsAnalysis extends SingleFileAnalysis {
 
   private val countProjectMethodsOnlySymbol: Symbol = Symbol("count-project-only")
-
-  override protected def buildAnalysis(): SingleFileAnalysis = this
 
   override def analyzeProject(project: Project[URL], customOptions: OptionMap): Try[Iterable[JarFileMetricValue]] = Try {
 
@@ -23,6 +21,5 @@ object NumberOfMethodsAnalysis extends SingleFileAnalysisApplication with Single
     List(JarFileMetricValue("methods.count", metric))
   }
 
-
-
+  override def analysisName: String = "method.count"
 }

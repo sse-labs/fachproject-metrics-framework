@@ -59,6 +59,18 @@ abstract class CliParser(usage: String) {
         // Hardcoded options valid for all analyses
       case "--out-file" :: value :: tail =>
         nextOption(appOptions ++ Map(outFileSymbol -> value), analysisOptions, tail)
+      case "--exclude-analysis" :: value :: tail if appOptions.contains(excludeAnalysisSymbol) =>
+        val newAppOptions = appOptions.updated(excludeAnalysisSymbol,
+          appOptions(excludeAnalysisSymbol).asInstanceOf[List[String]] ++ List(value))
+        nextOption(newAppOptions, analysisOptions, tail)
+      case "--exclude-analysis" :: value :: tail =>
+        nextOption(appOptions ++ Map(excludeAnalysisSymbol -> List(value)), analysisOptions, tail)
+      case "--include-analysis" :: value :: tail if appOptions.contains(includeAnalysisSymbol) =>
+        val newAppOptions = appOptions.updated(includeAnalysisSymbol,
+          appOptions(includeAnalysisSymbol).asInstanceOf[List[String]] ++ List(value))
+        nextOption(newAppOptions, analysisOptions, tail)
+      case "--include-analysis" :: value :: tail =>
+        nextOption(appOptions ++ Map(includeAnalysisSymbol -> List(value)), analysisOptions, tail)
         // Hardcoded switches valid for all analyses
       case "--is-library" :: tail =>
         nextOption(appOptions ++ Map(isLibrarySymbol -> true), analysisOptions, tail)
@@ -94,4 +106,7 @@ object CliParser {
   val inFileSymbol: Symbol = Symbol("infile")
   val isLibrarySymbol: Symbol = Symbol("is-library")
   val enableOpalLoggingSymbol: Symbol = Symbol("enabled-logging")
+  val excludeAnalysisSymbol: Symbol = Symbol("exclude-analysis")
+  val includeAnalysisSymbol: Symbol = Symbol("include-analysis")
+
 }

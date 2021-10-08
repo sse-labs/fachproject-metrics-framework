@@ -6,8 +6,9 @@ import org.slf4j.{Logger, LoggerFactory}
 import multifileanalysis.MultiFileAnalysis
 import input.CliParser.OptionMap
 import opal.{ClassStreamReader, OPALLogAdapter}
-
 import output.CsvFileOutput
+
+import org.tud.sse.metrics.impl.{AverageMethodDifferenceAnalysis, AverageNumberOfMethodsAnalysis}
 
 import java.io.{File, FilenameFilter}
 import java.nio.file.{Files, Paths}
@@ -57,6 +58,11 @@ trait MultiFileAnalysisApplication[T] extends CsvFileOutput {
    * @return Instance of type MultiFileAnalysis with intermediate result type T
    */
   protected def buildAnalysis(directory: File, analysisOptions: OptionMap): MultiFileAnalysis[T]
+
+  protected def buildAnalyses(directory: File, analysisOptions: OptionMap): Seq[MultiFileAnalysis[_]] = Seq (
+    new AverageNumberOfMethodsAnalysis(directory, analysisOptions),
+    new AverageMethodDifferenceAnalysis(directory, analysisOptions)
+  )
 
 
   /**

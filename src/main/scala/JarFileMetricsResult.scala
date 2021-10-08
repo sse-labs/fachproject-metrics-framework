@@ -11,7 +11,7 @@ import java.io.File
  * @param success Boolean indicating the success of all calculations involved
  * @param metricValues Iterable of MetricsValues for this file
  */
-case class JarFileMetricsResult (jarFile: File, success: Boolean, metricValues: Iterable[JarFileMetricValue])
+case class JarFileMetricsResult (analysisName: String, jarFile: File, success: Boolean, metricValues: Iterable[JarFileMetricValue])
 
 object JarFileMetricsResult {
   /**
@@ -19,7 +19,8 @@ object JarFileMetricsResult {
    * @param jarFile JAR file or directory for which the analysis has failed
    * @return JarFileMetricsResult with success set to false, and an empty List of MetricValues
    */
-  def analysisFailed(jarFile: File): JarFileMetricsResult = JarFileMetricsResult(jarFile, success = false, List())
+  def analysisFailed(analysisName: String, jarFile: File): JarFileMetricsResult =
+    JarFileMetricsResult(analysisName, jarFile, success = false, List())
 }
 
 /**

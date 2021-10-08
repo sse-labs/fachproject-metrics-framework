@@ -43,8 +43,10 @@ class AverageNumberOfMethodsAnalysis(directory: File, customOptions: OptionMap)
       analysisResultsPerFile.values.map(_.get).sum.toDouble / analysisResultsPerFile.size.toDouble
 
     val metricList = List(JarFileMetricValue("methods.average", averageMethods))
-    List(JarFileMetricsResult(directory, success = true, metricList))
+    List(JarFileMetricsResult(analysisName, directory, success = true, metricList))
   }
+
+  override def analysisName: String = "methods.average"
 }
 
 /**

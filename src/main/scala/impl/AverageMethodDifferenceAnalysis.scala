@@ -25,8 +25,10 @@ class AverageMethodDifferenceAnalysis(jarDir: File,
     val averageNewMethodCount = allNewMethodCounts.toDouble / analysisResultsPerFile.size
     val averageNewMethodMetric = JarFileMetricValue("newmethodcount.average", averageNewMethodCount)
 
-    List(JarFileMetricsResult(jarDir, success = true, List(averageNewMethodMetric)))
+    List(JarFileMetricsResult(analysisName, jarDir, success = true, List(averageNewMethodMetric)))
   }
+
+  override def analysisName: String = "method-difference.avg"
 }
 
 object AverageMethodsDifferenceAnalysisApp extends MultiFileAnalysisApplication[Int] {
