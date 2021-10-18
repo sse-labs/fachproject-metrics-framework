@@ -1,22 +1,21 @@
 package org.tud.sse.metrics
 package impl
 
-import multifileanalysis.MultiFileAnalysis
+import analysis.{JarFileMetricValue, JarFileMetricsResult, MultiFileAnalysis}
+import input.CliParser.OptionMap
 
 import org.opalj.br.analyses.Project
-import org.tud.sse.metrics.input.CliParser.OptionMap
 
 import java.io.File
 import java.net.URL
 import scala.util.Try
 
-class AverageMethodDifferenceAnalysis(jarDir: File,
-                                      customOptions: OptionMap)
-  extends MultiFileAnalysis[Int](jarDir, customOptions){
+class AverageMethodDifferenceAnalysis(jarDir: File) extends MultiFileAnalysis[Long](jarDir){
 
   override def produceAnalysisResultForJAR(project: Project[URL],
-                                           lastResult: Option[Int]): Try[Int] = {
-    Try(project.methodsCount - lastResult.getOrElse(0))
+                                           lastResult: Option[Long],
+                                           customOptions: OptionMap): Try[Long] = {
+    Try(project.methodsCount - lastResult.getOrElse(0L))
   }
 
   override def produceMetricValues(): List[JarFileMetricsResult] = {
@@ -29,12 +28,4 @@ class AverageMethodDifferenceAnalysis(jarDir: File,
   }
 
   override def analysisName: String = "method-difference.avg"
-}
-
-object AverageMethodsDifferenceAnalysisApp extends MultiFileAnalysisApplication[Int] {
-
-  override protected def buildAnalysis(directory: File,
-                                       analysisOptions: OptionMap): MultiFileAnalysis[Int] =
-    new AverageMethodDifferenceAnalysis(directory, analysisOptions)
-
 }

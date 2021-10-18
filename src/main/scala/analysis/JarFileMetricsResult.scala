@@ -1,4 +1,5 @@
 package org.tud.sse.metrics
+package analysis
 
 import java.io.File
 
@@ -7,6 +8,7 @@ import java.io.File
  * may calculate multiple metrics values for a single file / directory, it contains a list of
  * JarFileMetricValues.
  *
+ * @param analysisName Name of the analysis that produced this result
  * @param jarFile JAR file / directory that has been analyzed
  * @param success Boolean indicating the success of all calculations involved
  * @param metricValues Iterable of MetricsValues for this file

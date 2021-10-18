@@ -1,9 +1,9 @@
 package org.tud.sse.metrics
-package singlefileanalysis
+package analysis
+
+import input.CliParser.OptionMap
 
 import org.opalj.br.analyses.Project
-import org.slf4j.{Logger, LoggerFactory}
-import input.CliParser.OptionMap
 
 import java.net.URL
 import scala.util.Try
@@ -23,7 +23,7 @@ trait SingleFileAnalysis extends NamedAnalysis {
    * should typically be stateless, for state-dependent analyses on multiple JAR files a
    * MultiFileAnalysis should be used.
    *
-   * @param project Fully initialized OPAL project representing the JAR file under analysis
+   * @param project       Fully initialized OPAL project representing the JAR file under analysis
    * @param customOptions Custom analysis options taken from the CLI. Can be used to modify behavior
    *                      of the analysis via command-line
    * @return Try object that, if successful, holds a set of metrics values.

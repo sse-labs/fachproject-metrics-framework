@@ -1,17 +1,14 @@
 package org.tud.sse.metrics
+package application
 
-
+import analysis.{JarFileMetricsResult, SingleFileAnalysis}
+import application.SingleFileAnalysisCliParser.batchModeSymbol
+import input.CliParser
+import input.CliParser.OptionMap
 import opal.{ClassStreamReader, OPALLogAdapter}
 
-import org.slf4j.{Logger, LoggerFactory}
-import SingleFileAnalysisCliParser.batchModeSymbol
-import input.CliParser
-import input.CliParser.{OptionMap, includeAnalysisSymbol}
-import singlefileanalysis.SingleFileAnalysis
-import output.CsvFileOutput
-
 import java.io.{File, FilenameFilter}
-import java.nio.file.{Files, Paths}
+import java.nio.file.Files
 import scala.util.{Failure, Success}
 
 /**
@@ -58,22 +55,17 @@ object SingleFileAnalysisCliParser {
  *
  * @author Johannes Düsing
  */
-trait SingleFileAnalysisApplication extends CsvFileOutput {
+trait SingleFileAnalysisApplication extends FileAnalysisApplication {
+
+  override val cliParser: CliParser = SingleFileAnalysisCliParser()
 
   /**
-   * The Logger for this instance
+   * Sequence of analyses that can be selected for execution in this application
    */
-  private val log: Logger = LoggerFactory.getLogger(this.getClass)
+  protected val registeredAnalyses: Seq[SingleFileAnalysis]
 
-  /**
-   * Override this method to return all analyses that this application can execute.
-   *
-   * @return Sequence of SingleFileAnalyses that can be enabled or disabled via CLI parameters
-   */
-  protected def registeredAnalyses(): Seq[SingleFileAnalysis]
-
-  def validateApplicationOptions(appOptions: OptionMap): Option[ApplicationConfiguration] = {
-    log.info(s"The following analyses are available for execution :${registeredAnalyses().map(_.analysisName).mkString(",")}")
+  override def validateApplicationOptions(appOptions: OptionMap): Option[ApplicationConfiguration] = {
+    log.info(s"The following analyses are available for execution :${registeredAnalyses.map(_.analysisName).mkString(",")}")
 
     val appConfiguration = ApplicationConfiguration.fromOptionsSingleFile(appOptions)
 
@@ -98,12 +90,12 @@ trait SingleFileAnalysisApplication extends CsvFileOutput {
     }
   }
 
-  def calculateResults(appConfiguration: ApplicationConfiguration, analysisOptions: OptionMap): List[JarFileMetricsResult] = {
-    val effectiveAnalysisNames = appConfiguration.getActiveAnalysisNamesFor(registeredAnalyses())
+  override def calculateResults(appConfiguration: ApplicationConfiguration, analysisOptions: OptionMap): List[JarFileMetricsResult] = {
+    val effectiveAnalysisNames = appConfiguration.getActiveAnalysisNamesFor(registeredAnalyses)
 
     OPALLogAdapter.setOpalLoggingEnabled(appConfiguration.opalLoggingEnabled)
 
-    val analyses = registeredAnalyses()
+    val analyses = registeredAnalyses
       .filter(a => effectiveAnalysisNames.contains(a.analysisName))
 
     analyses.foreach(_.initialize())
@@ -129,25 +121,6 @@ trait SingleFileAnalysisApplication extends CsvFileOutput {
         .toList
     } else {
       handleBatch(analyses, appConfiguration.inputFile, analysisOptions, appConfiguration.treatFilesAsLibrary)
-    }
-  }
-
-  def handleResults(results: List[JarFileMetricsResult], appConfiguration: ApplicationConfiguration): Unit = {
-    results.foreach{ res =>
-      log.info(s"Results for analysis '${res.analysisName}' on file ${res.jarFile.getName}:")
-      res.metricValues.foreach{ v =>
-        log.info(s"\t-${v.metricName}: ${v.value}")
-      }
-    }
-
-    if(appConfiguration.outFileOption.isDefined){
-      log.info(s"Writing results to output file ${appConfiguration.outFileOption.get}")
-      writeResultsToFile(appConfiguration.outFileOption.get, results) match {
-        case Failure(ex) =>
-          log.error("Error writing results", ex)
-        case Success(_) =>
-          log.info(s"Done writing results to file")
-      }
     }
   }
 
@@ -187,26 +160,4 @@ trait SingleFileAnalysisApplication extends CsvFileOutput {
 
     results
   }
-
-  final def main(arguments: Array[String]): Unit = {
-    val parser: CliParser = SingleFileAnalysisCliParser()
-    parser.parseArguments(arguments.toList) match {
-      case Success((appOptions, _))
-        if !appOptions.contains(CliParser.inFileSymbol) =>
-        log.error("Missing required parameter infile")
-      case Success((appOptions, analysisOptions)) =>
-        validateApplicationOptions(appOptions) match {
-          case Some(appConfig) =>
-            val results = calculateResults(appConfig, analysisOptions)
-            handleResults(results, appConfig)
-          case None =>
-            System.exit(1)
-        }
-      case Failure(ex) =>
-        log.error(s"Error parsing options: ${ex.getMessage}")
-    }
-
-  }
-
-
 }

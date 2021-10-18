@@ -1,9 +1,9 @@
 package org.tud.sse.metrics
-package multifileanalysis
+package analysis
+
+import input.CliParser.OptionMap
 
 import org.opalj.br.analyses.Project
-import org.slf4j.{Logger, LoggerFactory}
-import input.CliParser.OptionMap
 
 import java.io.File
 import java.net.URL
@@ -17,33 +17,60 @@ import scala.util.Try
  * those intermediate results into one or more metric values.
  *
  * @param directory Directory containing all JAR files that are being analyzed
- * @param customOptions Custom analysis options taken from the CLI. Can be used to modify behavior
- *                      of the analysis via command-line
  * @tparam T Type of the intermediate results produced for each JAR file in the folder
  *
  * @author Johannes Düsing
  */
-abstract class MultiFileAnalysis[T](directory: File, customOptions: OptionMap) extends NamedAnalysis {
+abstract class MultiFileAnalysis[T](directory: File) extends NamedAnalysis {
 
   /**
    * Map that contains the intermediate results for each JAR file. Technically the map contains
    * values of type Try[T], as the calculation of intermediate results may fail. This map is
    * being filled automatically by an enclosing MultiFileAnalysisApplication.
    */
-  val analysisResultsPerFile: mutable.Map[File, Try[T]] = mutable.HashMap[File, Try[T]]()
+  protected val analysisResultsPerFile: mutable.Map[File, Try[T]] = mutable.HashMap[File, Try[T]]()
+
+  /**
+   * Result of the last file analysis performed by this instance
+   */
+  private var lastResult: Option[T] = None
 
   /**
    * This method is called by an enclosing MultiFileAnalysisApplication for each JAR file individually.
+   * It calculates the intermediate results of type Try[T], keeps track of the last file results and updates
+   * the analysisResultsPerFile map automatically.
+   *
+   * @param project Fully initialized OPAL project representing the JAR file under analysis
+   * @param file File that is currently being analyzed
+   * @param customOptions Custom analysis options taken from the CLI. Can be used to modify behavior
+   *                      of the analysis via command-line
+   * @return Result of the analysis execution
+   */
+  final def analyzeNext(project:Project[URL], file: File, customOptions: OptionMap): Try[T] = {
+
+    val result = produceAnalysisResultForJAR(project, lastResult, customOptions)
+
+    analysisResultsPerFile.put(file, result)
+
+    lastResult = result.toOption
+
+    result
+  }
+
+  /**
+   * This method is called to execute the analysis for each JAR file individually.
    * It calculates the intermediate results of type Try[T], which will be stored in the
-   * analysisResultsPerFile map automatically by an enclosing MultiFileAnalysisApplication.
+   * analysisResultsPerFile map automatically by the enclosing analyzeNext call.
    *
    * @param project Fully initialized OPAL project representing the JAR file under analysis
    * @param lastResult Option that contains the intermediate result for the previous JAR file, if
    *                   available. This makes differential analyses easier to implement. This argument
    *                   may be None if either this is the first JAR file or the last calculation failed.
+   * @param customOptions Custom analysis options taken from the CLI. Can be used to modify behavior
+   *                      of the analysis via command-line
    * @return Try[T] object holding the intermediate result, if successful
    */
-  def produceAnalysisResultForJAR(project: Project[URL], lastResult: Option[T]): Try[T]
+  protected def produceAnalysisResultForJAR(project: Project[URL], lastResult: Option[T], customOptions: OptionMap): Try[T]
 
   /**
    * This method is called after all individual intermediate results have been calculated. It may

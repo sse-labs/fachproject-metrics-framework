@@ -1,0 +1,92 @@
+package org.tud.sse.metrics
+package application
+
+import analysis.JarFileMetricsResult
+import input.CliParser
+import input.CliParser.OptionMap
+import output.CsvFileOutput
+
+import org.slf4j.{Logger, LoggerFactory}
+
+import scala.util.{Failure, Success}
+
+/**
+ * Base trait for applications that execute any kind of analysis on JAR files. Provides Lifecycle Hooks,
+ * export functionality and logging access.
+ */
+trait FileAnalysisApplication extends CsvFileOutput{
+
+  /**
+   * The logger for this instance
+   */
+  protected final val log: Logger = LoggerFactory.getLogger(this.getClass)
+
+  /**
+   * The CLI Parser instance to use for this application.
+   */
+  protected val cliParser: CliParser
+
+  /**
+   * Method that validates the application options and, if they are valid, creates a corresponding
+   * ApplicationConfiguration object. If the options are invalid, None shall be returned. This method
+   * is called before any analysis is initialized.
+   * @param appOptions The application options produced by the CLI parser
+   * @return Option holding the ApplicationConfiguration, or None
+   */
+  def validateApplicationOptions(appOptions: OptionMap): Option[ApplicationConfiguration]
+
+  /**
+   * Method that executes all analyses on the input file(s) and produces the resulting List of JarFileMetrics.
+   * @param appConfiguration ApplicationConfiguration object as produced by "validateApplicationOptions"
+   * @param analysisOptions Custom analysis options produced by the CLI parser
+   * @return List of JarFileMetricsResults
+   */
+  def calculateResults(appConfiguration: ApplicationConfiguration, analysisOptions: OptionMap): List[JarFileMetricsResult]
+
+  /**
+   * Prints results to the CLI and writes them to a CSV report if specified by the
+   * application configuration.
+   * @param results Results to process
+   * @param appConfiguration ApplicationConfiguration object
+   */
+  def handleResults(results: List[JarFileMetricsResult], appConfiguration: ApplicationConfiguration): Unit = {
+    results.foreach { res =>
+      log.info(s"Results for analysis '${res.analysisName}' on file ${res.jarFile.getName}:")
+      res.metricValues.foreach { v =>
+        log.info(s"\t-${v.metricName}: ${v.value}")
+      }
+    }
+
+    if (appConfiguration.outFileOption.isDefined) {
+      log.info(s"Writing results to output file ${appConfiguration.outFileOption.get}")
+      writeResultsToFile(appConfiguration.outFileOption.get, results) match {
+        case Failure(ex) =>
+          log.error("Error writing results", ex)
+        case Success(_) =>
+          log.info(s"Done writing results to file")
+      }
+    }
+  }
+
+  /**
+   * The main entrypoint for every analysis application. Parses CLI input and controls the application lifecycle.
+   * @param arguments List of arguments
+   */
+  final def main(arguments: Array[String]): Unit = {
+    cliParser.parseArguments(arguments.toList) match {
+      case Success((appOptions, _))
+        if !appOptions.contains(CliParser.inFileSymbol) =>
+        log.error("Missing required parameter infile")
+      case Success((appOptions, analysisOptions)) =>
+        validateApplicationOptions(appOptions) match {
+          case Some(appConfig) =>
+            val results = calculateResults(appConfig, analysisOptions)
+            handleResults(results, appConfig)
+          case None =>
+            System.exit(1)
+        }
+      case Failure(ex) =>
+        log.error(s"Error parsing options: ${ex.getMessage}")
+    }
+  }
+}

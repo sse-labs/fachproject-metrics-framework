@@ -1,7 +1,11 @@
 package org.tud.sse.metrics
+package analysis
 
 import org.slf4j.{Logger, LoggerFactory}
 
+/**
+ * Base trait for all analyses. Provides access to common functionality including logging and the analysis name.
+ */
 trait NamedAnalysis {
 
   /**
@@ -22,6 +26,5 @@ trait NamedAnalysis {
   def initialize(): Unit = {
     log.debug("Analysis initialized")
   }
-
 
 }

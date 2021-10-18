@@ -4,6 +4,7 @@ package output
 import java.io.{BufferedWriter, FileWriter}
 import scala.util.Try
 import com.opencsv.CSVWriter
+import analysis.JarFileMetricsResult
 
 import scala.collection.mutable
 

@@ -1,8 +1,11 @@
 package org.tud.sse.metrics
 
+import analysis.NamedAnalysis
+import application.SingleFileAnalysisCliParser
+import input.CliParser
+import input.CliParser.OptionMap
+
 import org.slf4j.Logger
-import org.tud.sse.metrics.input.CliParser
-import org.tud.sse.metrics.input.CliParser.OptionMap
 
 import java.io.File
 

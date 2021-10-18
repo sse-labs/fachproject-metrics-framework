@@ -1,12 +1,12 @@
 package org.tud.sse.metrics
 package impl
 
-import singlefileanalysis.SingleFileAnalysis
+import analysis.{JarFileMetricValue, SingleFileAnalysis}
+import input.CliParser.OptionMap
 
 import org.opalj.br.analyses.Project
 import org.opalj.br.fpcf.PropertyStoreKey
-import org.opalj.tac.cg.{CHACallGraphKey, RTACallGraphKey, XTACallGraphKey}
-import org.tud.sse.metrics.input.CliParser.OptionMap
+import org.opalj.tac.cg.XTACallGraphKey
 
 import java.net.URL
 import scala.util.{Success, Try}
@@ -20,7 +20,7 @@ class CgTestImpl extends SingleFileAnalysis{
     ps.shutdown()
 
     var cnt = 0
-    for(m <- cg.reachableMethods()) {
+    for(_ <- cg.reachableMethods()) {
       //println(m.toJava)
       cnt += 1
     }

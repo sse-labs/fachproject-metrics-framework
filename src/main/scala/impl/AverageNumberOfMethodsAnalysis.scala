@@ -1,10 +1,10 @@
 package org.tud.sse.metrics
 package impl
 
-import multifileanalysis.MultiFileAnalysis
+import analysis.{JarFileMetricValue, JarFileMetricsResult, MultiFileAnalysis}
+import input.CliParser.OptionMap
 
 import org.opalj.br.analyses.Project
-import input.CliParser.OptionMap
 
 import java.io.File
 import java.net.URL
@@ -16,10 +16,9 @@ import scala.util.Try
  * is INT, as it is the number of methods per JAR file.
  *
  * @param directory Directory containing all JAR files
- * @param customOptions Custom analysis options that have been passed via CLI
  */
-class AverageNumberOfMethodsAnalysis(directory: File, customOptions: OptionMap)
-  extends MultiFileAnalysis[Int](directory, customOptions) {
+class AverageNumberOfMethodsAnalysis(directory: File)
+  extends MultiFileAnalysis[Int](directory) {
 
   /**
    * Produces intermediate results for each JAR file. For this example, the intermediate result
@@ -29,7 +28,8 @@ class AverageNumberOfMethodsAnalysis(directory: File, customOptions: OptionMap)
    * @return Number of methods
    */
   override def produceAnalysisResultForJAR(project: Project[URL],
-                                           lastResult: Option[Int]): Try[Int] = {
+                                           lastResult: Option[Int],
+                                           customOptions: OptionMap): Try[Int] = {
     Try(project.methodsCount)
   }
 
@@ -47,17 +47,4 @@ class AverageNumberOfMethodsAnalysis(directory: File, customOptions: OptionMap)
   }
 
   override def analysisName: String = "methods.average"
-}
-
-/**
- * Example implementation for an MultiFileAnalysis Application that uses the
- * AverageNumberOfMethodsAnalysis implementation above to analyze a set of
- * JAR files
- */
-object AverageMethodsAnalysisApp extends MultiFileAnalysisApplication[Int] {
-
-  override protected def buildAnalysis(directory: File,
-                                       analysisOptions: OptionMap): MultiFileAnalysis[Int] =
-    new AverageNumberOfMethodsAnalysis(directory, analysisOptions)
-
 }
