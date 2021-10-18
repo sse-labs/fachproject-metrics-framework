@@ -1,7 +1,7 @@
 package org.tud.sse.metrics
 package application
 
-import analysis.JarFileMetricsResult
+import analysis.{JarFileMetricsResult, NamedAnalysis}
 import input.CliParser
 import input.CliParser.OptionMap
 import output.CsvFileOutput
@@ -65,6 +65,38 @@ trait FileAnalysisApplication extends CsvFileOutput{
         case Success(_) =>
           log.info(s"Done writing results to file")
       }
+    }
+  }
+
+  /**
+   * Checks the names of registered analyses, excludes and includes for ineffective or invalid configuration and prints
+   * errors to the console.
+   * @param analyses Set of analyses
+   * @param appConfig App Configuration
+   */
+  protected def validateAnalysesNames(analyses: Seq[NamedAnalysis], appConfig: ApplicationConfiguration): Unit = {
+    val allNames = analyses.map(_.analysisName).toList
+
+    allNames
+      .foreach{ name =>
+        val isDuplicate = allNames
+          .count(n => n.toLowerCase().equals(name.toLowerCase())) > 1
+
+        if(isDuplicate){
+          log.warn(s"Configuration error: Analysis name $name is used more than once")
+        }
+      }
+
+    if(appConfig.excludeSpecificationsApply()){
+      appConfig
+        .excludedAnalysesNames
+        .filter{ excludedName => !allNames.contains(excludedName)}
+        .foreach{ name => log.warn(s"Configuration error: Excluded analysis name $name has no effect since it is not contained in the set of registered analyses.")}
+    } else if(appConfig.includeSpecificationsApply()){
+      appConfig
+        .includedAnalysesNames
+        .filter{ includedName => !allNames.contains(includedName)}
+        .foreach{ name => log.error(s"Configuration error: Included analysis name $name is not contained in the set of registered analyses.")}
     }
   }
 

@@ -69,7 +69,7 @@ trait SingleFileAnalysisApplication extends FileAnalysisApplication {
 
     val appConfiguration = ApplicationConfiguration.fromOptionsSingleFile(appOptions)
 
-    // Validate usage of analysis includes and exculdes
+    // Validate usage of analysis includes and excludes
     if(appConfiguration.excludedAnalysesNames.nonEmpty && appConfiguration.includedAnalysesNames.nonEmpty){
       log.warn(s"Both analysis includes and analysis excludes have been specified. Only includes will be accounted for.")
     }
@@ -85,6 +85,7 @@ trait SingleFileAnalysisApplication extends FileAnalysisApplication {
       log.error("No batch mode enabled but input file is directory")
       None
     } else {
+      validateAnalysesNames(registeredAnalyses, appConfiguration)
       appConfiguration.logInfo(log)
       Some(appConfiguration)
     }

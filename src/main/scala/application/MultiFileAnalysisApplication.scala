@@ -83,6 +83,7 @@ trait MultiFileAnalysisApplication extends FileAnalysisApplication {
       log.error("Input file is no directory")
       None
     } else {
+      validateAnalysesNames(registeredAnalyses, appConfiguration)
       appConfiguration.logInfo(log)
       Some(appConfiguration)
     }
