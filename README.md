@@ -11,15 +11,15 @@ JAR file is implemented:
 
 ```
 import org.tud.sse.metrics.input.CliParser.OptionMap
-import org.tud.sse.metrics.singlefileanalysis.SingleFileAnalysis
-import org.tud.sse.metrics.SingleFileAnalysisApplication
+import org.tud.sse.metrics.analysis.SingleFileAnalysis
+import org.tud.sse.metrics.application.SingleFileAnalysisApplication
 
 import org.opalj.br.analyses.Project
 
 import java.net.URL
 import scala.util.Try
 
-object NumberOfMethodsAnalysis extends SingleFileAnalysisApplication with SingleFileAnalysis {
+object NumberOfMethodsAnalysis extends SingleFileAnalysis {
 
   override protected def buildAnalysis(): SingleFileAnalysis = this
 
@@ -29,16 +29,28 @@ object NumberOfMethodsAnalysis extends SingleFileAnalysisApplication with Single
 
     List(JarFileMetricValue("methods.count", metric))
   }
+  
+  override def analysisName: String = "method.count"
 }
 ```
-Since in the above example `NumberOfMethodsAnalysis` extends `SingleFileAnalysisApplication`, it
+To execute this analysis example, you need to register it in an executable `SingleFileAnalysisApplication`,
+which may look like this:
+```
+object MyAnalysisApplication extends SingleFileAnalysisApplication {
+
+  override protected val registeredAnalyses: Seq[SingleFileAnalysis] = 
+    Seq(new NumberOfMethodsAnalysis())
+}
+```
+
+Since in the above example `MyAnalysisApplication` extends `SingleFileAnalysisApplication`, it
 already is a self-contained, executable analysis. You can execute it for example with the following
 parameters:
 ```
 --batch-mode --out-file out.csv /path/to/jar/folder
 ```
 This will execute the analysis for all JAR files contained in `/path/to/jar/folder`, and create 
-a result report containing the file names and their method count at `out.csv`. Executing the analysis
+a result report containing the file names, and their method count at `out.csv`. Executing the analysis
 for a single JAR file is done with the following parameters:
 ```
 --out-file out.csv /path/to/jar/file.jar
@@ -48,8 +60,8 @@ For more information on default CLI parameters, see **CLI Reference**.
 ## Complex Analyses
 As seen above, a `SingleFileAnalysis` extracts metrics from JAR files independently. It is meant to
 be *stateless*, as it does not regard previous analysis results when processing a JAR file. However,
-sometimes metrics values depend on multiple JAR files (ie. all releases of a library), or are 
-calculated based on the differences between two JAR files (ie. number of *new* methods). For these
+sometimes metrics values depend on multiple JAR files (i.e. all releases of a library), or are 
+calculated based on the differences between two JAR files (i.e. number of *new* methods). For these
 cases, the `MultiFileAnalysis` can be used.
 
 A `MultiFileAnalysis` first calculates intermediate results of a generic type `T` for every JAR file,
@@ -58,12 +70,12 @@ shows an analysis that calculates the average increase in the number of methods 
 analyzed JAR files. The intermediate result (the absolute increase in methods) is of type `Int`, therefore
 the analysis extends `MultiFileAnalysis[Int]`.
 ```
-class AverageMethodDifferenceAnalysis(jarDir: File,
-                                      customOptions: OptionMap) 
-  extends MultiFileAnalysis[Int](jarDir, customOptions){
+class AverageMethodDifferenceAnalysis(jarDir: File) 
+  extends MultiFileAnalysis[Int](jarDir){
 
   override def produceAnalysisResultForJAR(project: Project[URL],
-                                           lastResult: Option[Int]): Try[Int] = {
+                                           lastResult: Option[Int],
+                                           customOptions: OptionMap): Try[Int] = {
     Try(project.methodsCount - lastResult.getOrElse(0))
   }
 
@@ -75,18 +87,18 @@ class AverageMethodDifferenceAnalysis(jarDir: File,
 
     List(JarFileMetricsResult(jarDir, success = true, List(averageNewMethodMetric)))
   }
+  
+  override def analysisName: String = "method-difference.avg"
 }
 ```
 
-To make this example executable, it is sufficient to create an object that extends `MultiFileAnalysisApplication[Int]`,
+To make this example executable, it is sufficient to create an object that extends `MultiFileAnalysisApplication`,
 as shown below:
 ```
-object AverageMethodsDifferenceAnalysisApp extends MultiFileAnalysisApplication[Int] {
+object AverageMethodsDifferenceAnalysisApp extends MultiFileAnalysisApplication {
 
-  override protected def buildAnalysis(directory: File,
-                                       analysisOptions: OptionMap): MultiFileAnalysis[Int] =
-    new AverageMethodDifferenceAnalysis(directory, analysisOptions)
-
+  override protected def buildAnalyses(directory: File): Seq[MultiFileAnalysis] =
+    Seq(new AverageMethodDifferenceAnalysis(directory))
 }
 ```
 
@@ -105,3 +117,5 @@ via the parameter `customOptions: OptionMap`, so you can customize your analysis
 |`--is-library` | Yes | Yes | If this switch is set, all OPAL projects will be loaded as libraries (as opposed to applications). This mainly affects analyses that depend on the entrypoints / callgraph of a project.|
 |`--opal-logging` | Yes | Yes | If set, all OPAL logging will be forwarded to the console. By default, all OPAL logging output is suppressed.|
 |`--batch-mode`| Yes | No | If set, the `<inputfile>` will be interpreted as a directory, and the `SingleFileAnalysis` will be executed for every JAR file contained in that directory.|
+|`--exclude-analysis <name>`| Yes | Yes | Excludes the analysis with name `<value>` from the current analysis run. May be specified multiple times to exclude multiple analyses. All non-excluded analyses will be executed. Cannot be used in combination with `--include-analysis`.|
+|`--include-analysis <name>`| Yes | Yes | Includes the analysis with name `<value>` for the current analysis run. May be specified multiple times to include multiple analyses. All non-included analyses will not be executed. If used in combination with usage of `--exclude-analysis`, only include specifications will apply.| 
