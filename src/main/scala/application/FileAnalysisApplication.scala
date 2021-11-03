@@ -1,7 +1,7 @@
 package org.tud.sse.metrics
 package application
 
-import analysis.{JarFileMetricsResult, NamedAnalysis}
+import analysis.{MetricsResult, NamedAnalysis}
 import input.CliParser
 import input.CliParser.OptionMap
 import output.CsvFileOutput
@@ -41,7 +41,7 @@ trait FileAnalysisApplication extends CsvFileOutput{
    * @param analysisOptions Custom analysis options produced by the CLI parser
    * @return List of JarFileMetricsResults
    */
-  def calculateResults(appConfiguration: ApplicationConfiguration, analysisOptions: OptionMap): List[JarFileMetricsResult]
+  def calculateResults(appConfiguration: ApplicationConfiguration, analysisOptions: OptionMap): List[MetricsResult]
 
   /**
    * Prints results to the CLI and writes them to a CSV report if specified by the
@@ -49,11 +49,11 @@ trait FileAnalysisApplication extends CsvFileOutput{
    * @param results Results to process
    * @param appConfiguration ApplicationConfiguration object
    */
-  def handleResults(results: List[JarFileMetricsResult], appConfiguration: ApplicationConfiguration): Unit = {
+  def handleResults(results: List[MetricsResult], appConfiguration: ApplicationConfiguration): Unit = {
     results.foreach { res =>
       log.info(s"Results for analysis '${res.analysisName}' on file ${res.jarFile.getName}:")
       res.metricValues.foreach { v =>
-        log.info(s"\t-${v.metricName}: ${v.value}")
+        log.info(s"\t- ${v.metricName} on ${v.entityIdent}: ${v.metricValue}")
       }
     }
 

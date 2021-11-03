@@ -1,7 +1,7 @@
 package org.tud.sse.metrics
 package impl
 
-import analysis.{JarFileMetricValue, JarFileMetricsResult, MultiFileAnalysis}
+import analysis.{MetricValue, MetricsResult, MultiFileAnalysis}
 import input.CliParser.OptionMap
 
 import org.opalj.br.analyses.Project
@@ -18,13 +18,13 @@ class AverageMethodDifferenceAnalysis(jarDir: File) extends MultiFileAnalysis[Lo
     Try(project.methodsCount - lastResult.getOrElse(0L))
   }
 
-  override def produceMetricValues(): List[JarFileMetricsResult] = {
+  override def produceMetricValues(): List[MetricsResult] = {
 
     val allNewMethodCounts = analysisResultsPerFile.values.map(_.get).sum
     val averageNewMethodCount = allNewMethodCounts.toDouble / analysisResultsPerFile.size
-    val averageNewMethodMetric = JarFileMetricValue("newmethodcount.average", averageNewMethodCount)
+    val averageNewMethodMetric = MetricValue("file", "newmethodcount.average", averageNewMethodCount)
 
-    List(JarFileMetricsResult(analysisName, jarDir, success = true, List(averageNewMethodMetric)))
+    List(MetricsResult(analysisName, jarDir, success = true, List(averageNewMethodMetric)))
   }
 
   override def analysisName: String = "method-difference.avg"

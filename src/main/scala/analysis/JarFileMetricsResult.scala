@@ -6,28 +6,31 @@ import java.io.File
 /**
  * Class representing the result of metrics calculations for a given file or directory. As an analysis
  * may calculate multiple metrics values for a single file / directory, it contains a list of
- * JarFileMetricValues.
+ * MetricValues.
  *
  * @param analysisName Name of the analysis that produced this result
  * @param jarFile JAR file / directory that has been analyzed
  * @param success Boolean indicating the success of all calculations involved
  * @param metricValues Iterable of MetricsValues for this file
  */
-case class JarFileMetricsResult (analysisName: String, jarFile: File, success: Boolean, metricValues: Iterable[JarFileMetricValue])
+case class MetricsResult (analysisName: String, jarFile: File, success: Boolean, metricValues: Iterable[MetricValue])
 
-object JarFileMetricsResult {
+object MetricsResult {
   /**
-   * Generates a JarFileMetricsResult for a failed analysis.
+   * Generates a MetricsResult for a failed analysis.
    * @param jarFile JAR file or directory for which the analysis has failed
-   * @return JarFileMetricsResult with success set to false, and an empty List of MetricValues
+   * @return MetricsResult with success set to false, and an empty List of MetricValues
    */
-  def analysisFailed(analysisName: String, jarFile: File): JarFileMetricsResult =
-    JarFileMetricsResult(analysisName, jarFile, success = false, List())
+  def analysisFailed(analysisName: String, jarFile: File): MetricsResult =
+    MetricsResult(analysisName, jarFile, success = false, List())
 }
 
 /**
- * Class representing the value of a single metric
- * @param metricName Name of the metric
- * @param value Value of the metric
+ *
+ * @param entityIdent Entity this metric was calculate for. May be the entire file, a single method or any other entity.
+ * @param metricName Name of the metric that was calculated here
+ * @param metricValue Value calculated for this entity
  */
-case class JarFileMetricValue(metricName: String, value: Double)
+case class MetricValue(entityIdent: String, metricName: String, metricValue: Double)
+
+

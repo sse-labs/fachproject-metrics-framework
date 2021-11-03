@@ -1,7 +1,7 @@
 package org.tud.sse.metrics
 package application
 
-import analysis.{JarFileMetricsResult, SingleFileAnalysis}
+import analysis.{MetricsResult, SingleFileAnalysis}
 import application.SingleFileAnalysisCliParser.batchModeSymbol
 import input.CliParser
 import input.CliParser.OptionMap
@@ -91,7 +91,7 @@ trait SingleFileAnalysisApplication extends FileAnalysisApplication {
     }
   }
 
-  override def calculateResults(appConfiguration: ApplicationConfiguration, analysisOptions: OptionMap): List[JarFileMetricsResult] = {
+  override def calculateResults(appConfiguration: ApplicationConfiguration, analysisOptions: OptionMap): List[MetricsResult] = {
     val effectiveAnalysisNames = appConfiguration.getActiveAnalysisNamesFor(registeredAnalyses)
 
     OPALLogAdapter.setOpalLoggingEnabled(appConfiguration.opalLoggingEnabled)
@@ -113,10 +113,10 @@ trait SingleFileAnalysisApplication extends FileAnalysisApplication {
         .map { analysis =>
           analysis.analyzeProject(opalProject, analysisOptions) match {
             case Success(values) =>
-              JarFileMetricsResult(analysis.analysisName, file, success = true, values)
+              MetricsResult(analysis.analysisName, file, success = true, values)
             case Failure(ex) =>
               log.error(s"Unexpected failure while processing JAR file", ex)
-              JarFileMetricsResult.analysisFailed(analysis.analysisName, file)
+              MetricsResult.analysisFailed(analysis.analysisName, file)
           }
         }
         .toList
@@ -128,7 +128,7 @@ trait SingleFileAnalysisApplication extends FileAnalysisApplication {
   private def handleBatch(analyses: Seq[SingleFileAnalysis],
                           inputDirectory: File,
                           customOptions: OptionMap,
-                          loadAsLibrary: Boolean): List[JarFileMetricsResult] = {
+                          loadAsLibrary: Boolean): List[MetricsResult] = {
 
     log.info(s"Batch mode: Processing all JAR files in ${inputDirectory.getPath}...")
     var count = 0
@@ -147,10 +147,10 @@ trait SingleFileAnalysisApplication extends FileAnalysisApplication {
           .map { analysis =>
             analysis.analyzeProject(project, customOptions) match {
               case Success(values) =>
-                JarFileMetricsResult(analysis.analysisName, file, success = true, values)
+                MetricsResult(analysis.analysisName, file, success = true, values)
               case Failure(ex) =>
                 log.error(s"Unexpected failure while processing JAR file", ex)
-                JarFileMetricsResult.analysisFailed(analysis.analysisName, file)
+                MetricsResult.analysisFailed(analysis.analysisName, file)
             }
           }
           .toList

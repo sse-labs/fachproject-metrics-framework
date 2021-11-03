@@ -79,6 +79,6 @@ abstract class MultiFileAnalysis[T](directory: File) extends NamedAnalysis {
    *
    * @return List of JarFileMetricsResults
    */
-  def produceMetricValues(): List[JarFileMetricsResult]
+  def produceMetricValues(): List[MetricsResult]
 
 }

@@ -1,7 +1,7 @@
 package org.tud.sse.metrics
 package impl
 
-import analysis.{JarFileMetricValue, JarFileMetricsResult, MultiFileAnalysis}
+import analysis.{MetricValue, MetricsResult, MultiFileAnalysis}
 import input.CliParser.OptionMap
 
 import org.opalj.br.analyses.Project
@@ -38,12 +38,12 @@ class AverageNumberOfMethodsAnalysis(directory: File)
    * for each JAR file earlier. In this case, it calculates the average of all method counts.
    * @return
    */
-  override def produceMetricValues(): List[JarFileMetricsResult] = {
+  override def produceMetricValues(): List[MetricsResult] = {
     val averageMethods =
       analysisResultsPerFile.values.map(_.get).sum.toDouble / analysisResultsPerFile.size.toDouble
 
-    val metricList = List(JarFileMetricValue("methods.average", averageMethods))
-    List(JarFileMetricsResult(analysisName, directory, success = true, metricList))
+    val metricList = List(MetricValue("file", "methods.average", averageMethods))
+    List(MetricsResult(analysisName, directory, success = true, metricList))
   }
 
   override def analysisName: String = "methods.average"

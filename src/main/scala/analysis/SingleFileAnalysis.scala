@@ -29,7 +29,7 @@ trait SingleFileAnalysis extends NamedAnalysis {
    * @return Try object that, if successful, holds a set of metrics values.
    */
   def analyzeProject(project: Project[URL],
-                     customOptions: OptionMap): Try[Iterable[JarFileMetricValue]]
+                     customOptions: OptionMap): Try[Iterable[MetricValue]]
 
 
 }

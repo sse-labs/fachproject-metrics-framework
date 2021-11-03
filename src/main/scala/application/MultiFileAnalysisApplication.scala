@@ -1,7 +1,7 @@
 package org.tud.sse.metrics
 package application
 
-import analysis.{JarFileMetricsResult, MultiFileAnalysis}
+import analysis.{MetricsResult, MultiFileAnalysis}
 import input.CliParser
 import input.CliParser.OptionMap
 import opal.{ClassStreamReader, OPALLogAdapter}
@@ -89,7 +89,7 @@ trait MultiFileAnalysisApplication extends FileAnalysisApplication {
     }
   }
 
-  override final def calculateResults(appConfiguration: ApplicationConfiguration, analysisOptions: OptionMap): List[JarFileMetricsResult] = {
+  override final def calculateResults(appConfiguration: ApplicationConfiguration, analysisOptions: OptionMap): List[MetricsResult] = {
     registeredAnalyses = buildAnalyses(appConfiguration.inputFile)
 
     val effectiveAnalysisNames = appConfiguration.getActiveAnalysisNamesFor(registeredAnalyses)

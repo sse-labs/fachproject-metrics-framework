@@ -1,7 +1,7 @@
 package org.tud.sse.metrics
 package impl
 
-import analysis.{JarFileMetricValue, SingleFileAnalysis}
+import analysis.{MetricValue, SingleFileAnalysis}
 import input.CliParser.OptionMap
 
 import org.opalj.br.analyses.Project
@@ -13,7 +13,7 @@ import scala.util.{Success, Try}
 
 class CgTestImpl extends SingleFileAnalysis{
 
-  override def analyzeProject(project: Project[URL], customOptions: OptionMap): Try[Iterable[JarFileMetricValue]] = {
+  override def analyzeProject(project: Project[URL], customOptions: OptionMap): Try[Iterable[MetricValue]] = {
     val cg = project.get(XTACallGraphKey)
 
     val ps = project.get(PropertyStoreKey)
@@ -27,7 +27,7 @@ class CgTestImpl extends SingleFileAnalysis{
 
     Runtime.getRuntime.gc()
 
-    Success(List(JarFileMetricValue("reachable-methods.count", cnt), JarFileMetricValue("project.codesize", project.codeSize)))
+    Success(List(MetricValue("file", "reachable-methods.count", cnt), MetricValue("file", "project.codesize", project.codeSize)))
   }
 
   /**
