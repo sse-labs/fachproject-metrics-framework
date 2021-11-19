@@ -4,11 +4,12 @@ package application
 import analysis.{MetricsResult, MultiFileAnalysis}
 import input.CliParser
 import input.CliParser.OptionMap
-import opal.{ClassStreamReader, OPALLogAdapter}
+import opal.{OPALLogAdapter, OPALProjectHelper}
 
-import java.io.{File, FilenameFilter}
+import java.io.{File, FileInputStream, FilenameFilter}
 import java.nio.file.Files
-import scala.util.Try
+import java.util.jar.JarInputStream
+import scala.util.{Failure, Success, Try}
 
 /**
  * Command-Line parser for analyses that process multiple JAR files as a unit.
@@ -32,6 +33,15 @@ private object MultiFileAnalysisCliParser { def apply() = new MultiFileAnalysisC
  *  - --out-file <path> Path to output file, results will be written in CSV format
  *  - --is-library If set, all JARs will be interpreted als libraries (important for entry-point detection)
  *  - --opal-logging If set, OPAL logging will be output to CLI
+ *  - --no-jre-classes Will not load JRE class files when initializing the OPAL project
+ *  - --exclude-analysis <name> Used to specify the name of an analysis that will be excluded when running the
+ *                              application. May be specified multiple times to exclude multiple analyses.
+ *  - --include-analysis <name> Used to specify the name of an analysis that will be included when running the
+ *                              application. May be specified multiple times to include multiple analyses. Specifying
+ *                              this option will disabled all 'exclude' specifications.
+ *  - --no-jre-classes Will not load JRE class files when initializing the OPAL project
+ *  - --additional-classes-dir path to a JAR file or directory containing JAR files. All classes contained in those JAR
+ *                             files will be loaded as library classes when initializing the OPAL project
  *
  * @author Johannes Düsing
  */
@@ -112,16 +122,28 @@ trait MultiFileAnalysisApplication extends FileAnalysisApplication {
       .sorted(fileOrdering)
       .foreach { file =>
         count += 1
-        val project = ClassStreamReader.createProject(file.toURI.toURL, appConfiguration.treatFilesAsLibrary)
 
-        log.debug(s"Successfully initialized OPAL project for ${file.getName}")
+        Try {
+          val projectClasses = OPALProjectHelper.readClassesFromJarStream(new FileInputStream(file), file.toURI.toURL)
+          val additionalClasses = appConfiguration
+            .additionalClassesDir
+            .flatMap(dir => OPALProjectHelper.readClassesFromFileStructure(new File(dir)).toOption)
+            .getOrElse(List.empty)
+          OPALProjectHelper.buildOPALProject(projectClasses.get, additionalClasses, appConfiguration.treatFilesAsLibrary, appConfiguration.excludeJreClasses)
+        } match {
+          case Success(project) =>
+            log.debug(s"Successfully initialized OPAL project for ${file.getName}")
 
-        analyses.foreach { analysis =>
-          val result: Try[_] = analysis.analyzeNext(project, file, analysisOptions)
+            analyses.foreach { analysis =>
+              val result: Try[_] = analysis.analyzeNext(project, file, analysisOptions)
 
-          if (result.isFailure) {
-            log.error(s"Error while processing a JAR file: $file", result.failed.get)
-          }
+              if (result.isFailure) {
+                log.error(s"Error while processing a JAR file: $file", result.failed.get)
+              }
+            }
+
+          case Failure(ex) =>
+            log.error(s"Failure while initializing OPAL project for ${file.getName}", ex)
         }
       }
 

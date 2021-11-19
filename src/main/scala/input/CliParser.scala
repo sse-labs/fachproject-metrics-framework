@@ -71,7 +71,11 @@ abstract class CliParser(usage: String) {
         nextOption(newAppOptions, analysisOptions, tail)
       case "--include-analysis" :: value :: tail =>
         nextOption(appOptions ++ Map(includeAnalysisSymbol -> List(value)), analysisOptions, tail)
+      case "--additional-classes-dir" :: value :: tail =>
+        nextOption(appOptions ++ Map(additionalClassesDirSymbol -> value), analysisOptions, tail)
         // Hardcoded switches valid for all analyses
+      case "--no-jre-classes" :: tail =>
+        nextOption(appOptions ++ Map(noJreClassesSymbol -> true), analysisOptions, tail)
       case "--is-library" :: tail =>
         nextOption(appOptions ++ Map(isLibrarySymbol -> true), analysisOptions, tail)
       case "--opal-logging" :: tail =>
@@ -108,5 +112,6 @@ object CliParser {
   val enableOpalLoggingSymbol: Symbol = Symbol("enabled-logging")
   val excludeAnalysisSymbol: Symbol = Symbol("exclude-analysis")
   val includeAnalysisSymbol: Symbol = Symbol("include-analysis")
-
+  val noJreClassesSymbol: Symbol = Symbol("no-jre-classes")
+  val additionalClassesDirSymbol: Symbol = Symbol("additional-classes-dir")
 }

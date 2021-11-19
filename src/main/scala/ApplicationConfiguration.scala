@@ -15,7 +15,9 @@ class ApplicationConfiguration(val inputFilePath: String,
                                val opalLoggingEnabled: Boolean,
                                val batchModeEnabled: Option[Boolean],
                                val excludedAnalysesNames: List[String],
-                               val includedAnalysesNames: List[String]) {
+                               val includedAnalysesNames: List[String],
+                               val excludeJreClasses: Boolean,
+                               val additionalClassesDir: Option[String]) {
 
   def includeSpecificationsApply(): Boolean = includedAnalysesNames.nonEmpty
 
@@ -40,6 +42,10 @@ class ApplicationConfiguration(val inputFilePath: String,
     else if(excludeSpecificationsApply())
       log.info(s"\t- Excluded Analyses: ${excludedAnalysesNames.mkString(",")}")
 
+    if(additionalClassesDir.isDefined)
+      log.info(s"\t- Additional Classes Directory: ${additionalClassesDir.get}")
+
+    log.info(s"\t- Exclude JRE classes: $excludeJreClasses")
     log.info(s"\t- OPAL Logging Enabled: $opalLoggingEnabled")
   }
 
@@ -72,13 +78,18 @@ object ApplicationConfiguration {
 
     val batchModeEnabled = appOptions.contains(SingleFileAnalysisCliParser.batchModeSymbol)
 
+    val additionalClassesDir = appOptions.get(CliParser.additionalClassesDirSymbol).map(_.toString)
+    val jreClassesExcluded = appOptions.contains(CliParser.noJreClassesSymbol)
+
     new ApplicationConfiguration(appOptions(CliParser.inFileSymbol).toString,
       appOptions.contains(CliParser.isLibrarySymbol),
       appOptions.get(CliParser.outFileSymbol).map(_.toString),
       appOptions.contains(CliParser.enableOpalLoggingSymbol),
       if(isSingleFile) Some(batchModeEnabled) else None,
       excludedAnalysesNames,
-      includedAnalysesNames)
+      includedAnalysesNames,
+      jreClassesExcluded,
+      additionalClassesDir)
   }
 
   def fromOptionsSingleFile(appOptions: OptionMap): ApplicationConfiguration = fromOptions(appOptions, isSingleFile = true)

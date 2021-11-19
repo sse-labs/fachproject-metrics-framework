@@ -5,11 +5,12 @@ import analysis.{MetricsResult, SingleFileAnalysis}
 import application.SingleFileAnalysisCliParser.batchModeSymbol
 import input.CliParser
 import input.CliParser.OptionMap
-import opal.{ClassStreamReader, OPALLogAdapter}
+import opal.{OPALLogAdapter, OPALProjectHelper}
 
-import java.io.{File, FilenameFilter}
+import java.io.{File, FileInputStream, FilenameFilter}
 import java.nio.file.Files
-import scala.util.{Failure, Success}
+import java.util.jar.JarInputStream
+import scala.util.{Failure, Success, Try}
 
 /**
  * Command-Line parser for analyses that process single JAR files. Extends the base parser with
@@ -50,6 +51,9 @@ object SingleFileAnalysisCliParser {
  *  - --include-analysis <name> Used to specify the name of an analysis that will be included when running the
  *                              application. May be specified multiple times to include multiple analyses. Specifying
  *                              this option will disabled all 'exclude' specifications.
+ *  - --no-jre-classes Will not load JRE class files when initializing the OPAL project
+ *  - --additional-classes-dir <path> path to a JAR file or directory containing JAR files. All classes contained in those JAR
+ *                                    files will be loaded as library classes when initializing the OPAL project
  *
  *
  *
@@ -106,29 +110,41 @@ trait SingleFileAnalysisApplication extends FileAnalysisApplication {
       val file = appConfiguration.inputFile
 
       log.debug(s"Initializing OPAL project for input file ${file.getName} ...")
-      val opalProject = ClassStreamReader.createProject(file.toURI.toURL, appConfiguration.treatFilesAsLibrary)
-      log.info(s"Done initializing OPAL project.")
+      Try {
+        val projectClasses = OPALProjectHelper.readClassesFromJarStream(new FileInputStream(file), file.toURI.toURL)
+        val additionalClasses = appConfiguration
+          .additionalClassesDir
+          .flatMap(dir => OPALProjectHelper.readClassesFromFileStructure(new File(dir)).toOption)
+          .getOrElse(List.empty)
 
-      analyses
-        .map { analysis =>
-          analysis.analyzeProject(opalProject, analysisOptions) match {
-            case Success(values) =>
-              MetricsResult(analysis.analysisName, file, success = true, values)
-            case Failure(ex) =>
-              log.error(s"Unexpected failure while processing JAR file", ex)
-              MetricsResult.analysisFailed(analysis.analysisName, file)
-          }
-        }
-        .toList
+        OPALProjectHelper.buildOPALProject(projectClasses.get, additionalClasses, appConfiguration.treatFilesAsLibrary, appConfiguration.excludeJreClasses)
+      } match {
+        case Success(project) =>
+          log.info(s"Done initializing OPAL project.")
+          analyses
+            .map { analysis =>
+              analysis.analyzeProject(project, analysisOptions) match {
+                case Success(values) =>
+                  MetricsResult(analysis.analysisName, file, success = true, values)
+                case Failure(ex) =>
+                  log.error(s"Unexpected failure while processing JAR file", ex)
+                  MetricsResult.analysisFailed(analysis.analysisName, file)
+              }
+            }
+            .toList
+        case Failure(ex) =>
+          log.error(s"Failure while initializing OPAL project for ${file.getName}", ex)
+          List.empty
+      }
     } else {
-      handleBatch(analyses, appConfiguration.inputFile, analysisOptions, appConfiguration.treatFilesAsLibrary)
+      handleBatch(analyses, appConfiguration.inputFile, appConfiguration, analysisOptions)
     }
   }
 
   private def handleBatch(analyses: Seq[SingleFileAnalysis],
                           inputDirectory: File,
-                          customOptions: OptionMap,
-                          loadAsLibrary: Boolean): List[MetricsResult] = {
+                          appConfiguration: ApplicationConfiguration,
+                          customOptions: OptionMap): List[MetricsResult] = {
 
     log.info(s"Batch mode: Processing all JAR files in ${inputDirectory.getPath}...")
     var count = 0
@@ -139,21 +155,32 @@ trait SingleFileAnalysisApplication extends FileAnalysisApplication {
       })
       .flatMap{ file =>
         count += 1
-        val project = ClassStreamReader.createProject(file.toURI.toURL, loadAsLibrary)
 
-        log.debug(s"Successfully initialized OPAL project for ${file.getName}")
-
-        analyses
-          .map { analysis =>
-            analysis.analyzeProject(project, customOptions) match {
-              case Success(values) =>
-                MetricsResult(analysis.analysisName, file, success = true, values)
-              case Failure(ex) =>
-                log.error(s"Unexpected failure while processing JAR file", ex)
-                MetricsResult.analysisFailed(analysis.analysisName, file)
-            }
-          }
-          .toList
+        Try {
+          val projectClasses = OPALProjectHelper.readClassesFromJarStream(new FileInputStream(file), file.toURI.toURL)
+          val additionalClasses = appConfiguration
+            .additionalClassesDir
+            .flatMap(dir => OPALProjectHelper.readClassesFromFileStructure(new File(dir)).toOption)
+            .getOrElse(List.empty)
+          OPALProjectHelper.buildOPALProject(projectClasses.get, additionalClasses, appConfiguration.treatFilesAsLibrary, appConfiguration.excludeJreClasses)
+        } match {
+          case Success(project) =>
+            log.debug(s"Successfully initialized OPAL project for ${file.getName}")
+            analyses
+              .map { analysis =>
+                analysis.analyzeProject(project, customOptions) match {
+                  case Success(values) =>
+                    MetricsResult(analysis.analysisName, file, success = true, values)
+                  case Failure(ex) =>
+                    log.error(s"Unexpected failure while processing JAR file", ex)
+                    MetricsResult.analysisFailed(analysis.analysisName, file)
+                }
+              }
+              .toList
+          case Failure(ex) =>
+            log.error(s"Failure while initializing OPAL project for ${file.getName}", ex)
+            List.empty
+        }
       }
       .toList
 

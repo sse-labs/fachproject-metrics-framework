@@ -12,12 +12,18 @@ import scala.util.Try
 
 class MethodSizeAnalysis extends MethodAnalysis{
   override def analyzeMethod(method: Method, project: Project[URL], customOptions: OptionMap): Try[Iterable[MetricValue]] = Try{
-    method.body.map(c => c.codeSize) match {
-      case Some(codeSize) =>
-        List(MetricValue(method.fullyQualifiedSignature, this.analysisName, codeSize))
-      case None =>
-        List.empty
+    if(project.isProjectType(method.classFile.thisType)){
+      method.body.map(c => c.codeSize) match {
+        case Some(codeSize) =>
+          List(MetricValue(method.fullyQualifiedSignature, this.analysisName, codeSize))
+        case None =>
+          List.empty
+      }
+    } else {
+      List.empty
     }
+
+
   }
 
   /**

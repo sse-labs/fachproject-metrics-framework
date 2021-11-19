@@ -1,7 +1,7 @@
 package org.tud.sse.metrics
 package opal
 
-import org.opalj.log.{DevNullLogger, Fatal, GlobalLogContext, Info, LogContext, LogMessage, OPALLogger, StandardLogContext, Warn}
+import org.opalj.log.{Fatal, GlobalLogContext, Info, Level, LogContext, LogMessage, OPALLogger, Warn}
 import org.slf4j.LoggerFactory
 
 /**
@@ -12,34 +12,32 @@ import org.slf4j.LoggerFactory
 object OPALLogAdapter extends OPALLogger {
 
   private val internalLogger = LoggerFactory.getLogger("opal-logger")
+  private var minLogLevel: Level = Warn
+
   private var opalLoggingEnabled = false
 
-  final val emptyLogger = DevNullLogger
-  final val consoleLogger = OPALLogAdapter
-
-  final val analysisLogContext = new StandardLogContext()
-
-  OPALLogger.register(analysisLogContext, emptyLogger)
-  OPALLogger.updateLogger(GlobalLogContext, emptyLogger)
+  OPALLogger.updateLogger(GlobalLogContext, this)
 
 
-  override def log(message: LogMessage)(implicit ctx: LogContext): Unit = {
-    message.level match {
-      case Info =>
-        internalLogger.info(message.message)
-      case Warn =>
-        internalLogger.warn(message.message)
-      case org.opalj.log.Error =>
-        internalLogger.error(message.message)
-      case Fatal =>
-        internalLogger.error(message.message)
-    }
+  def setMinLogLevel(level: Level): Unit = {
+    this.minLogLevel = level
   }
 
-  /**
-   * Logger currently used by the analysis framework
-   */
-  def analysisLogger: OPALLogger = if(opalLoggingEnabled) consoleLogger else emptyLogger
+  override def log(message: LogMessage)(implicit ctx: LogContext): Unit = {
+
+    if(this.opalLoggingEnabled){
+      message.level match {
+        case Info if minLogLevel == Info =>
+          internalLogger.info(message.message)
+        case Warn if minLogLevel == Info || minLogLevel == Warn =>
+          internalLogger.warn(message.message)
+        case org.opalj.log.Error if minLogLevel == Info || minLogLevel == Warn || minLogLevel == org.opalj.log.Error =>
+          internalLogger.error(message.message)
+        case Fatal =>
+          internalLogger.error(message.message)
+      }
+    }
+  }
 
   /**
    * Method that enables or disables OPAL logging entirely. If enabled, all log levels of OPAL will
@@ -50,13 +48,6 @@ object OPALLogAdapter extends OPALLogger {
    */
   def setOpalLoggingEnabled(enabled: Boolean): Unit = {
     opalLoggingEnabled = enabled
-
-    OPALLogger.updateLogger(GlobalLogContext, analysisLogger)
-
-    if(OPALLogger.isUnregistered(analysisLogContext))
-      OPALLogger.register(analysisLogContext, analysisLogger)
-    else
-      OPALLogger.updateLogger(analysisLogContext, analysisLogger)
   }
 
 }
