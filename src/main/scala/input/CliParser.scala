@@ -74,6 +74,8 @@ abstract class CliParser(usage: String) {
       case "--additional-classes-dir" :: value :: tail =>
         nextOption(appOptions ++ Map(additionalClassesDirSymbol -> value), analysisOptions, tail)
         // Hardcoded switches valid for all analyses
+      case "--load-additional-classes-as-interfaces" :: tail =>
+        nextOption(appOptions ++ Map(loadAdditionalClassesAsInterfacesSymbol -> true), analysisOptions, tail)
       case "--no-jre-classes" :: tail =>
         nextOption(appOptions ++ Map(noJreClassesSymbol -> true), analysisOptions, tail)
       case "--is-library" :: tail =>
@@ -114,4 +116,5 @@ object CliParser {
   val includeAnalysisSymbol: Symbol = Symbol("include-analysis")
   val noJreClassesSymbol: Symbol = Symbol("no-jre-classes")
   val additionalClassesDirSymbol: Symbol = Symbol("additional-classes-dir")
+  val loadAdditionalClassesAsInterfacesSymbol: Symbol = Symbol("load-additional-classes-as-interfaces")
 }

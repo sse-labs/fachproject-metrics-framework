@@ -54,6 +54,8 @@ object SingleFileAnalysisCliParser {
  *  - --no-jre-classes Will not load JRE class files when initializing the OPAL project
  *  - --additional-classes-dir <path> path to a JAR file or directory containing JAR files. All classes contained in those JAR
  *                                    files will be loaded as library classes when initializing the OPAL project
+ *  - --load-additional-classes-as-interfaces If set, all additional classes will be loaded as interfaces only, without
+ *                                            their actual implementation
  *
  *
  *
@@ -114,7 +116,7 @@ trait SingleFileAnalysisApplication extends FileAnalysisApplication {
         val projectClasses = OPALProjectHelper.readClassesFromJarStream(new FileInputStream(file), file.toURI.toURL)
         val additionalClasses = appConfiguration
           .additionalClassesDir
-          .flatMap(dir => OPALProjectHelper.readClassesFromFileStructure(new File(dir)).toOption)
+          .flatMap(dir => OPALProjectHelper.readClassesFromFileStructure(new File(dir), !appConfiguration.loadAdditionalClassesAsInterface).toOption)
           .getOrElse(List.empty)
 
         OPALProjectHelper.buildOPALProject(projectClasses.get, additionalClasses, appConfiguration.treatFilesAsLibrary, appConfiguration.excludeJreClasses)
@@ -160,7 +162,7 @@ trait SingleFileAnalysisApplication extends FileAnalysisApplication {
           val projectClasses = OPALProjectHelper.readClassesFromJarStream(new FileInputStream(file), file.toURI.toURL)
           val additionalClasses = appConfiguration
             .additionalClassesDir
-            .flatMap(dir => OPALProjectHelper.readClassesFromFileStructure(new File(dir)).toOption)
+            .flatMap(dir => OPALProjectHelper.readClassesFromFileStructure(new File(dir), !appConfiguration.loadAdditionalClassesAsInterface).toOption)
             .getOrElse(List.empty)
           OPALProjectHelper.buildOPALProject(projectClasses.get, additionalClasses, appConfiguration.treatFilesAsLibrary, appConfiguration.excludeJreClasses)
         } match {

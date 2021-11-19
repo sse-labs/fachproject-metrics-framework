@@ -88,14 +88,13 @@ object OPALProjectHelper {
     Project(projectClasses, libClasses, libraryClassFilesAreInterfacesOnly = false, Traversable.empty, inconsistentExceptionHandler)(config, OPALLogAdapter)
   }
 
-  def readClassesFromFileStructure(file: File): Try[ClassList] = Try {
+  def readClassesFromFileStructure(file: File, loadImplementation: Boolean): Try[ClassList] = Try {
 
     if(file.isFile){
-      //TODO: make loading of implementation configurable
-      readClassesFromJarStream(new FileInputStream(file), file.toURI.toURL).get
+      readClassesFromJarStream(new FileInputStream(file), file.toURI.toURL, loadImplementation).get
     } else if(file.isDirectory){
       getJarFilesRecursive(file)
-        .map(f => readClassesFromJarStream(new FileInputStream(f), f.toURI.toURL))
+        .map(f => readClassesFromJarStream(new FileInputStream(f), f.toURI.toURL, loadImplementation))
         .filter(readTry => readTry match {
           case Failure(ex) =>
             log.error("Failed to load additional classes: " + ex.getMessage)

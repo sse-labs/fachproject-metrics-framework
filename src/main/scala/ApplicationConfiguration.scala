@@ -17,7 +17,8 @@ class ApplicationConfiguration(val inputFilePath: String,
                                val excludedAnalysesNames: List[String],
                                val includedAnalysesNames: List[String],
                                val excludeJreClasses: Boolean,
-                               val additionalClassesDir: Option[String]) {
+                               val additionalClassesDir: Option[String],
+                               val loadAdditionalClassesAsInterface: Boolean) {
 
   def includeSpecificationsApply(): Boolean = includedAnalysesNames.nonEmpty
 
@@ -42,8 +43,10 @@ class ApplicationConfiguration(val inputFilePath: String,
     else if(excludeSpecificationsApply())
       log.info(s"\t- Excluded Analyses: ${excludedAnalysesNames.mkString(",")}")
 
-    if(additionalClassesDir.isDefined)
+    if(additionalClassesDir.isDefined) {
       log.info(s"\t- Additional Classes Directory: ${additionalClassesDir.get}")
+      log.info(s"\t- Load Additional Classes As Interfaces: $loadAdditionalClassesAsInterface")
+    }
 
     log.info(s"\t- Exclude JRE classes: $excludeJreClasses")
     log.info(s"\t- OPAL Logging Enabled: $opalLoggingEnabled")
@@ -79,6 +82,7 @@ object ApplicationConfiguration {
     val batchModeEnabled = appOptions.contains(SingleFileAnalysisCliParser.batchModeSymbol)
 
     val additionalClassesDir = appOptions.get(CliParser.additionalClassesDirSymbol).map(_.toString)
+    val loadAdditionalClassesAsInterfaces = appOptions.contains(CliParser.loadAdditionalClassesAsInterfacesSymbol)
     val jreClassesExcluded = appOptions.contains(CliParser.noJreClassesSymbol)
 
     new ApplicationConfiguration(appOptions(CliParser.inFileSymbol).toString,
@@ -89,7 +93,8 @@ object ApplicationConfiguration {
       excludedAnalysesNames,
       includedAnalysesNames,
       jreClassesExcluded,
-      additionalClassesDir)
+      additionalClassesDir,
+      loadAdditionalClassesAsInterfaces)
   }
 
   def fromOptionsSingleFile(appOptions: OptionMap): ApplicationConfiguration = fromOptions(appOptions, isSingleFile = true)
