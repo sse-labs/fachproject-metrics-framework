@@ -12,7 +12,7 @@ import org.slf4j.LoggerFactory
 object OPALLogAdapter extends OPALLogger {
 
   private val internalLogger = LoggerFactory.getLogger("opal-logger")
-  private var minLogLevel: Level = Warn
+  private var minLogLevel: Level = org.opalj.log.Error
 
   private var opalLoggingEnabled = false
 

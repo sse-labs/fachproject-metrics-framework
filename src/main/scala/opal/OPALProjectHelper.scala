@@ -104,6 +104,7 @@ object OPALProjectHelper {
         })
         .flatMap(_.get)
     } else {
+      log.error("Failed to load additional classes, file not found at: " + file.getPath)
       throw new IllegalStateException("Invalid input file for loading additional classes")
     }
   }
