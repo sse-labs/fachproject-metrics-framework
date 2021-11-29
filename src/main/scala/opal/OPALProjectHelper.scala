@@ -27,6 +27,7 @@ import org.slf4j.{Logger, LoggerFactory}
 import java.io.{ByteArrayInputStream, ByteArrayOutputStream, DataInputStream, File, FileInputStream, InputStream}
 import java.net.URL
 import java.util.jar.JarInputStream
+import java.util.zip.ZipFile
 import scala.collection.mutable.ListBuffer
 import scala.util.{Failure, Try}
 
@@ -48,10 +49,10 @@ object OPALProjectHelper {
 
   lazy val jreClasses: ClassList = {
 
-    getJarFilesRecursive(JRELibraryFolder)
+    getContainerFilesRecursive(JRELibraryFolder)
       .filter(f => !f.getName.equals("jfxswt.jar")) // Do not load SWT classes, they depend on eclipse implementations
       .map(f => {
-        readClassesFromJarStream(new FileInputStream(f), f.toURI.toURL, LOAD_JRE_IMPLEMENTATION)
+        readClassesFromContainerFile(f, LOAD_JRE_IMPLEMENTATION)
       })
       .filter(readTry => readTry match {
         case Failure(ex) =>
@@ -62,9 +63,11 @@ object OPALProjectHelper {
       .flatMap(_.get)
   }
 
-  private def getJarFilesRecursive(directory: File): List[File] = {
-    val directChildJars = directory.listFiles.filter(f => f.isFile && f.getName.toLowerCase().endsWith(".jar")).toList
-    directChildJars ++ directory.listFiles.filter(_.isDirectory).flatMap(getJarFilesRecursive).toList
+  private def isClassContainerFile(file: File) = file.getName.toLowerCase.endsWith(".jar") || file.getName.toLowerCase.endsWith(".jmod")
+
+  private def getContainerFilesRecursive(directory: File): List[File] = {
+    val directChildJars = directory.listFiles.filter(f => f.isFile && isClassContainerFile(f)).toList
+    directChildJars ++ directory.listFiles.filter(_.isDirectory).flatMap(getContainerFilesRecursive).toList
   }
 
   def isThirdPartyMethod(project: Project[URL],method: DeclaredMethod): Boolean = {
@@ -90,11 +93,11 @@ object OPALProjectHelper {
 
   def readClassesFromFileStructure(file: File, loadImplementation: Boolean): Try[ClassList] = Try {
 
-    if(file.isFile){
-      readClassesFromJarStream(new FileInputStream(file), file.toURI.toURL, loadImplementation).get
+    if(file.isFile && isClassContainerFile(file)){
+      readClassesFromContainerFile(file, loadImplementation).get
     } else if(file.isDirectory){
-      getJarFilesRecursive(file)
-        .map(f => readClassesFromJarStream(new FileInputStream(f), f.toURI.toURL, loadImplementation))
+      getContainerFilesRecursive(file)
+        .map(f => readClassesFromContainerFile(f, loadImplementation))
         .filter(readTry => readTry match {
           case Failure(ex) =>
             log.error("Failed to load additional classes: " + ex.getMessage)
@@ -103,8 +106,18 @@ object OPALProjectHelper {
         })
         .flatMap(_.get)
     } else {
-      log.error("Failed to load additional classes, file not found at: " + file.getPath)
+      log.error("Failed to load additional classes, no valid class container file found at: " + file.getPath)
       throw new IllegalStateException("Invalid input file for loading additional classes")
+    }
+  }
+
+  def readClassesFromContainerFile(file: File, loadImplementation: Boolean): Try[ClassList] = {
+    if(file.getName.toLowerCase.endsWith(".jar")){
+      readClassesFromJarStream(new FileInputStream(file), file.toURI.toURL, loadImplementation)
+    } else if(file.getName.toLowerCase.endsWith(".jmod")) {
+      readClassesFromJmodFile(file, loadImplementation)
+    } else {
+      Failure(new IllegalStateException("Not a class container file: " + file.getName))
     }
   }
 
@@ -133,7 +146,33 @@ object OPALProjectHelper {
     entries.toList
   }
 
-  private def getEntryByteStream(in: JarInputStream): DataInputStream = {
+  def readClassesFromJmodFile(jmod: File, loadImplementation: Boolean): Try[ClassList] = Try {
+    val entries = new ListBuffer[(ClassFile, URL)]()
+
+    val zipFile = new ZipFile(jmod)
+    val source = jmod.toURI.toURL
+    val entryEnum = zipFile.entries()
+
+    val reader = if(loadImplementation) this.fullClassFileReader else this.interfaceClassFileReader
+
+    while(entryEnum.hasMoreElements){
+      val currentEntry = entryEnum.nextElement()
+      val entryName = currentEntry.getName.toLowerCase
+
+      if (entryName.endsWith(".class")){
+        val is = zipFile.getInputStream(currentEntry)
+
+        reader
+          .ClassFile(getEntryByteStream(is))
+          .map(cf => (cf, source))
+          .foreach(t => entries.append(t))
+      }
+    }
+
+    entries.toList
+  }
+
+  private def getEntryByteStream(in: InputStream): DataInputStream = {
     val entryBytes = {
       val baos = new ByteArrayOutputStream()
       val buffer = new Array[Byte](32 * 1024)
