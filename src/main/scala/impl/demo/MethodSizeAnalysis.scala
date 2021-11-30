@@ -1,11 +1,11 @@
 package org.tud.sse.metrics
-package impl
+package impl.demo
 
 import analysis.{MethodAnalysis, MetricValue}
+import input.CliParser.OptionMap
 
 import org.opalj.br.Method
 import org.opalj.br.analyses.Project
-import input.CliParser.OptionMap
 
 import java.net.URL
 import scala.util.Try

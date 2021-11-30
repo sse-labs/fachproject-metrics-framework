@@ -1,5 +1,5 @@
 package org.tud.sse.metrics
-package impl
+package impl.demo
 
 import analysis.SingleFileAnalysis
 import application.SingleFileAnalysisApplication
@@ -8,7 +8,6 @@ object DefaultSingleFileAnalysisApplication extends SingleFileAnalysisApplicatio
 
   override protected val registeredAnalyses: Seq[SingleFileAnalysis] = Seq(
     new NumberOfMethodsAnalysis(),
-    new CgTestImpl(),
     new MethodSizeAnalysis()
   )
 }
