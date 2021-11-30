@@ -79,16 +79,17 @@ object ApplicationConfiguration {
       .map(_.asInstanceOf[List[String]])
       .getOrElse(List.empty)
 
-    val batchModeEnabled = appOptions.contains(SingleFileAnalysisCliParser.batchModeSymbol)
+    val batchModeEnabled = appOptions.get(SingleFileAnalysisCliParser.batchModeSymbol).exists(_.asInstanceOf[Boolean])
+
 
     val additionalClassesDir = appOptions.get(CliParser.additionalClassesDirSymbol).map(_.toString)
-    val loadAdditionalClassesAsInterfaces = appOptions.contains(CliParser.loadAdditionalClassesAsInterfacesSymbol)
-    val jreClassesExcluded = appOptions.contains(CliParser.noJreClassesSymbol)
+    val loadAdditionalClassesAsInterfaces = appOptions.get(CliParser.loadAdditionalClassesAsInterfacesSymbol).exists(_.asInstanceOf[Boolean])
+    val jreClassesExcluded = appOptions.get(CliParser.noJreClassesSymbol).exists(_.asInstanceOf[Boolean])
 
     new ApplicationConfiguration(appOptions(CliParser.inFileSymbol).toString,
-      appOptions.contains(CliParser.isLibrarySymbol),
+      appOptions.get(CliParser.isLibrarySymbol).exists(_.asInstanceOf[Boolean]),
       appOptions.get(CliParser.outFileSymbol).map(_.toString),
-      appOptions.contains(CliParser.enableOpalLoggingSymbol),
+      appOptions.get(CliParser.enableOpalLoggingSymbol).exists(_.asInstanceOf[Boolean]),
       if(isSingleFile) Some(batchModeEnabled) else None,
       excludedAnalysesNames,
       includedAnalysesNames,

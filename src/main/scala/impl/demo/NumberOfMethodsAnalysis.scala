@@ -1,5 +1,6 @@
 package org.tud.sse.metrics
-package impl
+package impl.demo
+
 import analysis.{MetricValue, SingleFileAnalysis}
 import input.CliParser.OptionMap
 

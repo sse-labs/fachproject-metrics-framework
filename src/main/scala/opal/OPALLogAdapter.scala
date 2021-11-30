@@ -35,6 +35,7 @@ object OPALLogAdapter extends OPALLogger {
           internalLogger.error(message.message)
         case Fatal =>
           internalLogger.error(message.message)
+        case _ =>
       }
     }
   }
