@@ -50,12 +50,6 @@ trait FileAnalysisApplication extends CsvFileOutput{
    * @param appConfiguration ApplicationConfiguration object
    */
   def handleResults(results: List[MetricsResult], appConfiguration: ApplicationConfiguration): Unit = {
-    results.foreach { res =>
-      log.info(s"Results for analysis '${res.analysisName}' on file ${res.jarFile.getName}:")
-      res.metricValues.foreach { v =>
-        log.info(s"\t- ${v.metricName} on ${v.entityIdent}: ${v.metricValue}")
-      }
-    }
 
     if (appConfiguration.outFileOption.isDefined) {
       log.info(s"Writing results to output file ${appConfiguration.outFileOption.get}")
@@ -64,6 +58,13 @@ trait FileAnalysisApplication extends CsvFileOutput{
           log.error("Error writing results", ex)
         case Success(_) =>
           log.info(s"Done writing results to file")
+      }
+    } else {
+      results.foreach { res =>
+        log.info(s"Results for analysis '${res.analysisName}' on file ${res.jarFile.getName}:")
+        res.metricValues.foreach { v =>
+          log.info(s"\t- ${v.metricName} on ${v.entityIdent}: ${v.metricValue}")
+        }
       }
     }
   }

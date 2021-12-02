@@ -84,7 +84,7 @@ object OPALProjectHelper {
     val config = if(asLibrary) BaseConfig.withValue("org.opalj.br.analyses.cg.InitialEntryPointsKey.analysis",
       ConfigValueFactory.fromAnyRef("org.opalj.br.analyses.cg.LibraryEntryPointsFinder")) else BaseConfig
 
-    val inconsistentExceptionHandler = (_: LogContext, error: InconsistentProjectException) => log.error("Inconsistent Project Exception: " + error.message)
+    val inconsistentExceptionHandler = (_: LogContext, error: InconsistentProjectException) => log.info("Inconsistent Project: " + error.message)
 
     val libClasses = if(excludeJRE) thirdPartyClasses else thirdPartyClasses ++ jreClasses
 
