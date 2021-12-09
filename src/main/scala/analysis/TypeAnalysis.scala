@@ -14,7 +14,7 @@ trait TypeAnalysis extends SingleFileAnalysis {
   override final def analyzeProject(project: Project[URL],
                                     customOptions: OptionMap): Try[Iterable[MetricValue]] = {
     val typeResults = project
-      .projectClassFiles
+      .allProjectClassFiles
       .map(_.thisType)
       .map( typeObj => analyzeType(typeObj, project, customOptions))
 
