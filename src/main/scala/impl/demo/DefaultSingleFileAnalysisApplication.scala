@@ -3,7 +3,7 @@ package impl.demo
 
 import analysis.SingleFileAnalysis
 import application.SingleFileAnalysisApplication
-import impl.gruppe3.CBOAnalysis
+import impl.group3.CBOAnalysis
 
 object DefaultSingleFileAnalysisApplication extends SingleFileAnalysisApplication {
 

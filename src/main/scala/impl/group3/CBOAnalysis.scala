@@ -1,5 +1,5 @@
 package org.tud.sse.metrics
-package impl.gruppe3
+package impl.group3
 
 
 import analysis.{MetricValue, SingleFileAnalysis}
@@ -14,6 +14,7 @@ class CBOAnalysis extends SingleFileAnalysis{
 
    def analyzeProject(project: Project[URL], customOptions: OptionMap): Try[Iterable[MetricValue]] = Try {
     //calculate the metric
+     log.info("Please implement the CBO Metric here")
       List.empty
   }
 
