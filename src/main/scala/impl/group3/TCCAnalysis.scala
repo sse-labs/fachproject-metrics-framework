@@ -13,7 +13,7 @@ class TCCAnalysis extends SingleFileAnalysis {
 
   override def analyzeProject(project: Project[URL], customOptions: OptionMap): Try[Iterable[MetricValue]] = Try {
     // calculate the metric
-    log.info("please calculate the metric here")
+    log.info("please calculate the TCC metric here")
     val metricsResult = 100
 
     List(MetricValue("file", this.analysisName, metricsResult))
