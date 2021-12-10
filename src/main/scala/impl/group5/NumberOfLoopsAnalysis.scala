@@ -1,11 +1,14 @@
 package org.tud.sse.metrics
 package impl.group5
 
-import analysis.{MethodAnalysis, MetricValue}
+import analysis.{ClassFileAnalysis, MetricValue}
 import input.CliParser.OptionMap
-import org.opalj.br.Method
+
+import org.opalj.br.{ClassFile, Method}
 import org.opalj.br.analyses.Project
+
 import java.net.URL
+import scala.collection.mutable.ListBuffer
 import scala.util.Try
 
 /**
@@ -14,24 +17,28 @@ import scala.util.Try
  *
  */
 
-class NumberOfLoopsAnalysis extends MethodAnalysis {
+class NumberOfLoopsAnalysis extends ClassFileAnalysis {
 
 
   /**
    * Die Methode führt die Metrik Loop aus.
-   * @param method Ist ein Interface von Projekt
+   * @param classFile Ist ein Interface von Projekt
    * @param project Bekommt die vom Framework gelesende jar file in einer Präsedationsform
    * @param customOptions Einstell möglichkeiten der Analyze
    * @return Das Ergebniss wird in der Liste für die ausgabe gespeichert
    */
-  override def analyzeMethod(method: Method, project: Project[URL], customOptions: OptionMap): Try[Iterable[MetricValue]] = Try {
+  override def analyzeClassFile(classFile: ClassFile, project: Project[URL], customOptions: OptionMap): Try[Iterable[MetricValue]] = Try {
 
-      if (project.isProjectType(method.classFile.thisType)) {
-        val body = method.body
-        if (body.nonEmpty) {
+    val methods= classFile.methodsWithBody
+    var classloops = 0
+    var rlist = new ListBuffer[MetricValue]
+    while(methods.hasNext) {
+      val method = methods.next()
+      val body = method.body
+      var loops = 0
+      if (body.nonEmpty) {
         val inset = body.get
         val singleIn = inset.instructions
-        var loops = 0
         for (code <- singleIn) {
           // Im Array vom Framework können leere Felder sein, die mit null belegt sind
           if (code != null) {
@@ -45,10 +52,19 @@ class NumberOfLoopsAnalysis extends MethodAnalysis {
             }
           }
         }
-        List(MetricValue(method.fullyQualifiedSignature, this.analysisName, loops))
+
+
       }
+      classloops += loops
+      rlist +=MetricValue(method.fullyQualifiedSignature, this.analysisName, loops)
+      println(MetricValue(method.fullyQualifiedSignature, this.analysisName, loops))
     }
-      List.empty
+    println(MetricValue(classFile.fqn, this.analysisName, classloops))
+    List.empty
+
+
+
+
   }
 
 
