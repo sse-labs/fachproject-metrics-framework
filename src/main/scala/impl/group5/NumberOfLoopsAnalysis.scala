@@ -47,32 +47,46 @@ class NumberOfLoopsAnalysis extends ClassFileAnalysis {
 
     if(noClass &&(onlyClass||onClassLoops))
       {
-        println("Fehler Beide argumente dürfen nicht gleichzeitig gesetzt sein")
-        List.empty
+        log.error("Fehler! Argumente sind inkompatibel")
       }
 
     val methods= classFile.methodsWithBody
     var classloops = 0
     val rlist = new ListBuffer[MetricValue]()
+
     while(methods.hasNext) {
       val method = methods.next()
       val body = method.body
       var loops = 0
+      val line = new ListBuffer[Int]()
       if (body.nonEmpty) {
-        val inset = body.get
-        val singleIn = inset.instructions
-        for (code <- singleIn) {
+        val code = body.get
+        val instructions = code.instructions
+        var linelegth = 0
+        for (instruction <- instructions) {
           // Im Array vom Framework können leere Felder sein, die mit null belegt sind
-          if (code != null) {
+          if (instruction != null) {
             //opcode von goto ist 167
-            if (code.opcode == 167) {
-              val gotoInstruction = code.asGotoInstruction
+            if (instruction.opcode == 167) {
+              val gotoInstruction = instruction.asGotoInstruction
               if (gotoInstruction.branchoffset < 0) {
-                loops += 1
+                //Überprüfe ob die Schleife schon gezählt wurde
+                //Bei if Anweisungen in einer Schleife, kann es bei der Code Optimierung vorkommen das goto nicht
+                // zum ende des Code blocks geht sondern zurück zum Schleifenrumpf. Das kommt vor wenn nach dem if block keine Anweisungen mehr stehen
+                val index = linelegth + gotoInstruction.branchoffset
+                if(!line.contains(index))
+                  {
+
+                    loops += 1
+                    line +=index
+                  }
+
+
               }
 
             }
           }
+          linelegth += 1
         }
 
 
