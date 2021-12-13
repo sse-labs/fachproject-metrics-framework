@@ -12,15 +12,15 @@ import scala.collection.mutable.ListBuffer
 import scala.util.Try
 
 /**
- * Die Klasse NumberOfLoopsAnalysis stellt die impliktion  der Metrik Number of Loops (Loop) da.
- * Diese Metrik zählt für jede Methode die anzahl der Schleifen und gibt sie aus.
+ * Die Klasse NumberOfLoopsAnalysis stellt die Implementierung  der Metrik Number of Loops (Loop) da.
+ * Diese Metrik zählt für jede Methode die Anzahl der Schleifen und gibt sie aus.
  *
- * Die Default einstellung ist das nur die Methoden ausgeben werden in denn Loops sich befinden. Die anderen Methoden wo Loops 0 ist werden weggelassen
+ * Die Default Einstellung ist, dass nur die Methoden ausgeben werden, in denen sich Loops befinden. Die anderen Methoden in denen Loops 0 ist werden weggelassen
  *
  * Optional CLI argument:
  *  - --only-class Es wird nur die Anzahl an Loops in einer Klasse angezeigt und nicht für jede Methode
  *  - --out-all-loops Es werden alle Methoden ausgeben, auch die mit Loop 0.
- *  - --no-class Es wird nicht die gesamt Zahl der Loops einer Klasse ausgeben
+ *  - --no-class Es wird nicht die gesamte Zahl der Loops einer Klasse ausgeben
  *  - --only-class-with-loops Gibt nur Klassen mit Loops aus.
  */
 
@@ -34,9 +34,9 @@ class NumberOfLoopsAnalysis extends ClassFileAnalysis {
   /**
    * Die Methode führt die Metrik Loop aus.
    * @param classFile Ist ein Interface von Projekt
-   * @param project Bekommt die vom Framework gelesende jar file in einer Präsedationsform
-   * @param customOptions Einstell möglichkeiten der Analyze
-   * @return Das Ergebniss wird in der Liste für die ausgabe gespeichert
+   * @param project Bekommt die vom Framework gelesende jar file in einer Präsentationsform
+   * @param customOptions Einstellungs Möglichkeiten der Analyse
+   * @return Das Ergebniss wird in der Liste für die Ausgabe gespeichert
    */
   override def analyzeClassFile(classFile: ClassFile, project: Project[URL], customOptions: OptionMap): Try[Iterable[MetricValue]] = Try {
 
