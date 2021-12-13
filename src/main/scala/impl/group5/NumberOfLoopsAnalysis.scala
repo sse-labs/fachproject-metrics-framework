@@ -4,7 +4,7 @@ package impl.group5
 import analysis.{ClassFileAnalysis, MetricValue}
 import input.CliParser.OptionMap
 
-import org.opalj.br.{ClassFile, Method}
+import org.opalj.br.ClassFile
 import org.opalj.br.analyses.Project
 
 import java.net.URL
