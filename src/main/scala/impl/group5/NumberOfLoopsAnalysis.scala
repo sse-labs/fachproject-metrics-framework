@@ -19,18 +19,18 @@ import scala.util.control.Breaks.break
  * Die Default Einstellung ist, dass nur die Methoden ausgeben werden, in denen sich Loops befinden. Die anderen Methoden in denen Loops 0 ist werden weggelassen
  *
  * Optional CLI argument:
- *  - --only-class Es wird nur die Anzahl an Loops in einer Klasse angezeigt und nicht für jede Methode
- *  - --out-all-loops Es werden alle Methoden ausgeben, auch die mit Loop 0.
- *  - --no-class Es wird nicht die gesamte Zahl der Loops einer Klasse ausgeben
- *  - --only-class-with-loops Gibt nur Klassen mit Loops aus.
+ *  - --no-methode Es werden nur Klassen ausgeben
+ *  - --out-all Es wird alles ausgeben
+ *  - --no-class Es werden nur Methoden ausgeben
+ *  - --zeroloopclasses Gibt nur Klassen mit Loops aus.
  */
 
 class NumberOfLoopsAnalysis extends ClassFileAnalysis {
 
-  private val onlyClassSymbol: Symbol = Symbol("only-class")
-  private val outAllSymbol: Symbol = Symbol("out-all-loops")
+  private val noMethodenSymbol: Symbol = Symbol("no-methoden")
+  private val outAllSymbol: Symbol = Symbol("out-all")
   private val noClassSymbol: Symbol = Symbol("no-class")
-  private  val onlyClassWithLoopsSymbol: Symbol = Symbol("only-class-with-loops")
+  private  val nozeroLoopsClassesSymbol: Symbol = Symbol("no-zeroloopclasses")
 
   /**
    * Die Methode führt die Metrik Loop aus.
@@ -42,11 +42,11 @@ class NumberOfLoopsAnalysis extends ClassFileAnalysis {
   override def analyzeClassFile(classFile: ClassFile, project: Project[URL], customOptions: OptionMap): Try[Iterable[MetricValue]] = Try {
 
     val outAllMethode = customOptions.contains(outAllSymbol)
-    val onlyClass = customOptions.contains(onlyClassSymbol)
+    val noMethoden = customOptions.contains(noMethodenSymbol)
     val noClass = customOptions.contains(noClassSymbol)
-    val onClassLoops = customOptions.contains(onlyClassWithLoopsSymbol)
+    val noZeroLoopsClasses = customOptions.contains(nozeroLoopsClassesSymbol)
 
-    if(noClass &&(onlyClass||onClassLoops))
+    if(noClass &&(noMethoden||noZeroLoopsClasses))
       {
         log.error("Fehler! Argumente sind inkompatibel")
       }
@@ -103,7 +103,7 @@ class NumberOfLoopsAnalysis extends ClassFileAnalysis {
       }
       classloops += loops
 
-      if(loops>0 && !onlyClass) {
+      if(loops>0 && !noMethoden) {
         rlist += MetricValue(method.fullyQualifiedSignature, this.analysisName, loops)
       }
       else if(outAllMethode)
@@ -115,10 +115,10 @@ class NumberOfLoopsAnalysis extends ClassFileAnalysis {
 
     if(!noClass)
     {
-      if(onClassLoops && classloops>0.0) {
+      if(noZeroLoopsClasses && classloops>0.0) {
         rlist += MetricValue("Class:" + classFile.thisType.fqn, this.analysisName, classloops)
       }
-      else if(!onClassLoops) rlist += MetricValue("Class:" + classFile.thisType.fqn, this.analysisName, classloops)
+      else if(!noZeroLoopsClasses) rlist += MetricValue("Class:" + classFile.thisType.fqn, this.analysisName, classloops)
     }
 
     rlist.toList

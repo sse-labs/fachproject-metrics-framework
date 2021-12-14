@@ -40,7 +40,7 @@ class NumberOfLoopsAnalysisTest extends FlatSpec with Matchers{
   assert(metricResult2.metricValues.exists(value => value.entityIdent.equals("java.lang.String org.apache.pdfbox.cos.COSDictionary.getDictionaryString(org.apache.pdfbox.cos.COSBase,java.util.List)") && value.metricValue == 2.0))
 
 //Nur Klassen
-  private  val result3 = AnalysisTestUtils.runSingleFileAnalysis(analysisToTest, fileToTest, appConfig, Map(Symbol("only-class") -> true))
+  private  val result3 = AnalysisTestUtils.runSingleFileAnalysis(analysisToTest, fileToTest, appConfig, Map(Symbol("no-methoden") -> true))
   private  val metricResult3 = result3.head
   assert(metricResult3.success)
   assert(metricResult3.metricValues.nonEmpty)
@@ -50,7 +50,7 @@ class NumberOfLoopsAnalysisTest extends FlatSpec with Matchers{
   assert(!metricResult3.metricValues.exists(value => value.entityIdent.equals("java.lang.String org.apache.pdfbox.cos.COSDictionary.getDictionaryString(org.apache.pdfbox.cos.COSBase,java.util.List)") && value.metricValue == 2.0))
 
   //Nur Klassen mit loops ausgeben
-  private  val result4 = AnalysisTestUtils.runSingleFileAnalysis(analysisToTest, fileToTest, appConfig, Map(Symbol("only-class-with-loops") -> true))
+  private  val result4 = AnalysisTestUtils.runSingleFileAnalysis(analysisToTest, fileToTest, appConfig, Map(Symbol("no-zeroloopclasses") -> true))
   private  val metricResult4 = result4.head
   assert(metricResult4.success)
   assert(metricResult4.metricValues.nonEmpty)
@@ -60,7 +60,7 @@ class NumberOfLoopsAnalysisTest extends FlatSpec with Matchers{
   assert(metricResult4.metricValues.exists(value => value.entityIdent.equals("java.lang.String org.apache.pdfbox.cos.COSDictionary.getDictionaryString(org.apache.pdfbox.cos.COSBase,java.util.List)") && value.metricValue == 2.0))
 
 //Alles ausgeben
-  private  val result5 = AnalysisTestUtils.runSingleFileAnalysis(analysisToTest, fileToTest, appConfig, Map(Symbol("out-all-loops") -> true))
+  private  val result5 = AnalysisTestUtils.runSingleFileAnalysis(analysisToTest, fileToTest, appConfig, Map(Symbol("out-all") -> true))
   private  val metricResult5 = result5.head
   assert(metricResult5.success)
   assert(metricResult5.metricValues.nonEmpty)
@@ -69,7 +69,7 @@ class NumberOfLoopsAnalysisTest extends FlatSpec with Matchers{
   assert(metricResult5.metricValues.exists(value => value.entityIdent.equals("java.lang.String org.apache.pdfbox.cos.COSDictionary.getDictionaryString(org.apache.pdfbox.cos.COSBase,java.util.List)") && value.metricValue == 2.0))
 
   //Test Argument fehler
-  private val result6 = AnalysisTestUtils.runSingleFileAnalysis(analysisToTest, fileToTest, appConfig, Map(Symbol("only-class") -> true, Symbol("no-class") -> true ))
+  private val result6 = AnalysisTestUtils.runSingleFileAnalysis(analysisToTest, fileToTest, appConfig, Map(Symbol("no-methoden") -> true, Symbol("no-class") -> true ))
   private val metricResult6 = result6.head
   assert(metricResult6.success)
   assert(metricResult6.metricValues.isEmpty)
