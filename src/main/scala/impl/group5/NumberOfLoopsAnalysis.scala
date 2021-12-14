@@ -10,6 +10,7 @@ import org.opalj.br.analyses.Project
 import java.net.URL
 import scala.collection.mutable.ListBuffer
 import scala.util.Try
+import scala.util.control.Breaks.break
 
 /**
  * Die Klasse NumberOfLoopsAnalysis stellt die Implementierung  der Metrik Number of Loops (Loop) da.
@@ -62,31 +63,40 @@ class NumberOfLoopsAnalysis extends ClassFileAnalysis {
       if (body.nonEmpty) {
         val code = body.get
         val instructions = code.instructions
-        var linelegth = 0
+        var instructionPosition = 0
         for (instruction <- instructions) {
           // Im Array vom Framework können leere Felder sein, die mit null belegt sind
           if (instruction != null) {
-            //opcode von goto ist 167
-            if (instruction.opcode == 167) {
-              val gotoInstruction = instruction.asGotoInstruction
-              if (gotoInstruction.branchoffset < 0) {
-                //Überprüfe ob die Schleife schon gezählt wurde
-                //Bei if Anweisungen in einer Schleife, kann es bei der Code Optimierung vorkommen das goto nicht
-                // zum ende des Code blocks geht sondern zurück zum Schleifenrumpf. Das kommt vor wenn nach dem if block keine Anweisungen mehr stehen
-                val index = linelegth + gotoInstruction.branchoffset
-                if(!line.contains(index))
+            val isInstruction = instruction.opcode match{
+              case 159 => instruction.asIFICMPInstruction
+              case 160 => instruction.asIFICMPInstruction
+              case 161 => instruction.asIFICMPInstruction
+              case 162 => instruction.asIFICMPInstruction
+              case 163 => instruction.asIFICMPInstruction
+              case 164 => instruction.asIFICMPInstruction
+              case 167 => instruction.asGotoInstruction
+              case _ => null
+            }
+
+            if(isInstruction !=null)
+              {
+                if(isInstruction.branchoffset<0)
                   {
+                    //Überprüfe ob die Schleife schon gezählt wurde
+                    //Bei if Anweisungen in einer Schleife, kann es bei der Code Optimierung vorkommen das goto nicht
+                    // zum ende des Code blocks geht sondern zurück zum Schleifenrumpf. Das kommt vor wenn nach dem if block keine Anweisungen mehr stehen
+                    val index = instructionPosition + isInstruction.branchoffset
+                    if(!line.contains(index))
+                    {
 
-                    loops += 1
-                    line +=index
+                      loops += 1
+                      line +=index
+                    }
                   }
-
-
               }
 
-            }
           }
-          linelegth += 1
+          instructionPosition += 1
         }
 
 
