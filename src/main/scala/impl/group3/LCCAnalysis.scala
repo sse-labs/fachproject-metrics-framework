@@ -7,9 +7,6 @@ import input.CliParser.OptionMap
 import org.opalj.br.analyses.Project
 
 import java.net.URL
-import scala.Console.println
-import scala.collection.immutable.HashMap
-import scala.collection.mutable
 import scala.util.Try
 import scala.util.control.Breaks.{break, breakable}
 
@@ -33,7 +30,7 @@ class LCCAnalysis extends SingleFileAnalysis {
         val numberOfPossibleConnections = (publicMethodsCount * (publicMethodsCount-1) / 2).toDouble
         val allPublicMethods= c.methods.filter(_.isPublic)
         var directlyConnectedMethodPairs = 0.toDouble
-        var map = scala.collection.mutable.Map[String, List[String]]()
+        val map = scala.collection.mutable.Map[String, List[String]]()
         if(c.fields.nonEmpty){
           allPublicMethods.combinations(2).foreach(seq =>
             breakable{
