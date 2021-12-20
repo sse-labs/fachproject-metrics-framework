@@ -14,9 +14,12 @@ import scala.util.Try
 class AVGFanOut extends MethodAnalysis{
   override def analyzeMethod(method: Method, project: Project[URL], customOptions: OptionMap): Try[Iterable[MetricValue]] = Try{
     if (project.isProjectType(method.classFile.thisType)) {
-      method.body.map(c => c.codeSize) match {
+
+      val FanOut = method.asMethod
+      val attr = method.attributes
+      FanOut.body.map(c => c.codeSize) match {
         case Some(codeSize) =>
-          List(MetricValue(method.fullyQualifiedSignature, this.analysisName, codeSize))
+          List(MetricValue(method.fullyQualifiedSignature, this.analysisName, codeSize + attr))
         case None =>
           List.empty
       }
