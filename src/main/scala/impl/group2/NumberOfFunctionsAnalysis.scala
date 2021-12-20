@@ -11,6 +11,13 @@ import input.CliParser.OptionMap
 import analysis.{ClassFileAnalysis, MetricValue}
 
 
+/*
+ * Implementation of metric "Number of Functions"
+ *
+ * The metric counts the number of methods a class implements
+ * (inherited methods and default constructors included).
+ *
+ */
 class NumberOfFunctionsAnalysis extends ClassFileAnalysis {
 
   override def analysisName: String = "class.NumberOfFunctions"
