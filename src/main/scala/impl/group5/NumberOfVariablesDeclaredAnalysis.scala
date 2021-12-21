@@ -58,7 +58,6 @@ class NumberOfVariablesDeclaredAnalysis extends SingleFileAnalysis {
             //Check if method body has local variables table
             val localVariableTable = m.body.get.localVariableTable
             if (localVariableTable.nonEmpty) {
-              println("Local Variables: " + localVariableTable)
               numberOfMethodVariables = numberOfMethodVariables + localVariableTable.get.size
               temporaryMethodVariables = localVariableTable.get.size
               temporaryMethodVariablesSum = temporaryMethodVariablesSum + temporaryMethodVariables
@@ -71,9 +70,9 @@ class NumberOfVariablesDeclaredAnalysis extends SingleFileAnalysis {
       }
     }
     println("------------------------------------------------------------------------------------------------------------------")
-    println("Anzahl deklarierter Variablen in den Klassen: " + numberOfClassVariables)
+    println("Anzahl deklarierter Variablen in allen Klassen: " + numberOfClassVariables)
     println("------------------------------------------------------------------------------------------------------------------")
-    println("Anzahl deklarierter Variablen in den Methoden: " + numberOfMethodVariables)
+    println("Anzahl deklarierter Variablen in allen Methoden: " + numberOfMethodVariables)
     println("------------------------------------------------------------------------------------------------------------------")
     metric = numberOfMethodVariables + numberOfClassVariables
 

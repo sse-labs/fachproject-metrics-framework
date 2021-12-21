@@ -11,7 +11,7 @@ class NumberOfVariablesDeclaredTest extends FlatSpec with Matchers{
 
   "The MethodSizeAnalysis" must "calculate valid results for single JARs" in {
 
-    val fileToTest = new File(getClass.getResource("/demo/utils-3.5-beta76.jar").getPath)
+    val fileToTest = new File(getClass.getResource("/group5/vdec-test-1.0.jar").getPath)
     val analysisToTest = new NumberOfVariablesDeclaredAnalysis()
 
     val appConfig = new ApplicationConfiguration(inputFilePath = "", treatFilesAsLibrary = true, outFileOption = None,
