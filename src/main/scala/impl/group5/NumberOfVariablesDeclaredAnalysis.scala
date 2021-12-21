@@ -16,16 +16,12 @@ class NumberOfVariablesDeclaredAnalysis extends SingleFileAnalysis {
   private val onlyMethodVariablesSymbol: Symbol = Symbol("only-method-variables")
 
 
-
-
-
-
   override def analyzeProject(project: Project[URL], customOptions: OptionMap): Try[Iterable[MetricValue]] = Try {
 
     var noMethodVariables = customOptions.contains(noMethodVariablesSymbol)
     var onlyMethodVariables = customOptions.contains(onlyMethodVariablesSymbol)
 
-    if(noMethodVariables && onlyMethodVariables) {
+    if (noMethodVariables && onlyMethodVariables) {
       println("Nur Methodenvariablen und keine Methodenvaraiblen können nicht zusammen ausgewählt werden. Das Ergebnis wird mit Standart Optionen ausgegeben.")
       noMethodVariables = false
       onlyMethodVariables = false
@@ -37,37 +33,41 @@ class NumberOfVariablesDeclaredAnalysis extends SingleFileAnalysis {
     var metric = 0
 
     //Getting all variables declared in the class
-    if(!onlyMethodVariables) {
-      for (c <- classes) {
+
+    for (c <- classes) {
+      var temporaryMethodVariablesSum = 0
+      var temporaryClassVariables = 0
+      if (!onlyMethodVariables) {
         for (f <- c.fields) {
           println("Field is : " + f.fieldType)
+          temporaryClassVariables = temporaryClassVariables + 1
           numberOfClassVariables = numberOfClassVariables + 1
-
         }
-
+        println("Anzahl von Klassenvariablen in " +c.toString()+ " beträgt: "+temporaryClassVariables)
       }
-    }
-    println("Anzahl deklarierter Variablen in den Klassen: "+numberOfClassVariables)
-
-    println("------------------------------------------------------------------------------------------------------------------")
-    //Getting all variables declared in Methods
-    if(!noMethodVariables) {
-      for (c <- classes) {
+      //Getting all variables declared in Methods
+      if (!noMethodVariables) {
         if (c.methods != null) {
           for (m <- c.methodsWithBody) {
+            var temporaryMethodVariables = 0
             //Check if method body has local variables table
             if (m.body.get.localVariableTable.nonEmpty) {
               println("Local Variables: " + m.body.get.localVariableTable)
               numberOfMethodVariables = numberOfMethodVariables + m.body.get.localVariableTable.size
-            }
+              temporaryMethodVariables = m.body.get.localVariableTable.size
+              temporaryMethodVariablesSum = temporaryMethodVariablesSum + temporaryMethodVariables
 
+            }
+            println("Anzahl lokaler Variablen in "+m.toString()+ " beträgt: "+temporaryMethodVariables)
           }
         }
+        println("Anzahl von lokalen Variablen in allen Methoden von "+c.toString()+" beträgt: "+temporaryMethodVariablesSum)
       }
     }
-
-    println("Anzahl deklarierter Variablen in den Methoden: "+numberOfMethodVariables)
-
+    println("------------------------------------------------------------------------------------------------------------------")
+    println("Anzahl deklarierter Variablen in den Klassen: " + numberOfClassVariables)
+    println("------------------------------------------------------------------------------------------------------------------")
+    println("Anzahl deklarierter Variablen in den Methoden: " + numberOfMethodVariables)
     println("------------------------------------------------------------------------------------------------------------------")
     metric = numberOfMethodVariables + numberOfClassVariables
 
