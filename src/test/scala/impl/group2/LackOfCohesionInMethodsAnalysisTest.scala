@@ -8,7 +8,7 @@ import org.tud.sse.metrics.testutils.AnalysisTestUtils
 
 class LackOfCohesionInMethodsAnalysisTest extends FlatSpec with Matchers{
 
-  val fileToTest = new File(getClass.getResource("/group2/FachprojektTest1.jar").getPath)
+  val fileToTest = new File(getClass.getResource("/group2/LCOM_Test1.jar").getPath)
   val analysisToTest = new LackOfCohesionInMethodsAnalysis()
 
   val appConfig = new ApplicationConfiguration(inputFilePath = "", treatFilesAsLibrary = true, outFileOption = None,
@@ -19,4 +19,11 @@ class LackOfCohesionInMethodsAnalysisTest extends FlatSpec with Matchers{
 
   assert(result.size == 1)
 
+  val metricResult = result.head
+
+  assert(metricResult.success)
+  assert(metricResult.metricValues.nonEmpty)
+
+  assert(metricResult.metricValues.exists(value => value.entityIdent.equals("ErsteKlasse") && value.metricValue == 0))
+  assert(metricResult.metricValues.exists(value => value.entityIdent.equals("ZweiteKlasse") && value.metricValue == 9))
 }
