@@ -12,6 +12,7 @@ import org.opalj.br.instructions.{NEW,MethodInvocationInstruction,FieldAccess}
 import analysis.{MethodAnalysis, MetricValue}
 import input.CliParser.OptionMap
 
+
 /*
  * Implementation of metric "Classes Referenced" (CREF)
  *
@@ -24,9 +25,14 @@ import input.CliParser.OptionMap
  *  - field access (read/write).
  *  - return type and parameters (even if not used)
  *
- * Multiple references to the same class are only counted once.
+ * Note
+ *  - Multiple references to the same class are only counted once.
+ *  - References to the class the examined method belongs to are not counted.
  *
- * References to the class the examined method belongs to are not counted.
+ * Optional CLI switch
+ *  --project-cref-only: Count only references to classes which belong to the
+ *                       same project (references to e.g. the standard library
+ *                       are ignored).
  *
  */
 class ClassesReferencedAnalysis extends MethodAnalysis {
@@ -60,10 +66,23 @@ class ClassesReferencedAnalysis extends MethodAnalysis {
       /* remove class the method belongs to */
       crefs.remove(method.classFile.thisType)
 
+      /* the metric value: number of references found */
+      val metricValue =
+        if (customOptions.contains(this.projectCrefOnly)) {
+          /* exclude references not from this project if requested */
+          crefs.intersect(project.allProjectClassFiles.map(_.thisType).toSet).size
+        } else {
+          /* by default, count all references */
+          crefs.size
+        }
+
       /* return result */
-      List(MetricValue(method.fullyQualifiedSignature, this.analysisName, crefs.size))
+      List(MetricValue(method.fullyQualifiedSignature, this.analysisName, metricValue))
     } else {
       List.empty
     }
   }
+
+  /* cli option */
+  private val projectCrefOnly = Symbol("project-cref-only")
 }

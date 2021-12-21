@@ -89,5 +89,48 @@ class ClassesReferencedAnalysisTest extends FlatSpec with Matchers {
     assert(metricResult.metricValues.exists(value => value.entityIdent
       .equals("void org.renjin.utils.IntPrinter.<init>(java.io.PrintWriter,org.renjin.sexp.IntVector,java.lang.String)")
       && value.metricValue ==  4))
+
+    /*
+     * Test 3: test with cli option "--project-cref-only"
+     */
+    result = AnalysisTestUtils.runSingleFileAnalysis(analysisToTest, filesToTest.head, appConfig, Map(Symbol("project-cref-only") -> true))
+    assert(result.size == 1)
+
+    metricResult = result.head
+    assert(metricResult.success)
+    assert(metricResult.metricValues.nonEmpty)
+
+    assert(metricResult.metricValues.exists(value => value.entityIdent.equals("void C.noOp()") && value.metricValue == 0))
+    assert(metricResult.metricValues.exists(value => value.entityIdent.equals("int C.incInt(int)") && value.metricValue == 0))
+    assert(metricResult.metricValues.exists(value => value.entityIdent.equals("void C.setField2(B)") && value.metricValue == 2))
+    assert(metricResult.metricValues.exists(value => value.entityIdent.equals("boolean C.compare(B)") && value.metricValue == 1))
+    assert(metricResult.metricValues.exists(value => value.entityIdent.equals("java.lang.String C.aOrB()") && value.metricValue == 2))
+
+    /*
+     * Test 4: renjin.utils and --project-cref-only
+     */
+    result = AnalysisTestUtils.runSingleFileAnalysis(analysisToTest, filesToTest.tail.head, appConfig, Map(Symbol("project-cref-only") -> true))
+    assert(result.size == 1)
+
+    metricResult = result.head
+    assert(metricResult.success)
+    assert(metricResult.metricValues.nonEmpty)
+
+    // method: DoublePrinter.<init>, references: 6 (Object, PrintWriter, DoubleVector, String, DecimalFormatSymbols, DecimalFormat)
+    assert(metricResult.metricValues.exists(value => value.entityIdent
+      .equals("void org.renjin.utils.DoublePrinter.<init>(java.io.PrintWriter,org.renjin.sexp.DoubleVector,java.lang.String,java.lang.String)")
+      && value.metricValue == 0))
+    // method: FactorPrinter.<init>, references: 4 (Object, PrintWriter, IntVector, String)
+    assert(metricResult.metricValues.exists(value => value.entityIdent
+      .equals("void org.renjin.utils.FactorPrinter.<init>(java.io.PrintWriter,org.renjin.sexp.IntVector,boolean,java.lang.String)")
+      && value.metricValue == 0))
+    // method: FactorPrinter.print, references: 2 (IntVector, PrintWriter)
+    assert(metricResult.metricValues.exists(value => value.entityIdent
+      .equals("void org.renjin.utils.FactorPrinter.print(int)")
+      && value.metricValue == 0))
+    // method: ColumnPrinter.print, references: 0
+    assert(metricResult.metricValues.exists(value => value.entityIdent
+      .equals("void org.renjin.utils.ColumnPrinter.print(int)")
+      && value.metricValue == 0))
   }
 }
