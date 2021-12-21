@@ -28,14 +28,18 @@ class NumberOfVariablesDeclaredAnalysis extends SingleFileAnalysis {
     }
 
     val classes = project.allProjectClassFiles
+    //Counts Method Variables for all classes
     var numberOfMethodVariables = 0
+    //Counts all Class Variables
     var numberOfClassVariables = 0
     var metric = 0
 
     //Getting all variables declared in the class
 
     for (c <- classes) {
+      //Counts Method Variables for whole Class
       var temporaryMethodVariablesSum = 0
+      //Counts only Class variables
       var temporaryClassVariables = 0
       if (!onlyMethodVariables) {
         for (f <- c.fields) {
@@ -49,12 +53,14 @@ class NumberOfVariablesDeclaredAnalysis extends SingleFileAnalysis {
       if (!noMethodVariables) {
         if (c.methods != null) {
           for (m <- c.methodsWithBody) {
+            //Counts local Variables for this Method only
             var temporaryMethodVariables = 0
             //Check if method body has local variables table
-            if (m.body.get.localVariableTable.nonEmpty) {
-              println("Local Variables: " + m.body.get.localVariableTable)
-              numberOfMethodVariables = numberOfMethodVariables + m.body.get.localVariableTable.size
-              temporaryMethodVariables = m.body.get.localVariableTable.size
+            val localVariableTable = m.body.get.localVariableTable
+            if (localVariableTable.nonEmpty) {
+              println("Local Variables: " + localVariableTable)
+              numberOfMethodVariables = numberOfMethodVariables + localVariableTable.get.size
+              temporaryMethodVariables = localVariableTable.get.size
               temporaryMethodVariablesSum = temporaryMethodVariablesSum + temporaryMethodVariables
 
             }
