@@ -20,11 +20,19 @@ class NumberOfVariablesDeclaredTest extends FlatSpec with Matchers{
 
     val result = AnalysisTestUtils.runSingleFileAnalysis(analysisToTest, fileToTest, appConfig, Map.empty[Symbol, Any])
 
-    assert(result.size == 1)
+    //TODO Test noch fehlerhaft
+    val metricResult = result.head
+    assert(metricResult.metricValues.exists(value => value.entityIdent.equals("Anzahl von Klassenvariablen in testclassUndev") && value.metricValue == 4.0))
+    assert(metricResult.metricValues.exists(value => value.entityIdent.equals("Anzahl von Klassenvariablen in testclass") && value.metricValue == 2.0))
+    assert(metricResult.metricValues.exists(value => value.entityIdent.equals("Anzahl lokaler Variablen in int testclassUndev.rechner(int,int)") && value.metricValue == 4.0))
+    assert(metricResult.metricValues.exists(value => value.entityIdent.equals("Anzahl lokaler Variablen in int testclass.rechner(int,int)") && value.metricValue == 4.0))
 
-    val metricResult = result
 
-    println("result " + metricResult)
+
+
+
+
+
 
   }
 
