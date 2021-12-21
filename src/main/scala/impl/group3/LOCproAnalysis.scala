@@ -15,7 +15,8 @@ class LOCproAnalysis extends SingleFileAnalysis{
   override def analyzeProject(project: Project[URL], customOptions: OptionMap): Try[Iterable[MetricValue]] = Try {
     //calculate the metric
     log.info("Please implement the LOCpro metric here")
-    val metricsResult = 100
+    val metricsResult = project.codeSize // Should we calculate all the lines or only the method lines?
+
     List(MetricValue("file", this.analysisName, metricsResult))
   }
 
