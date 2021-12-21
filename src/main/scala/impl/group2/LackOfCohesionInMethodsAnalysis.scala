@@ -16,8 +16,21 @@ class LackOfCohesionInMethodsAnalysis extends SingleFileAnalysis{
     val classes = project.allProjectClassFiles
 
     classes.foreach(singleClass => {
+      /*println("newclass")
+      singleClass.fields.foreach(f => println(s"$f"))*/
 
       val methods = singleClass.methods
+
+      /*methods.foreach(m => {
+        println("newmethod")
+        if(m.body.isDefined){
+          m.body.get.localVariableTable match{
+            case Some(t) => t.foreach(v => println(s"$v"))
+            case None =>
+          }
+        }
+      })*/
+
       var metric = 0 // Wert der LCOM-Metrik
 
       // es wird fuer alle Methodenpaare geprueft, ob die Attributmengen disjunkt sind
