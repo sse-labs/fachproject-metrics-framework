@@ -4,7 +4,6 @@ package impl.group5
 import analysis.{MetricValue, SingleFileAnalysis}
 import input.CliParser.OptionMap
 
-
 import org.opalj.br.analyses.Project
 import org.opalj.br.instructions.FieldAccess
 
@@ -56,18 +55,21 @@ class NumberOfVariablesDeclaredAnalysis extends SingleFileAnalysis {
       var temporaryMethodVariablesSum = 0
       //Counts only Class variables
       var temporaryClassVariables = 0
-      if (!noClass) {
+      //Liste mit Fields
+      val usedFields = new ListBuffer[FieldAccess]()
+
         for (f <- c.fields) {
 
           println("Field is : " + f.fieldType)
           temporaryClassVariables = temporaryClassVariables + 1
           numberOfClassVariables = numberOfClassVariables + 1
         }
+      if (!noClass) {
         println("Anzahl von Klassenvariablen in " +c.toString()+ " beträgt: "+temporaryClassVariables)
         rlist += MetricValue("Anzahl von Klassenvariablen in " +c.fqn,this.analysisName, temporaryClassVariables)
       }
       //Getting all variables declared in Methods
-      if (!noMethod) {
+
         if (c.methods != null) {
           for (m <- c.methodsWithBody) {
             //Counts local Variables for this Method only
@@ -98,13 +100,28 @@ class NumberOfVariablesDeclaredAnalysis extends SingleFileAnalysis {
               temporaryMethodVariablesSum = temporaryMethodVariablesSum + temporaryMethodVariables
 
             }
-            println("Anzahl lokaler Variablen in "+m.toString()+ " beträgt: "+temporaryMethodVariables)
-            rlist += MetricValue("Anzahl lokaler Variablen in "+m.fullyQualifiedSignature, this.analysisName,temporaryMethodVariables)
+            fieldList.foreach(field => {
+              if(!usedFields.exists(y =>{y.name == field.name}) ) usedFields.append(field)
+
+          })
+            if(!noMethod) {
+              println("Anzahl lokaler Variablen in " + m.toString() + " beträgt: " + temporaryMethodVariables)
+              rlist += MetricValue("Anzahl lokaler Variablen in " + m.fullyQualifiedSignature, this.analysisName, temporaryMethodVariables)
+            }
           }
         }
+      if(!noMethod) {
         println("Anzahl von lokalen Variablen in allen Methoden von "+c.toString()+" beträgt: "+temporaryMethodVariablesSum)
         rlist += MetricValue("Anzahl von lokalen Variablen in allen Methoden von "+c.fqn, this.analysisName, temporaryMethodVariablesSum)
       }
+      var neverUsedField =0
+      c.fields.foreach(field => {
+        if(!usedFields.exists(y =>{y.name == field.name}) )
+          {
+              neverUsedField +=1
+          }
+      })
+      rlist += MetricValue("Ungenutzte Variable: ", this.analysisName, neverUsedField )
     }
     println("------------------------------------------------------------------------------------------------------------------")
     println("Anzahl deklarierter Variablen in allen Klassen: " + numberOfClassVariables)
