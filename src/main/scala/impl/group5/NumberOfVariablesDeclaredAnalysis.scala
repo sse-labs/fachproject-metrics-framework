@@ -5,7 +5,7 @@ import analysis.{MetricValue, SingleFileAnalysis}
 import input.CliParser.OptionMap
 
 import org.opalj.br.analyses.Project
-import org.opalj.br.instructions.FieldAccess
+import org.opalj.br.instructions.{ALOAD, FieldAccess}
 
 import java.net.URL
 import scala.collection.mutable.ListBuffer
@@ -20,20 +20,24 @@ import scala.util.Try
  * Die Default Einstellung ist, dass alles ausgeben wird
  *
  * Optional CLI argument:
- *  - --no-methode Es werden nur Klassen ausgeben
+ *  - --no-method Es werden nur Klassen ausgeben
  *  - --no-class Es werden nur Methoden ausgeben
+ *  - --no-unusedfield Es wird nicht die anzahl an nicht benutzte Fields ausgeben
  *
  */
 class NumberOfVariablesDeclaredAnalysis extends SingleFileAnalysis {
 
   private val noMethodSymbol: Symbol = Symbol("no-method")
   private val noClassSymbol: Symbol = Symbol("no-class")
+  private val noUnunsedFiels: Symbol = Symbol("no-unusedfield")
 
 //TODO Varaiblen werden doppelt gezählt.
   override def analyzeProject(project: Project[URL], customOptions: OptionMap): Try[Iterable[MetricValue]] = Try {
 
     var noMethod = customOptions.contains(noMethodSymbol)
     var noClass = customOptions.contains(noClassSymbol)
+    var noUnUsedField = customOptions.contains(noUnunsedFiels)
+
     val rlist = new ListBuffer[MetricValue]()
     if (noMethod && noClass) {
       println("Nur Methodenvariablen und keine Methodenvaraiblen können nicht zusammen ausgewählt werden. Das Ergebnis wird mit Standart Optionen ausgegeben.")
@@ -60,12 +64,12 @@ class NumberOfVariablesDeclaredAnalysis extends SingleFileAnalysis {
 
         for (f <- c.fields) {
 
-          println("Field is : " + f.fieldType)
+
           temporaryClassVariables = temporaryClassVariables + 1
           numberOfClassVariables = numberOfClassVariables + 1
         }
       if (!noClass) {
-        println("Anzahl von Klassenvariablen in " +c.toString()+ " beträgt: "+temporaryClassVariables)
+
         rlist += MetricValue("Anzahl von Klassenvariablen in " +c.fqn,this.analysisName, temporaryClassVariables)
       }
       //Getting all variables declared in Methods
@@ -105,29 +109,29 @@ class NumberOfVariablesDeclaredAnalysis extends SingleFileAnalysis {
 
           })
             if(!noMethod) {
-              println("Anzahl lokaler Variablen in " + m.toString() + " beträgt: " + temporaryMethodVariables)
+
               rlist += MetricValue("Anzahl lokaler Variablen in " + m.fullyQualifiedSignature, this.analysisName, temporaryMethodVariables)
             }
           }
         }
       if(!noMethod) {
-        println("Anzahl von lokalen Variablen in allen Methoden von "+c.toString()+" beträgt: "+temporaryMethodVariablesSum)
+
         rlist += MetricValue("Anzahl von lokalen Variablen in allen Methoden von "+c.fqn, this.analysisName, temporaryMethodVariablesSum)
+
       }
-      var neverUsedField =0
-      c.fields.foreach(field => {
-        if(!usedFields.exists(y =>{y.name == field.name}) )
-          {
-              neverUsedField +=1
+      if(!noUnUsedField) {
+        var neverUsedField = 0
+        c.fields.foreach(field => {
+          if (!usedFields.exists(y => {
+            y.name == field.name
+          })) {
+            neverUsedField += 1
           }
-      })
-      rlist += MetricValue("Ungenutzte Variable: ", this.analysisName, neverUsedField )
+        })
+        rlist += MetricValue("Ungenutzte Variable: ", this.analysisName, neverUsedField)
+      }
     }
-    println("------------------------------------------------------------------------------------------------------------------")
-    println("Anzahl deklarierter Variablen in allen Klassen: " + numberOfClassVariables)
-    println("------------------------------------------------------------------------------------------------------------------")
-    println("Anzahl deklarierter Variablen in allen Methoden: " + numberOfMethodVariables)
-    println("------------------------------------------------------------------------------------------------------------------")
+
     metric = numberOfMethodVariables + numberOfClassVariables
     rlist +=MetricValue("Anzahl deklarierter Variablen in allen Klassen: ", this.analysisName, numberOfClassVariables)
     rlist +=MetricValue("Anzahl deklarierter Variablen in allen Methoden: ", this.analysisName, numberOfMethodVariables)
