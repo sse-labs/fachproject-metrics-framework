@@ -20,7 +20,13 @@ import scala.collection.Map
  * the ExternalStability metric
  * as defined in the paper "Identifying evolution patterns: a metrics-based approach for
  * external library reuse" by Eleni Constantinou und Ioannis Stamelos
+ *
  * @param jarDir directory containing the different jar-file versions of a software to analyze
+ *               Optional CLI arguments:
+ *  - --es_rem outputs values for partial metric es_removed: metric for classes of removed packages
+ *  - --es_red outputs values for partial metric es_remained: metric for classes which have been removed from a package
+ *  - --verbose log more information: file names, simple statistics, metric results
+ *
  */
 class ExternalStabilityAnalysis(jarDir: File) extends MultiFileAnalysis[(Double, Double, Double, String)](jarDir) {
 
@@ -30,19 +36,49 @@ class ExternalStabilityAnalysis(jarDir: File) extends MultiFileAnalysis[(Double,
   var previousNumberOfClasses: Int = 0
   var firstRound: Boolean = true
   var counter: Double = 0
-  var verbose: Boolean = true
+  var verbose: Boolean = false
+  var es_rem: Boolean = false
+  var es_red: Boolean = false
+  var currentfile: String = ""
+  var previousfile: String = ""
+
+  private val sym_es_rem: Symbol = Symbol("es_rem")
+  private val sym_es_red: Symbol = Symbol("es_red")
+  private val sym_verbose: Symbol = Symbol("verbose")
+
 
   /**
    * Calculcate the ExternalStability metric
    * as defined in the paper "Identifying evolution patterns: a metrics-based approach for
    * external library reuse" by Eleni Constantinou und Ioannis Stamelos
-   * @param project Fully initialized OPAL project representing the JAR file under analysis
-   * @param lastResult Option that contains the intermediate result for the previous JAR file, if
-   *                   available. This makes differential analyses easier to implement. This argument
-   *                   may be None if either this is the first JAR file or the last calculation failed.
+   *
+   * @param project       Fully initialized OPAL project representing the JAR file under analysis
+   * @param lastResult    Option that contains the intermediate result for the previous JAR file, if
+   *                      available. This makes differential analyses easier to implement. This argument
+   *                      may be None if either this is the first JAR file or the last calculation failed.
    * @param customOptions Custom analysis options taken from the CLI. Can be used to modify behavior
    *                      of the analysis via command-line
-   *  @return Try[T] object holding the intermediate result, if successful
+   * @return Try[T] object holding the intermediate result, if successful
+   */
+  override def produceAnalysisResultForJAR(project: Project[URL], file: File,
+                                           lastResult: Option[(Double, Double, Double, String)],
+                                           customOptions: OptionMap): Try[(Double, Double, Double, String)] = {
+    currentfile = file.toString
+    produceAnalysisResultForJAR(project, lastResult, customOptions)
+  }
+
+  /**
+   * Calculcate the ExternalStability metric
+   * as defined in the paper "Identifying evolution patterns: a metrics-based approach for
+   * external library reuse" by Eleni Constantinou und Ioannis Stamelos
+   *
+   * @param project       Fully initialized OPAL project representing the JAR file under analysis
+   * @param lastResult    Option that contains the intermediate result for the previous JAR file, if
+   *                      available. This makes differential analyses easier to implement. This argument
+   *                      may be None if either this is the first JAR file or the last calculation failed.
+   * @param customOptions Custom analysis options taken from the CLI. Can be used to modify behavior
+   *                      of the analysis via command-line
+   * @return Try[T] object holding the intermediate result, if successful
    */
   override def produceAnalysisResultForJAR(project: Project[URL],
                                            lastResult: Option[(Double, Double, Double, String)],
@@ -52,6 +88,11 @@ class ExternalStabilityAnalysis(jarDir: File) extends MultiFileAnalysis[(Double,
     //in removed packages and the total number of classes in a jar
 
     //Calculate ES_rem: first part of the ExternalStability metric
+
+    es_rem = customOptions.contains(sym_es_rem)
+    es_red = customOptions.contains(sym_es_red)
+    verbose = customOptions.contains(sym_verbose)
+
 
     val currentPackages: scala.collection.Set[String] = project.projectPackages
     val currentNumberOfClasses = project.projectClassFilesCount
@@ -68,16 +109,16 @@ class ExternalStabilityAnalysis(jarDir: File) extends MultiFileAnalysis[(Double,
     //calculate current round number
     counter += 1
 
-    if(verbose)
-     {
-       log.info("Round: " + counter)
-       log.info("Number of current Packages: " + currentPackages.size)
-       log.info("Number of previous Packages: " + previousPackages.size)
-       log.info("Number of Classes in Project: " + currentNumberOfClasses)
-       log.info("Number of previousClasses in Project: " + previousNumberOfClasses)
-       log.info("Number of Packages removed: " + packagesRemoved.size)
-       log.info("Number of Classes Removed: " + numberOfClassesRemoved)
-     }
+    if (verbose) {
+      log.info("Round: " + counter)
+      log.info("previous file: " + previousfile + " current File: " + currentfile)
+      log.info("Number of current Packages: " + currentPackages.size)
+      log.info("Number of previous Packages: " + previousPackages.size)
+      log.info("Number of Classes in Project: " + currentNumberOfClasses)
+      log.info("Number of previousClasses in Project: " + previousNumberOfClasses)
+      log.info("Number of Packages removed: " + packagesRemoved.size)
+      log.info("Number of Classes Removed: " + numberOfClassesRemoved)
+    }
 
     //set a default value for ES_rem
     var ES_rem: Double = 1.0
@@ -89,8 +130,7 @@ class ExternalStabilityAnalysis(jarDir: File) extends MultiFileAnalysis[(Double,
       ES_rem = 1.0 - numberOfClassesRemoved.toDouble / previousNumberOfClasses.toDouble
     }
 
-    if(verbose)
-    {
+    if (verbose) {
       log.info("ES_rem: " + ES_rem)
     }
 
@@ -113,8 +153,6 @@ class ExternalStabilityAnalysis(jarDir: File) extends MultiFileAnalysis[(Double,
     }
 
 
-
-
     var sum = 0
     //set a default value for ES_rem
     var ES_red: Double = 1.0
@@ -131,14 +169,17 @@ class ExternalStabilityAnalysis(jarDir: File) extends MultiFileAnalysis[(Double,
         val classesRemoved = previousClassesInPackages(packShared).diff(currentClassesInPackages(packShared))
         sum += classesRemoved.size
       }
-    ES_red = 1.0 - sum.toDouble / previousNumberOfClasses.toDouble
+      ES_red = 1.0 - sum.toDouble / previousNumberOfClasses.toDouble
     }
 
-    if(verbose)
-      {
-        log.info("ES_red: " + ES_red)
-      }
+    val external_stability_metric_value = ES_red * ES_rem
 
+    if (verbose) {
+      log.info("ES_red: " + ES_red)
+      log.info("ES: " + external_stability_metric_value)
+    }
+
+    var entity_ident: String = "Difference between: " + previousfile + " and " + currentfile
     previousPackages = currentPackages
     previousNumberOfClasses = currentNumberOfClasses
     firstRound = false
@@ -148,25 +189,57 @@ class ExternalStabilityAnalysis(jarDir: File) extends MultiFileAnalysis[(Double,
 
     //Store the package-class relationship information for the processing in the next round
     previousClassesInPackages = currentClassesInPackages
+    previousfile = currentfile
 
     //The final StabilityMetric is calculated by ES_rem * ES_red
     //The result contains the StabilityMetric, the two partial metrics and round in which these metrics were calculated
-    Try(ES_rem * ES_red, ES_rem, ES_red, counter.toString)
+
+
+    Try(external_stability_metric_value, ES_rem, ES_red, entity_ident)
 
   }
 
   override def produceMetricValues(): List[MetricsResult] = {
 
-    val stability_values = analysisResultsPerFile.values.map(_.get).toList.map(a => MetricValue(a._4, "ES_stability", a._1))//, MetricValue(a._4, "ES_Removed", a._2), MetricValue(a._4, "ES_Remained", a._3))
-      val removed_values = analysisResultsPerFile.values.map(_.get).toList.map(a => MetricValue(a._4, "ES_Removed", a._2))
-      val remained_values = analysisResultsPerFile.values.map(_.get).toList.map(a => MetricValue(a._4, "ES_Remained", a._3))
+    //value == (external_stability_metric_value, ES_rem, ES_red, entity_ident)
+    val stability_values = analysisResultsPerFile.values.map(_.get)
+      .toList.map(value => MetricValue(value._4, "ES_stability", value._1))
+    val removed_values = analysisResultsPerFile.values.map(_.get)
+      .toList.map(value => MetricValue(value._4, "ES_Removed", value._2))
+    val remained_values = analysisResultsPerFile.values.map(_.get)
+      .toList.map(value => MetricValue(value._4, "ES_Remained", value._3))
+
 
     val LBUff = collection.mutable.ListBuffer[MetricsResult]()
-    for (i <- stability_values.indices) {
-      LBUff.append(MetricsResult(analysisName, jarDir, success = true, metricValues = List(stability_values(i),removed_values(i),remained_values(i))))
+    if (es_red && es_rem) {
+      for (i <- stability_values.indices) {
+        LBUff.append(MetricsResult(analysisName, jarDir, success = true,
+          metricValues = List(stability_values(i), removed_values(i), remained_values(i))))
+      }
     }
-    val metricList: List[MetricsResult] = LBUff.toList.sortWith((a, b) => a.metricValues.toSeq.head.entityIdent > b.metricValues.toSeq.head.entityIdent)
-    metricList.foreach(a => println(a.toString))
+    else if (es_red) {
+      for (i <- stability_values.indices) {
+        LBUff.append(MetricsResult(analysisName, jarDir, success = true,
+          metricValues = List(stability_values(i), remained_values(i))))
+      }
+    }
+    else if (es_rem) {
+      for (i <- removed_values.indices) {
+        LBUff.append(MetricsResult(analysisName, jarDir, success = true,
+          metricValues = List(stability_values(i), removed_values(i))))
+      }
+    } else {
+      for (i <- remained_values.indices) {
+        LBUff.append(MetricsResult(analysisName, jarDir, success = true,
+          metricValues = List(stability_values(i))))
+      }
+    }
+
+    val metricList: List[MetricsResult] = LBUff.toList
+    if(verbose)
+      {
+        metricList.foreach(value => log.info("Metrik Result: " + value))
+      }
     metricList
   }
 
