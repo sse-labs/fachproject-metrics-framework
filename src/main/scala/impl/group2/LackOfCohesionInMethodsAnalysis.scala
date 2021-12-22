@@ -13,8 +13,8 @@ import scala.util.Try
 class LackOfCohesionInMethodsAnalysis extends ClassFileAnalysis{
 
   override def analyzeClassFile(classFile: ClassFile, project: Project[URL], customOptions: OptionMap): Try[Iterable[MetricValue]] = Try {
-    // es werden nur Methoden beruecksichtigt, keine Konstruktoren
-    val methods = classFile.methods.filter(m => m.isMethod).filter(m => !(m.name.equals("<init>")))
+    // zu methods gehoeren keine Konstruktoren, statische Methoden und statische Initialisierer
+    val methods = classFile.instanceMethods.toList
     var metric = 0 // Wert der LCOM-Metrik
 
     // es wird fuer alle Methodenpaare geprueft, ob die Attributmengen disjunkt sind
@@ -49,7 +49,7 @@ class LackOfCohesionInMethodsAnalysis extends ClassFileAnalysis{
       bool
     }
 
-    // getUsesAttributes gibt ein Menge mit den von der uebergebenen Methode verwendeten Attribute zurueck
+    // getUsedAttributes gibt ein Menge mit den von der uebergebenen Methode verwendeten Attribute zurueck
     def getUsedAttributes (method: Method): mutable.Set[String] ={
       val attributes = mutable.Set[String]()
       method.body match {
