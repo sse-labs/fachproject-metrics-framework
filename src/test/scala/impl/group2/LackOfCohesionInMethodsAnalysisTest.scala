@@ -13,7 +13,7 @@ import org.tud.sse.metrics.testutils.AnalysisTestUtils
 
 class LackOfCohesionInMethodsAnalysisTest extends FlatSpec with Matchers{
 
-  "The MethodSizeAnalysis" must "calculate valid results for single JARs" in {
+  "The LackOfCohesionInMethodsAnalysis" must "calculate valid results for single JARs" in {
 
     val fileToTest = new File(getClass.getResource("/group2/LCOM_Test1.jar").getPath)
     val analysisToTest = new LackOfCohesionInMethodsAnalysis()

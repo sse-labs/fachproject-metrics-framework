@@ -10,10 +10,28 @@ import org.opalj.br.instructions.FieldAccess
 import scala.collection.mutable
 import scala.util.Try
 
+/*
+ * Implementierung der "LackOfCohesionInMethodsAnalysis" (LCOM)
+ *
+ * Implementierung beruht auf der Defintion nach Chidamber und Kemerer aus
+ * "A Metrics Suite for Object Oriented Design" (1994)
+ *
+ * Die Liste mit den Methoden der Klasse beinhaltet keine Konstruktoren, keine statischen Methoden und
+ * keine statischen Initialisierer. Ausserdem sind keine geerbten Methoden in der Liste enthalten.
+ * Die Attributmengen der Methoden beinhalten nur Attribute, die in der Klasse (fuer die der LCOM-Wert
+ * berechnet wird) deklariert werden. Das bedeutet insbesondere, dass keine geerbten Attribute in der Menge
+ * enthalten sind.
+ *
+ * Fuer LCOM gilt (falls Ergebnis >=0): LCOM =    #Methodenpaare, mit disjunkten Attributmengen
+ *                                             - #Methodenpaare, mit nicht disjuntkten Attributmengen
+ * Wenn das Ergebnis <=0 ist, ist LCOM = 0
+ *
+ */
+
 class LackOfCohesionInMethodsAnalysis extends ClassFileAnalysis{
 
   override def analyzeClassFile(classFile: ClassFile, project: Project[URL], customOptions: OptionMap): Try[Iterable[MetricValue]] = Try {
-    // zu methods gehoeren keine Konstruktoren, statische Methoden und statische Initialisierer
+    // methods beinhaltet keine Konstruktoren, keine statischen Methoden und keine statischen Initialisierer
     val methods = classFile.instanceMethods.toList
     var metric = 0 // Wert der LCOM-Metrik
 
@@ -55,7 +73,11 @@ class LackOfCohesionInMethodsAnalysis extends ClassFileAnalysis{
       method.body match {
         case None =>
         case Some(code) => code.instructions.foreach {
-          case fieldAccess: FieldAccess => attributes.add(fieldAccess.name)
+          case fieldAccess: FieldAccess => {
+            if (fieldAccess.declaringClass.equals(method.classFile.thisType)){
+              attributes.add(fieldAccess.name)
+            }
+          }
           case _ =>
         }
       }
