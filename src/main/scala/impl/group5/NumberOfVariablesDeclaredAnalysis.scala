@@ -4,9 +4,9 @@ package impl.group5
 import analysis.{MetricValue, SingleFileAnalysis}
 import input.CliParser.OptionMap
 
-import org.opalj.br.ObjectType
+
 import org.opalj.br.analyses.Project
-import org.opalj.br.instructions.{FieldAccess, GETFIELD, PUTFIELD}
+import org.opalj.br.instructions.FieldAccess
 
 import java.net.URL
 import scala.collection.mutable.ListBuffer
@@ -73,23 +73,28 @@ class NumberOfVariablesDeclaredAnalysis extends SingleFileAnalysis {
             //Counts local Variables for this Method only
             var temporaryMethodVariables = 0
             //Check if method body has local variables table
-            //TODO Klassenvairable werden mit gezählt
+
             val localVariableTable = m.body.get.localVariableTable
             val fieldList = new ListBuffer[FieldAccess]()
             m.body match {
               case None =>
               case Some(code) => code.instructions.foreach{
 
-                case fieldAccess: FieldAccess => fieldList.append(fieldAccess)
+                case fieldAccess: FieldAccess => {
+                  if(!fieldList.exists(y =>{y.name == fieldAccess.name}) )
+                      fieldList.append(fieldAccess)
+                }
                 case _=>
-                //case getField: GETFIELD => fieldList.find(getField)
-                //case putField: PUTFIELD =>
 
               }
             }
+            var temporaryFielVariablen = 0
+            if(fieldList.nonEmpty) temporaryFielVariablen = fieldList.size
             if (localVariableTable.nonEmpty) {
+
               numberOfMethodVariables = numberOfMethodVariables + localVariableTable.get.size
               temporaryMethodVariables = localVariableTable.get.size
+              temporaryMethodVariables -= temporaryFielVariablen
               temporaryMethodVariablesSum = temporaryMethodVariablesSum + temporaryMethodVariables
 
             }
