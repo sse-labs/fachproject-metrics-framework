@@ -4,7 +4,6 @@ package impl
 import analysis.{MetricValue, MetricsResult, MultiFileAnalysis}
 import input.CliParser.{OptionMap, additionalClassesDirSymbol, inFileSymbol}
 
-import org.opalj.br.ObjectType
 import org.opalj.br.analyses.Project
 import org.opalj.da.ClassFile
 
@@ -32,7 +31,7 @@ class ExternalStabilityAnalysis(jarDir: File) extends MultiFileAnalysis[(Double,
 
   var previousPackages: Set[String] = Set[String]()
   var previousPackagesSize: Map[String, Int] = Map[String, Int]()
-  var previousClassesInPackages: Map[String, Set[ObjectType]] = Map[String, Set[ObjectType]]()
+  var previousClassesInPackages: Map[String, Set[String]] = Map[String, Set[String]]()
   var previousNumberOfClasses: Int = 0
   var firstRound: Boolean = true
   var counter: Double = 0
@@ -138,15 +137,16 @@ class ExternalStabilityAnalysis(jarDir: File) extends MultiFileAnalysis[(Double,
     //Calculate the second partial metric ES_red
     // It is necessary to have access to the package-class relationship information in the following round
     // This information needs to be calculated and than needs to be stored in variable outside of this function
-    var currentClassesInPackages: Map[String, Set[ObjectType]] = Map[String, Set[ObjectType]]()
+    var currentClassesInPackages: Map[String, Set[String]] = Map[String, Set[String]]()
 
     // For every package...
     for (curPack <- currentPackages) {
-      var classes = Set[ObjectType]()
+      var classes = Set[String]()
       // ...get every contained class
       for (curClass <- project.classesPerPackage(curPack)) {
         //store all the classes of a package in a Set[]
-        classes = classes + curClass.thisType
+        //compare classes by their fully qualified name = fqn
+        classes = classes + curClass.fqn
       }
       //..and store package-classes relationship information in a Map[]...
       currentClassesInPackages = currentClassesInPackages + (curPack -> classes)
@@ -203,33 +203,37 @@ class ExternalStabilityAnalysis(jarDir: File) extends MultiFileAnalysis[(Double,
 
     //value == (external_stability_metric_value, ES_rem, ES_red, entity_ident)
     val stability_values = analysisResultsPerFile.values.map(_.get)
-      .toList.map(value => MetricValue(value._4, "ES_stability", value._1))
+      .toList
+      .map(value => MetricValue(value._4, "ES_stability", value._1))
     val removed_values = analysisResultsPerFile.values.map(_.get)
-      .toList.map(value => MetricValue(value._4, "ES_Removed", value._2))
+      .toList
+      .map(value => MetricValue(value._4, "ES_Removed", value._2))
     val remained_values = analysisResultsPerFile.values.map(_.get)
-      .toList.map(value => MetricValue(value._4, "ES_Remained", value._3))
+      .toList
+      .map(value => MetricValue(value._4, "ES_Remained", value._3))
 
 
     val LBUff = collection.mutable.ListBuffer[MetricsResult]()
     if (es_red && es_rem) {
-      for (i <- stability_values.indices) {
+      //skip first calculation does not contain a difference, consists only of a single jar information
+      for (i <- 1 until stability_values.size) {
         LBUff.append(MetricsResult(analysisName, jarDir, success = true,
           metricValues = List(stability_values(i), removed_values(i), remained_values(i))))
       }
     }
     else if (es_red) {
-      for (i <- stability_values.indices) {
+      for (i <- 1 until stability_values.size) {
         LBUff.append(MetricsResult(analysisName, jarDir, success = true,
           metricValues = List(stability_values(i), remained_values(i))))
       }
     }
     else if (es_rem) {
-      for (i <- removed_values.indices) {
+      for (i <- 1 until stability_values.size) {
         LBUff.append(MetricsResult(analysisName, jarDir, success = true,
           metricValues = List(stability_values(i), removed_values(i))))
       }
     } else {
-      for (i <- remained_values.indices) {
+      for (i <- 1 until stability_values.size) {
         LBUff.append(MetricsResult(analysisName, jarDir, success = true,
           metricValues = List(stability_values(i))))
       }
