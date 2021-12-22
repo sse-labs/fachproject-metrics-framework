@@ -26,18 +26,26 @@ class NumberOfVariablesDeclaredTest extends FlatSpec with Matchers{
 
     val resultDemo = AnalysisTestUtils.runSingleFileAnalysis(analysisToTest, fileToTestDemo, appConfig, Map.empty[Symbol, Any])
     val metricsResultDemo = resultDemo.head
-    assert(!metricsResultDemo.metricValues.exists(value => value.entityIdent.equals("Class:testclass") && value.metricValue == 17.0))
-    assert(!metricsResultDemo.metricValues.exists(value => value.entityIdent.equals("java.lang.String testclass.welcome(java.lang.String)") && value.metricValue == 2.0))
+    assert(metricsResultDemo.metricValues.exists(value => value.entityIdent.equals("Anzahl von Klassenvariablen in testclass") && value.metricValue == 3.0))
+    assert(metricsResultDemo.metricValues.exists(value => value.entityIdent.equals("Anzahl lokaler Variablen in java.lang.String testclass.welcome(java.lang.String)") && value.metricValue == 2.0))
 
 
     val resultDemoOnlyClass = AnalysisTestUtils.runSingleFileAnalysis(analysisToTest, fileToTestDemo, appConfig, Map(Symbol("no-method") -> true))
     val metricsResultDemoOnlyClass = resultDemoOnlyClass.head
-    assert(!metricsResultDemoOnlyClass.metricValues.exists(value => value.entityIdent.equals("Class:testclass") && value.metricValue == 3.0))
+    assert(metricsResultDemoOnlyClass.metricValues.exists(value => value.entityIdent.equals("Anzahl von Klassenvariablen in testclass") && value.metricValue == 3.0))
+    assert(!metricsResultDemoOnlyClass.metricValues.exists(value => value.entityIdent.equals("Anzahl lokaler Variablen in java.lang.String testclass.welcome(java.lang.String)") && value.metricValue == 2.0))
+
 
     val resultDemoOnlyMethods = AnalysisTestUtils.runSingleFileAnalysis(analysisToTest, fileToTestDemo, appConfig, Map(Symbol("no-class") -> true))
     val metricsResultDemoOnlyMethods = resultDemoOnlyMethods.head
-    assert(!metricsResultDemoOnlyMethods.metricValues.exists(value => value.entityIdent.equals("Class:testclass") && value.metricValue == 14.0))
+    assert(!metricsResultDemoOnlyMethods.metricValues.exists(value => value.entityIdent.equals("Anzahl von Klassenvariablen in testclass") && value.metricValue == 3.0))
+    assert(metricsResultDemoOnlyMethods.metricValues.exists(value => value.entityIdent.equals("Anzahl lokaler Variablen in java.lang.String testclass.welcome(java.lang.String)") && value.metricValue == 2.0))
 
+
+
+
+
+    //Todo Ab hier ist noch nichts korrektgiert wurden
     val resultDemoWrongOptions = AnalysisTestUtils.runSingleFileAnalysis(analysisToTest, fileToTestDemo, appConfig, Map(Symbol("no-class") -> true, Symbol("no-method") -> true))
     val metricsResultDemoWrongOptions = resultDemoWrongOptions.head
     assert(!metricsResultDemoWrongOptions.metricValues.exists(value => value.entityIdent.equals("Class:testclass") && value.metricValue == 17.0))
