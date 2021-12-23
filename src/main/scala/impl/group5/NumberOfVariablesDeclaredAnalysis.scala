@@ -119,7 +119,7 @@ class NumberOfVariablesDeclaredAnalysis extends SingleFileAnalysis {
         rlist += MetricValue("Anzahl von lokalen Variablen in allen Methoden von "+c.fqn, this.analysisName, temporaryMethodVariablesSum)
 
       }
-      if(!noUnUsedField) {
+      if(noUnUsedField) {
         var neverUsedField = 0
         c.fields.foreach(field => {
           if (!usedFields.exists(y => {
@@ -136,10 +136,7 @@ class NumberOfVariablesDeclaredAnalysis extends SingleFileAnalysis {
     rlist +=MetricValue("Anzahl deklarierter Variablen in allen Klassen: ", this.analysisName, numberOfClassVariables)
     rlist +=MetricValue("Anzahl deklarierter Variablen in allen Methoden: ", this.analysisName, numberOfMethodVariables)
 
-    //TODO In welchem Format Ergebnis zurückgeben? Für Klassen aufgeteilt oder ganzes Projekt
-    MetricValue("Project:" + project.toString(), this.analysisName, metric)
-    rlist +=MetricValue("file", "VDEC", metric)
-    rlist.toList
+
   }
 
   override def analysisName: String = "VariablesDeclared.count"

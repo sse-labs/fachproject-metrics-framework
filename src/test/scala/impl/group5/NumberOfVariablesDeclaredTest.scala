@@ -26,14 +26,16 @@ class NumberOfVariablesDeclaredTest extends FlatSpec with Matchers{
 
     val resultDemo = AnalysisTestUtils.runSingleFileAnalysis(analysisToTest, fileToTestDemo, appConfig, Map.empty[Symbol, Any])
     val metricsResultDemo = resultDemo.head
+    print(metricsResultDemo)
     assert(metricsResultDemo.metricValues.exists(value => value.entityIdent.equals("Anzahl von Klassenvariablen in testclass") && value.metricValue == 3.0))
     assert(metricsResultDemo.metricValues.exists(value => value.entityIdent.equals("Anzahl lokaler Variablen in java.lang.String testclass.welcome(java.lang.String)") && value.metricValue == 2.0))
+    assert(metricsResultDemo.metricValues.exists(value => value.entityIdent.equals("Anzahl deklarierter Variablen in allen Klassen: ") && value.metricValue == 8.0))
 
 
     val resultDemoOnlyClass = AnalysisTestUtils.runSingleFileAnalysis(analysisToTest, fileToTestDemo, appConfig, Map(Symbol("no-method") -> true))
     val metricsResultDemoOnlyClass = resultDemoOnlyClass.head
     assert(metricsResultDemoOnlyClass.metricValues.exists(value => value.entityIdent.equals("Anzahl von Klassenvariablen in testclass") && value.metricValue == 3.0))
-    //Eintrag existiert nicht wenn no-method ausgewählt ist, braucht evtl. Abfang in Analysis aber macht als Abfrage ja eigtl keinen Sinn
+    //Eintrag existiert nicht wenn no-method ausgewählt ist, braucht evtl. Eingabe Fehler Abfang in Analysis aber macht als Abfrage ja eigtl keinen Sinn
     //assert(metricsResultDemoOnlyClass.metricValues.exists(value => value.entityIdent.equals("Anzahl lokaler Variablen in java.lang.String testclass.welcome(java.lang.String)") && value.metricValue == 2.0))
 
 
@@ -42,6 +44,14 @@ class NumberOfVariablesDeclaredTest extends FlatSpec with Matchers{
     //Konstruktor variablen werden hier nicht gezählt, zählt Konstruktor als methode?
     assert(metricsResultDemoOnlyMethods.metricValues.exists(value => value.entityIdent.equals("Anzahl von lokalen Variablen in allen Methoden von testclass") && value.metricValue == 10.0))
     assert(metricsResultDemoOnlyMethods.metricValues.exists(value => value.entityIdent.equals("Anzahl lokaler Variablen in java.lang.String testclass.welcome(java.lang.String)") && value.metricValue == 2.0))
+
+
+
+    val resultDemoNoUnused = AnalysisTestUtils.runSingleFileAnalysis(analysisToTest, fileToTestDemo, appConfig, Map(Symbol("no-unusedfield") -> true))
+    val metricsResultDemoNoUnused = resultDemoNoUnused.head
+    print(metricsResultDemoNoUnused)
+    assert(metricsResultDemoNoUnused.metricValues.exists(value => value.entityIdent.equals("Anzahl deklarierter Variablen in allen Klassen: ") && value.metricValue == 7.0))
+
 
 
 
@@ -55,7 +65,7 @@ class NumberOfVariablesDeclaredTest extends FlatSpec with Matchers{
     //Undefined
     val resultDemoUndefinedVariables = AnalysisTestUtils.runSingleFileAnalysis(analysisToTest, fileToTestDemo, appConfig, Map(Symbol("undefined-variables") -> true))
     val metricsResultDemoUndefinedVariables = resultDemoUndefinedVariables.head
-    assert(!metricsResultDemoUndefinedVariables.metricValues.exists(value => value.entityIdent.equals("Anzahl von Klassenvariablen in testclassUndev") && value.metricValue == 2.0))
+    assert(metricsResultDemoUndefinedVariables.metricValues.exists(value => value.entityIdent.equals("Anzahl von Klassenvariablen in testclassUndev") && value.metricValue == 2.0))
 
     val resultDemoUndefinedVariablesOnlyMethod = AnalysisTestUtils.runSingleFileAnalysis(analysisToTest, fileToTestDemo, appConfig, Map(Symbol("undefined-variables") -> true,Symbol("no-class") -> true))
     val metricsResultDemoUndefinedVariablesOnlyMethod = resultDemoUndefinedVariablesOnlyMethod.head
