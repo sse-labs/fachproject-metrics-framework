@@ -51,6 +51,7 @@ class NumberOfVariablesDeclaredTest extends FlatSpec with Matchers{
     val metricsResultDemoNoUnused = resultDemoNoUnused.head
     print(metricsResultDemoNoUnused)
     assert(metricsResultDemoNoUnused.metricValues.exists(value => value.entityIdent.equals("Ungenutzte Variable: ") && value.metricValue == 1.0))
+    assert(metricsResultDemoNoUnused.metricValues.exists(value => value.entityIdent.equals("Anzahl deklarierter Variablen in allen Klassen: ") && value.metricValue == 8.0))
 
 
 
@@ -65,7 +66,7 @@ class NumberOfVariablesDeclaredTest extends FlatSpec with Matchers{
     //Undefined
     val resultDemoUndefinedVariables = AnalysisTestUtils.runSingleFileAnalysis(analysisToTest, fileToTestDemo, appConfig, Map(Symbol("undefined-variables") -> true))
     val metricsResultDemoUndefinedVariables = resultDemoUndefinedVariables.head
-    assert(metricsResultDemoUndefinedVariables.metricValues.exists(value => value.entityIdent.equals("Anzahl von Klassenvariablen in testclassUndev") && value.metricValue == 2.0))
+    assert(metricsResultDemoUndefinedVariables.metricValues.exists(value => value.entityIdent.equals("Anzahl von Klassenvariablen in testclassUndev") && value.metricValue == 5.0))
 
     val resultDemoUndefinedVariablesOnlyMethod = AnalysisTestUtils.runSingleFileAnalysis(analysisToTest, fileToTestDemo, appConfig, Map(Symbol("undefined-variables") -> true,Symbol("no-class") -> true))
     val metricsResultDemoUndefinedVariablesOnlyMethod = resultDemoUndefinedVariablesOnlyMethod.head

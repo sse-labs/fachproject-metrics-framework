@@ -119,7 +119,7 @@ class NumberOfVariablesDeclaredAnalysis extends SingleFileAnalysis {
         rlist += MetricValue("Anzahl von lokalen Variablen in allen Methoden von "+c.fqn, this.analysisName, temporaryMethodVariablesSum)
 
       }
-      if(noUnUsedField) {
+      if(!noUnUsedField) {
         var neverUsedField = 0
         c.fields.foreach(field => {
           if (!usedFields.exists(y => {
