@@ -26,7 +26,6 @@ class NumberOfVariablesDeclaredTest extends FlatSpec with Matchers{
 
     val resultDemo = AnalysisTestUtils.runSingleFileAnalysis(analysisToTest, fileToTestDemo, appConfig, Map.empty[Symbol, Any])
     val metricsResultDemo = resultDemo.head
-    print(metricsResultDemo)
     assert(metricsResultDemo.metricValues.exists(value => value.entityIdent.equals("Anzahl von Klassenvariablen in testclass") && value.metricValue == 3.0))
     assert(metricsResultDemo.metricValues.exists(value => value.entityIdent.equals("Anzahl lokaler Variablen in java.lang.String testclass.welcome(java.lang.String)") && value.metricValue == 2.0))
     assert(metricsResultDemo.metricValues.exists(value => value.entityIdent.equals("Anzahl deklarierter Variablen in allen Klassen: ") && value.metricValue == 8.0))
@@ -49,8 +48,7 @@ class NumberOfVariablesDeclaredTest extends FlatSpec with Matchers{
 
     val resultDemoNoUnused = AnalysisTestUtils.runSingleFileAnalysis(analysisToTest, fileToTestDemo, appConfig, Map(Symbol("no-unusedfield") -> true))
     val metricsResultDemoNoUnused = resultDemoNoUnused.head
-    print(metricsResultDemoNoUnused)
-    assert(metricsResultDemoNoUnused.metricValues.exists(value => value.entityIdent.equals("Ungenutzte Variable: ") && value.metricValue == 1.0))
+    assert(metricsResultDemoNoUnused.metricValues.exists(value => value.entityIdent.equals("Ungenutzte Variable in testclassUndev") && value.metricValue == 1.0))
     assert(metricsResultDemoNoUnused.metricValues.exists(value => value.entityIdent.equals("Anzahl deklarierter Variablen in allen Klassen: ") && value.metricValue == 8.0))
 
 
