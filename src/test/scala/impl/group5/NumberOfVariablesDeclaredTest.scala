@@ -45,27 +45,27 @@ class NumberOfVariablesDeclaredTest extends FlatSpec with Matchers{
 
 
 
-    //Todo Ab hier ist noch nichts korrektgiert wurden
+
     val resultDemoWrongOptions = AnalysisTestUtils.runSingleFileAnalysis(analysisToTest, fileToTestDemo, appConfig, Map(Symbol("no-class") -> true, Symbol("no-method") -> true))
     val metricsResultDemoWrongOptions = resultDemoWrongOptions.head
-    assert(!metricsResultDemoWrongOptions.metricValues.exists(value => value.entityIdent.equals("Class:testclass") && value.metricValue == 17.0))
+    assert(!metricsResultDemoWrongOptions.metricValues.exists(value => value.entityIdent.equals("Anzahl von Klassenvariablen in testclass") && value.metricValue == 17.0))
 
     //Undefined
     val resultDemoUndefinedVariables = AnalysisTestUtils.runSingleFileAnalysis(analysisToTest, fileToTestDemo, appConfig, Map(Symbol("undefined-variables") -> true))
     val metricsResultDemoUndefinedVariables = resultDemoUndefinedVariables.head
-    assert(!metricsResultDemoUndefinedVariables.metricValues.exists(value => value.entityIdent.equals("Class:testclassUndev") && value.metricValue == 2.0))
+    assert(!metricsResultDemoUndefinedVariables.metricValues.exists(value => value.entityIdent.equals("Anzahl von Klassenvariablen in testclassUndev") && value.metricValue == 2.0))
 
     val resultDemoUndefinedVariablesOnlyMethod = AnalysisTestUtils.runSingleFileAnalysis(analysisToTest, fileToTestDemo, appConfig, Map(Symbol("undefined-variables") -> true,Symbol("no-class") -> true))
     val metricsResultDemoUndefinedVariablesOnlyMethod = resultDemoUndefinedVariablesOnlyMethod.head
-    assert(!metricsResultDemoUndefinedVariablesOnlyMethod.metricValues.exists(value => value.entityIdent.equals("Class:testclassUndev") && value.metricValue == 1.0))
+    assert(!metricsResultDemoUndefinedVariablesOnlyMethod.metricValues.exists(value => value.entityIdent.equals("Anzahl von Klassenvariablen in testclassUndev") && value.metricValue == 1.0))
 
     val resultDemoUndefinedVariablesOnlyClass = AnalysisTestUtils.runSingleFileAnalysis(analysisToTest, fileToTestDemo, appConfig, Map(Symbol("undefined-variables") -> true,Symbol("no-method") -> true))
     val metricsResultDemoUndefinedVariablesOnlyClass = resultDemoUndefinedVariablesOnlyClass.head
-    assert(!metricsResultDemoUndefinedVariablesOnlyClass.metricValues.exists(value => value.entityIdent.equals("Class:testclassUndev") && value.metricValue == 1.0))
+    assert(!metricsResultDemoUndefinedVariablesOnlyClass.metricValues.exists(value => value.entityIdent.equals("Anzahl von Klassenvariablen in testclassUndev") && value.metricValue == 1.0))
 
 
 
-    //TODO Test noch fehlerhaft
+
 
 
 
@@ -78,10 +78,10 @@ class NumberOfVariablesDeclaredTest extends FlatSpec with Matchers{
 
     val resultH2 = AnalysisTestUtils.runSingleFileAnalysis(analysisToTest, fileToTest2, appConfig, Map.empty[Symbol, Any])
     val metricResultH2 = resultH2.head
-    assert(!metricResultH2.metricValues.exists(value => value.entityIdent.equals("boolean org.h2.index.Index.mayHaveNullDuplicates(org.h2.result.SearchRow)") && value.metricValue == 5.0))
-    assert(!metricResultH2.metricValues.exists(value => value.entityIdent.equals("java.lang.String org.h2.jdbc.JdbcConnection.translateSQLImpl(java.lang.String)") && value.metricValue == 6.0))
-    assert(!metricResultH2.metricValues.exists(value => value.entityIdent.equals("void org.h2.server.TcpServer.shutdown(java.lang.String,java.lang.String,boolean,boolean)") && value.metricValue == 7.0))
-    assert(!metricResultH2.metricValues.exists(value => value.entityIdent.equals("Class:org/h2/engine/Setting") && value.metricValue == 14.0))
+    assert(!metricResultH2.metricValues.exists(value => value.entityIdent.equals("Anzahl lokaler Variablen in boolean org.h2.index.Index.mayHaveNullDuplicates(org.h2.result.SearchRow)") && value.metricValue == 5.0))
+    assert(!metricResultH2.metricValues.exists(value => value.entityIdent.equals("Anzahl lokaler Variablen in java.lang.String org.h2.jdbc.JdbcConnection.translateSQLImpl(java.lang.String)") && value.metricValue == 6.0))
+    assert(!metricResultH2.metricValues.exists(value => value.entityIdent.equals("Anzahl lokaler Variablen in void org.h2.server.TcpServer.shutdown(java.lang.String,java.lang.String,boolean,boolean)") && value.metricValue == 7.0))
+    assert(!metricResultH2.metricValues.exists(value => value.entityIdent.equals("Anzahl von Klassenvariablen in org/h2/engine/Setting") && value.metricValue == 14.0))
 
     val resultH2ClassOnly = AnalysisTestUtils.runSingleFileAnalysis(analysisToTest, fileToTest2, appConfig, Map.empty[Symbol, Any])
 
