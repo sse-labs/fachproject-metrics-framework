@@ -29,14 +29,14 @@ class NumberOfVariablesDeclaredAnalysis extends SingleFileAnalysis {
 
   private val noMethodSymbol: Symbol = Symbol("no-method")
   private val noClassSymbol: Symbol = Symbol("no-class")
-  private val noUnunsedFiels: Symbol = Symbol("no-unusedfield")
+  private val noUnusedFields: Symbol = Symbol("no-unusedfield")
 
 //TODO Varaiblen werden doppelt gezählt.
   override def analyzeProject(project: Project[URL], customOptions: OptionMap): Try[Iterable[MetricValue]] = Try {
 
     var noMethod = customOptions.contains(noMethodSymbol)
     var noClass = customOptions.contains(noClassSymbol)
-    var noUnUsedField = customOptions.contains(noUnunsedFiels)
+    var noUnUsedField = customOptions.contains(noUnusedFields)
 
     val rlist = new ListBuffer[MetricValue]()
     if (noMethod && noClass) {
