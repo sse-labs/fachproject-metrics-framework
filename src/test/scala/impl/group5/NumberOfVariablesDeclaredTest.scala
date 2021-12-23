@@ -50,7 +50,7 @@ class NumberOfVariablesDeclaredTest extends FlatSpec with Matchers{
     val resultDemoNoUnused = AnalysisTestUtils.runSingleFileAnalysis(analysisToTest, fileToTestDemo, appConfig, Map(Symbol("no-unusedfield") -> true))
     val metricsResultDemoNoUnused = resultDemoNoUnused.head
     print(metricsResultDemoNoUnused)
-    assert(metricsResultDemoNoUnused.metricValues.exists(value => value.entityIdent.equals("Anzahl deklarierter Variablen in allen Klassen: ") && value.metricValue == 7.0))
+    assert(metricsResultDemoNoUnused.metricValues.exists(value => value.entityIdent.equals("Ungenutzte Variable: ") && value.metricValue == 1.0))
 
 
 
