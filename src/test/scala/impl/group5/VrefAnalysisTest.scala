@@ -132,6 +132,13 @@ class VrefAnalysisTest extends FlatSpec with Matchers{
   val metricResultBox = resultBox.head
   assert(metricResultBox.success)
   assert(metricResultBox.metricValues.nonEmpty)
+  assert(metricResultBox.metricValues.exists(value => value.entityIdent.equals("org/apache/pdfbox/util/Version  Anzahl aller Referenzen der Variablen:") && value.metricValue == 16.0))
+  assert(metricResultBox.metricValues.exists(value => value.entityIdent.equals("void org.apache.pdfbox.util.Vector.<init>(float,float) Anzahl der gesamten Variablen Referenzen : ") && value.metricValue == 2.0))
+  assert(metricResultBox.metricValues.exists(value => value.entityIdent.equals("void org.apache.pdfbox.util.Vector.<init>(float,float) Anzahl der Field Referenzen: ") && value.metricValue == 2.0))
+  assert(metricResultBox.metricValues.exists(value => value.entityIdent.equals("int org.apache.pdfbox.util.NumberFormatUtil.formatFloatFast(float,int,byte[]) Anzahl der gesamten Variablen Referenzen : ") && value.metricValue == 39.0))
+  assert(metricResultBox.metricValues.exists(value => value.entityIdent.equals("org/apache/pdfbox/util/NumberFormatUtil  Anzahl aller Referenzen der Variablen:") && value.metricValue == 85.0))
+  assert(metricResultBox.metricValues.exists(value => value.entityIdent.equals("org.apache.pdfbox.util.Matrix org.apache.pdfbox.util.Matrix.extractTranslating() Anzahl der this Referenzen: ") && value.metricValue == 2.0))
+  assert(metricResultBox.metricValues.exists(value => value.entityIdent.equals("java.lang.String org.apache.pdfbox.util.DateConverter.toString(java.util.Calendar) Anzahl der Null Referenzen: ") && value.metricValue == 1.0))
 
   // H2 Datenbank
   val fileToTestH2 = new File(getClass.getResource("/group5/h2-2.0.202.jar").getPath)
