@@ -105,7 +105,7 @@ class vrefAnalysis extends ClassFileAnalysis{
                   storeInstructionmap += (store -> 1)
                 }
 
-            case _: LoadConstantInstruction[Null] => nullReferenz += 1
+            case nullInstruction: LoadConstantInstruction[Null] => if(nullInstruction.opcode ==1) nullReferenz += 1
 
             case putfield: PUTFIELD =>
               if(putfieldCount.contains(putfield))
@@ -183,21 +183,21 @@ class vrefAnalysis extends ClassFileAnalysis{
               list.foreach(x => {
                   loadInstructionmap.foreach(y=> {
                     if (y._1.lvIndex == x.index) {
-                      rlist += MetricValue("Die Anzahl der load Referenzen der Variable " + x.name + " :", this.analysisName, y._2)
+                      rlist += MetricValue(method.fullyQualifiedSignature +"Die Anzahl der load Referenzen der Variable " + x.name + " :", this.analysisName, y._2)
                     }
                   } )
                   storeInstructionmap.foreach(y =>{
                   if(y._1.lvIndex==x.index)
                     {
-                    rlist += MetricValue("Die Anzahl der store Referenzen der Variable " + x.name +" :", this.analysisName, y._2)
+                    rlist += MetricValue(method.fullyQualifiedSignature +"Die Anzahl der store Referenzen der Variable " + x.name +" :", this.analysisName, y._2)
                     }
                   })
               })
             }
             if(infoZuVariablen)
               {
-                getfieldCount.foreach(y => rlist += MetricValue("Die Anzahl der load Referenzen der Field in der Methode " + y._1.name +" :", this.analysisName, y._2) )
-                putfieldCount.foreach(y => rlist += MetricValue("Die Anzahl der Store Referenzen der Field in der Methode " + y._1.name +" :", this.analysisName, y._2) )
+                getfieldCount.foreach(y => rlist += MetricValue(method.fullyQualifiedSignature +"Die Anzahl der load Referenzen der Field in der Methode " + y._1.name +" :", this.analysisName, y._2) )
+                putfieldCount.foreach(y => rlist += MetricValue(method.fullyQualifiedSignature +"Die Anzahl der Store Referenzen der Field in der Methode " + y._1.name +" :", this.analysisName, y._2) )
               }
 
           if (!noNullReferenz) {
