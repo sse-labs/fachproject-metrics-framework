@@ -6,7 +6,8 @@ import input.CliParser.OptionMap
 
 import org.opalj.br.Field
 import org.opalj.br.analyses.Project
-import org.opalj.br.instructions.{ALOAD, FieldAccess}
+import org.opalj.br.instructions.LoadLocalVariableInstruction.unapply
+import org.opalj.br.instructions.{ALOAD, FieldAccess, LoadLocalVariableInstruction}
 
 import java.net.URL
 import scala.collection.mutable.ListBuffer
@@ -18,6 +19,7 @@ import scala.util.Try
  * Die Klasse NumberOfVariablesDeclaredAnalysis zählt die Anzahl der vorhanden Variablen in Klassen
  * Dabei werden sowohl Klassenargumente als auch Locale Varaiblen gezählt und ausgeben
  *
+ * Die Metrik braucht die Informationen aus localVariableTable sonst, kann sie nicht richtig arbeiten
  * Die Default Einstellung ist, dass alles ausgeben wird
  *
  * Optional CLI argument:
@@ -78,45 +80,64 @@ class NumberOfVariablesDeclaredAnalysis extends SingleFileAnalysis {
             //Check if method body has local variables table
 
             val localVariableTable = m.body.get.localVariableTable
+            val loadIn = new ListBuffer[LoadLocalVariableInstruction]()
             val fieldList = new ListBuffer[FieldAccess]()
             m.body match {
               case None =>
-              case Some(code) => code.instructions.foreach{
+              case Some(code) => code.instructions.foreach {
 
+                case loadInstruction: LoadLocalVariableInstruction => if (!loadIn.exists(y => {
+                  y.lvIndex == loadInstruction.lvIndex
+                })) loadIn.append(loadInstruction)
                 case fieldAccess: FieldAccess => {
-                  if(!fieldList.exists(y =>{y.name == fieldAccess.name}) )
+                  if (!fieldList.exists(y => {
+                    y.name == fieldAccess.name
+                  }))
                     fieldList.append(fieldAccess)
 
                 }
-                case _=>
+                case _ =>
 
               }
             }
             var temporaryFieldVariables = 0
-            if(fieldList.nonEmpty) temporaryFieldVariables = fieldList.size
+            if(localVariableTable.isEmpty) log.warn("Die Metrik braucht die Infos der localVariableTable, um korrekt zu arbeiten")
+            if (fieldList.nonEmpty) temporaryFieldVariables = fieldList.size
             if (localVariableTable.nonEmpty) {
               var thisIndex = 0
-              val  list=   localVariableTable.get
+              val list = localVariableTable.get
               list.foreach(y =>
-                if(y.name =="this") {
-                  thisIndex =1
+                if (y.name == "this") {
+                  thisIndex = 1
                 })
 
               numberOfMethodVariables = numberOfMethodVariables + localVariableTable.get.size
               temporaryMethodVariables = localVariableTable.get.size
-              temporaryMethodVariables -=thisIndex
+              temporaryMethodVariables -= thisIndex
               temporaryMethodVariablesSum = temporaryMethodVariablesSum + temporaryMethodVariables
 
             }
             fieldList.foreach(field => {
-              if(!usedFields.exists(y =>{y.name == field.name}) ) usedFields.append(field)
+              if (!usedFields.exists(y => {
+                y.name == field.name
+              })) usedFields.append(field)
 
-          })
-            if(!noMethod) {
+            })
+            if (!noMethod) {
 
               rlist += MetricValue("Anzahl lokaler Variablen in " + m.fullyQualifiedSignature, this.analysisName, temporaryMethodVariables)
             }
+            if (localVariableTable.nonEmpty) {
+              var unusedarguments = 0
+              localVariableTable.get.foreach(y => {
+                if (loadIn.exists(x => x.lvIndex == y.index)) unusedarguments += 1
+              })
+              val unUsed = localVariableTable.get.size - unusedarguments
+              rlist += MetricValue(m.fullyQualifiedSignature + "Anzahl nicht benuzte Methoden Argumente:", this.analysisName, unUsed)
+
+            }
           }
+
         }
       if(!noMethod) {
 
@@ -140,6 +161,7 @@ class NumberOfVariablesDeclaredAnalysis extends SingleFileAnalysis {
         })
         rlist += MetricValue("Ungenutzte Field in der Klasse "+c.fqn, this.analysisName, neverUsedField)
       }
+
     }
 
     metric = numberOfMethodVariables + numberOfClassVariables
