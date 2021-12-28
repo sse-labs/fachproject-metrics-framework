@@ -40,7 +40,7 @@ class NumberOfVariablesDeclaredTest extends FlatSpec with Matchers{
     val resultDemoOnlyMethods = AnalysisTestUtils.runSingleFileAnalysis(analysisToTest, fileToTestDemo, appConfig, Map(Symbol("no-class") -> true))
     val metricsResultDemoOnlyMethods = resultDemoOnlyMethods.head
     //Konstruktor variablen werden hier nicht gezählt, zählt Konstruktor als methode?
-    assert(metricsResultDemoOnlyMethods.metricValues.exists(value => value.entityIdent.equals("Anzahl von lokalen Variablen in allen Methoden von testclass") && value.metricValue == 10.0))
+    assert(metricsResultDemoOnlyMethods.metricValues.exists(value => value.entityIdent.equals("Anzahl von lokalen Variablen in allen Methoden von testclass") && value.metricValue == 13.0))
     assert(metricsResultDemoOnlyMethods.metricValues.exists(value => value.entityIdent.equals("Anzahl lokaler Variablen in java.lang.String testclass.welcome(java.lang.String)") && value.metricValue == 2.0))
 
 
