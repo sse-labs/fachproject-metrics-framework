@@ -4,6 +4,7 @@ package impl.group5
 import analysis.{MetricValue, SingleFileAnalysis}
 import input.CliParser.OptionMap
 
+import org.opalj.br.Field
 import org.opalj.br.analyses.Project
 import org.opalj.br.instructions.{ALOAD, FieldAccess}
 
@@ -63,8 +64,6 @@ class NumberOfVariablesDeclaredAnalysis extends SingleFileAnalysis {
       val usedFields = new ListBuffer[FieldAccess]()
 
         for (f <- c.fields) {
-
-
           temporaryClassVariables = temporaryClassVariables + 1
           numberOfClassVariables = numberOfClassVariables + 1
         }
@@ -94,13 +93,13 @@ class NumberOfVariablesDeclaredAnalysis extends SingleFileAnalysis {
 
               }
             }
-            var temporaryFielVariablen = 0
-            if(fieldList.nonEmpty) temporaryFielVariablen = fieldList.size
+            var temporaryFieldVariables = 0
+            if(fieldList.nonEmpty) temporaryFieldVariables = fieldList.size
             if (localVariableTable.nonEmpty) {
 
               numberOfMethodVariables = numberOfMethodVariables + localVariableTable.get.size
               temporaryMethodVariables = localVariableTable.get.size
-              temporaryMethodVariables -= temporaryFielVariablen
+              temporaryMethodVariables -= temporaryFieldVariables
               temporaryMethodVariablesSum = temporaryMethodVariablesSum + temporaryMethodVariables
 
             }
@@ -120,8 +119,14 @@ class NumberOfVariablesDeclaredAnalysis extends SingleFileAnalysis {
 
       }
       if(noUnUsedField) {
-        var neverUsedField = 0
+        //Test for Unused Field only on private Fields
+        val privateFields = new ListBuffer[Field]()
         c.fields.foreach(field => {
+          if(!field.isPublic)  privateFields.append(field)
+        })
+
+        var neverUsedField = 0
+        privateFields.foreach(field => {
           if (!usedFields.exists(y => {
             y.name == field.name
           })) {
