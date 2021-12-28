@@ -34,7 +34,6 @@ class NumberOfVariablesDeclaredTest extends FlatSpec with Matchers{
     val resultDemoOnlyClass = AnalysisTestUtils.runSingleFileAnalysis(analysisToTest, fileToTestDemo, appConfig, Map(Symbol("no-method") -> true))
     val metricsResultDemoOnlyClass = resultDemoOnlyClass.head
     assert(metricsResultDemoOnlyClass.metricValues.exists(value => value.entityIdent.equals("Anzahl von Klassenvariablen in testclass") && value.metricValue == 3.0))
-    //Eintrag existiert nicht wenn no-method ausgewählt ist, braucht evtl. Eingabe Fehler Abfang in Analysis aber macht als Abfrage ja eigtl keinen Sinn
     assert(!metricsResultDemoOnlyClass.metricValues.exists(value => value.entityIdent.equals("Anzahl lokaler Variablen in java.lang.String testclass.welcome(java.lang.String)") && value.metricValue == 2.0))
 
 
@@ -48,7 +47,7 @@ class NumberOfVariablesDeclaredTest extends FlatSpec with Matchers{
 
     val resultDemoNoUnused = AnalysisTestUtils.runSingleFileAnalysis(analysisToTest, fileToTestDemo, appConfig, Map(Symbol("no-unusedfield") -> true))
     val metricsResultDemoNoUnused = resultDemoNoUnused.head
-    assert(metricsResultDemoNoUnused.metricValues.exists(value => value.entityIdent.equals("Ungenutzte Variable in testclassUndev") && value.metricValue == 1.0))
+    assert(!metricsResultDemoNoUnused.metricValues.exists(value => value.entityIdent.equals("Ungenutzte Field in der Klasse testclassUndev") && value.metricValue == 1.0))
     assert(metricsResultDemoNoUnused.metricValues.exists(value => value.entityIdent.equals("Anzahl deklarierter Variablen in allen Klassen: ") && value.metricValue == 8.0))
 
 
