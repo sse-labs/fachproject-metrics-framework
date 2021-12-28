@@ -35,7 +35,7 @@ class NumberOfVariablesDeclaredTest extends FlatSpec with Matchers{
     val metricsResultDemoOnlyClass = resultDemoOnlyClass.head
     assert(metricsResultDemoOnlyClass.metricValues.exists(value => value.entityIdent.equals("Anzahl von Klassenvariablen in testclass") && value.metricValue == 3.0))
     //Eintrag existiert nicht wenn no-method ausgewählt ist, braucht evtl. Eingabe Fehler Abfang in Analysis aber macht als Abfrage ja eigtl keinen Sinn
-    //assert(metricsResultDemoOnlyClass.metricValues.exists(value => value.entityIdent.equals("Anzahl lokaler Variablen in java.lang.String testclass.welcome(java.lang.String)") && value.metricValue == 2.0))
+    assert(!metricsResultDemoOnlyClass.metricValues.exists(value => value.entityIdent.equals("Anzahl lokaler Variablen in java.lang.String testclass.welcome(java.lang.String)") && value.metricValue == 2.0))
 
 
     val resultDemoOnlyMethods = AnalysisTestUtils.runSingleFileAnalysis(analysisToTest, fileToTestDemo, appConfig, Map(Symbol("no-class") -> true))
