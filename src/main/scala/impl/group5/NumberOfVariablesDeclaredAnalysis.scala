@@ -37,7 +37,7 @@ class NumberOfVariablesDeclaredAnalysis extends SingleFileAnalysis {
 
     var noMethod = customOptions.contains(noMethodSymbol)
     var noClass = customOptions.contains(noClassSymbol)
-    var noUnUsedField = customOptions.contains(noUnusedFields)
+    val noUnUsedField = customOptions.contains(noUnusedFields)
 
     val rlist = new ListBuffer[MetricValue]()
     if (noMethod && noClass) {
@@ -58,18 +58,16 @@ class NumberOfVariablesDeclaredAnalysis extends SingleFileAnalysis {
     for (c <- classes) {
       //Counts Method Variables for whole Class
       var temporaryMethodVariablesSum = 0
-      //Counts only Class variables
-      var temporaryClassVariables = 0
       //Liste mit Fields
       val usedFields = new ListBuffer[FieldAccess]()
 
-        for (f <- c.fields) {
-          temporaryClassVariables = temporaryClassVariables + 1
-          numberOfClassVariables = numberOfClassVariables + 1
-        }
+
+      numberOfClassVariables += c.fields.size
+
+
       if (!noClass) {
 
-        rlist += MetricValue("Anzahl von Klassenvariablen in " +c.fqn,this.analysisName, temporaryClassVariables)
+        rlist += MetricValue("Anzahl von Klassenvariablen in " +c.fqn,this.analysisName,c.fields.size )
       }
       //Getting all variables declared in Methods
 
@@ -97,10 +95,16 @@ class NumberOfVariablesDeclaredAnalysis extends SingleFileAnalysis {
             var temporaryFieldVariables = 0
             if(fieldList.nonEmpty) temporaryFieldVariables = fieldList.size
             if (localVariableTable.nonEmpty) {
+              var thisIndex = 0
+              val  list=   localVariableTable.get
+              list.foreach(y =>
+                if(y.name =="this") {
+                  thisIndex =1
+                })
 
               numberOfMethodVariables = numberOfMethodVariables + localVariableTable.get.size
               temporaryMethodVariables = localVariableTable.get.size
-              temporaryMethodVariables -= temporaryFieldVariables
+              temporaryMethodVariables -=thisIndex
               temporaryMethodVariablesSum = temporaryMethodVariablesSum + temporaryMethodVariables
 
             }
