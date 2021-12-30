@@ -166,6 +166,9 @@ class vrefAnalysis extends ClassFileAnalysis{
           sumLoad -= sumthisLoad
           sumStore -= sumthisStore
         }
+        else {
+          log.warn("this kann nicht aufgelösst werden und wird als Referenz mitgezählt, da die jar die localVariableTable nicht mitliefert")
+        }
 
 
         if(!noMethoden) {
@@ -193,6 +196,10 @@ class vrefAnalysis extends ClassFileAnalysis{
                     }
                   })
               })
+            }
+          else if(localtable.isEmpty && infoZuVariablen)
+            {
+              log.warn("localVariableTable ist in der jar File nicht vorhanden und deswegen kann die optionen infoZuVariablen nur eingeschränkt genutzt werden")
             }
             if(infoZuVariablen)
               {
