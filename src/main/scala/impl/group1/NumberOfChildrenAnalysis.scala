@@ -12,15 +12,20 @@ import scala.util.Try
 class NumberOfChildrenAnalysis extends ClassFileAnalysis {
 
   /**
+   *  Counts the direct Children for each class. Based on the Definition from "A Metrics Suite for Object Oriented Design" from Chidamber and Kemerer.
+   *  "Definition: NOC = number of immediate subclasses subordinated to a class in the class hierarchy."
    *
-   * @param classFile class that the metric is calculated from
-   * @param project that contains the class
-   * @param customOptions settings for the Analysis
-   * @return iterable MetricValue
+   * @param classFile class that the NOC metric is calculated from
+   * @param project jar project file that includes the classes for the metric
+   * @param customOptions custom settings for the Analysis (not needed for the NOC Metric)
+   * @return iterable MetricValue for all classes
    */
   override def analyzeClassFile(classFile: ClassFile, project: Project[URL], customOptions: OptionMap): Try[Iterable[MetricValue]] = Try{
-    val subCount = project.classHierarchy.directSubtypesCount(classFile.thisType)
-    List(MetricValue(classFile.getClass.getName,this.analysisName,subCount))
+
+    val directChildrenCount = project.classHierarchy.directSubtypesCount(classFile.thisType)
+    val className = classFile.thisType.fqn
+
+    List(MetricValue(className,this.analysisName,directChildrenCount))
   }
 
   /**
