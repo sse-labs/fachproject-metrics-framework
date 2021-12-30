@@ -1,3 +1,4 @@
+package org.tud.sse.metrics
 package impl.group1
 
 import java.net.URL
@@ -26,6 +27,7 @@ class NumberOfChildrenAnalysis extends ClassFileAnalysis {
     val className = classFile.thisType.fqn
 
     List(MetricValue(className,this.analysisName,directChildrenCount))
+
   }
 
   /**
