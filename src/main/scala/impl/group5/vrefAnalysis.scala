@@ -166,7 +166,7 @@ class vrefAnalysis extends ClassFileAnalysis{
           sumLoad -= sumthisLoad
           sumStore -= sumthisStore
         }
-        else {
+        else if(sumFieldLoad !=0 || sumFieldStore !=0) {
           log.warn("this kann nicht aufgelösst werden und wird als Referenz mitgezählt, da die jar die localVariableTable nicht mitliefert")
         }
 
