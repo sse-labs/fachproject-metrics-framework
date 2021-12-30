@@ -6,8 +6,7 @@ import input.CliParser.OptionMap
 
 import org.opalj.br.Field
 import org.opalj.br.analyses.Project
-import org.opalj.br.instructions.LoadLocalVariableInstruction.unapply
-import org.opalj.br.instructions.{ALOAD, FieldAccess, LoadLocalVariableInstruction}
+import org.opalj.br.instructions.{ FieldAccess, LoadLocalVariableInstruction}
 
 import java.net.URL
 import scala.collection.mutable.ListBuffer
@@ -87,15 +86,16 @@ class NumberOfVariablesDeclaredAnalysis extends SingleFileAnalysis {
               case Some(code) => code.instructions.foreach {
 
                 case loadInstruction: LoadLocalVariableInstruction => if (!loadIn.exists(y => {
-                  y.lvIndex == loadInstruction.lvIndex
-                })) loadIn.append(loadInstruction)
-                case fieldAccess: FieldAccess => {
+                    y.lvIndex == loadInstruction.lvIndex
+                  })) loadIn.append(loadInstruction)
+
+                case fieldAccess: FieldAccess =>
                   if (!fieldList.exists(y => {
                     y.name == fieldAccess.name
                   }))
                     fieldList.append(fieldAccess)
 
-                }
+
                 case _ =>
 
               }
