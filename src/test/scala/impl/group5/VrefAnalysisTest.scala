@@ -141,11 +141,26 @@ class VrefAnalysisTest extends FlatSpec with Matchers{
   assert(metricResultBox.metricValues.exists(value => value.entityIdent.equals("org.apache.pdfbox.util.Matrix org.apache.pdfbox.util.Matrix.extractTranslating() Anzahl der this Referenzen: ") && value.metricValue == 2.0))
   assert(metricResultBox.metricValues.exists(value => value.entityIdent.equals("java.lang.String org.apache.pdfbox.util.DateConverter.toString(java.util.Calendar) Anzahl der Null Referenzen: ") && value.metricValue == 1.0))
 
+  private val resultBoxInfo = AnalysisTestUtils.runSingleFileAnalysis(analysisToTest, fileToTestBox, appConfig, Map(Symbol("infozuvariablen") -> true))
+  private val metricResultBoxInfo = resultBoxInfo.head
+  assert(metricResultBoxInfo.success)
+  assert(metricResultBoxInfo.metricValues.nonEmpty)
+  assert(metricResultBoxInfo.metricValues.exists(value => value.entityIdent.equals("void org.apache.pdfbox.pdmodel.interactive.action.PDActionResetForm.setFlags(int)Die Anzahl der load Referenzen der Field in der Methode action :") && value.metricValue == 1.0))
+  assert(metricResultBoxInfo.metricValues.exists(value => value.entityIdent.equals("org.apache.pdfbox.cos.COSArray org.apache.pdfbox.pdmodel.interactive.action.PDActionResetForm.getFields()Die Anzahl der load Referenzen der Variable retval :") && value.metricValue == 2.0))
+
+  private val resultBoxNoThis = AnalysisTestUtils.runSingleFileAnalysis(analysisToTest, fileToTestBox, appConfig, Map(Symbol("no-this") -> true))
+  private val metricResultBoxNoThis = resultBoxNoThis.head
+  assert(metricResultBoxNoThis.success)
+  assert(metricResultBoxNoThis.metricValues.nonEmpty)
+  assert(!metricResultBoxNoThis.metricValues.exists(value => value.entityIdent.equals("org.apache.pdfbox.util.Matrix org.apache.pdfbox.util.Matrix.extractTranslating() Anzahl der this Referenzen: ") && value.metricValue == 2.0))
+
+
+
+
   // H2 Datenbank
   private val fileToTestH2 = new File(getClass.getResource("/group5/h2-2.0.202.jar").getPath)
   private val resultH2 = AnalysisTestUtils.runSingleFileAnalysis(analysisToTest, fileToTestH2, appConfig, Map.empty[Symbol, Any])
   private val metricResultH2 = resultH2.head
-  print(metricResultH2)
   assert(metricResultH2.success)
   assert(metricResultH2.metricValues.nonEmpty)
   assert(metricResultH2.metricValues.exists(value => value.entityIdent.equals("org/h2/result/FetchedResult  Anzahl aller Referenzen der Variablen:") && value.metricValue == 14.0))
@@ -168,4 +183,10 @@ class VrefAnalysisTest extends FlatSpec with Matchers{
   private val metricResultGson = resultGson.head
   assert(metricResultGson.success)
   assert(metricResultGson.metricValues.nonEmpty)
+  assert(metricResultGson.metricValues.exists(value => value.entityIdent.equals("com.google.gson.stream.JsonReader com.google.gson.Gson.newJsonReader(java.io.Reader) Anzahl der this Referenzen: ") && value.metricValue == 1.0))
+  assert(metricResultGson.metricValues.exists(value => value.entityIdent.equals("java.lang.String com.google.gson.Gson.toJson(java.lang.Object,java.lang.reflect.Type) Anzahl der gesamten Variablen Referenzen : ") && value.metricValue == 5.0))
+  assert(metricResultGson.metricValues.exists(value => value.entityIdent.equals("com.google.gson.TypeAdapter com.google.gson.Gson.getDelegateAdapter(com.google.gson.TypeAdapterFactory,com.google.gson.reflect.TypeToken) Anzahl der Field Referenzen: ") && value.metricValue == 3.0))
+  assert(metricResultGson.metricValues.exists(value => value.entityIdent.equals("com/google/gson/JsonStreamParser  Anzahl aller Referenzen der Variablen:") && value.metricValue == 18.0))
+
+
 }
