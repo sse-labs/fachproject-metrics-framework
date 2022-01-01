@@ -1,19 +1,15 @@
 package org.tud.sse.metrics
-package impl
+package impl.group1
 
 import analysis.{MetricValue, MetricsResult, MultiFileAnalysis}
-import input.CliParser.{OptionMap, additionalClassesDirSymbol, inFileSymbol}
+import input.CliParser.OptionMap
 
 import org.opalj.br.analyses.Project
-import org.opalj.da.ClassFile
 
 import java.io.File
 import java.net.URL
-import scala.collection.mutable.ListBuffer
+import scala.collection.{Map, Set, SortedSet}
 import scala.util.Try
-
-import scala.collection.Set
-import scala.collection.Map
 
 /**
  * the ExternalStability metric
@@ -25,6 +21,7 @@ import scala.collection.Map
  *  - --es_rem outputs values for partial metric es_removed: metric for classes of removed packages
  *  - --es_red outputs values for partial metric es_remained: metric for classes which have been removed from a package
  *  - --verbose log more information: file names, simple statistics, metric results
+ *  - --ultra_verbose (like verbose) + list all package names and class (names) contained in each package
  *
  */
 class ExternalStabilityAnalysis(jarDir: File) extends MultiFileAnalysis[(Double, Double, Double, String)](jarDir) {
@@ -36,6 +33,7 @@ class ExternalStabilityAnalysis(jarDir: File) extends MultiFileAnalysis[(Double,
   var firstRound: Boolean = true
   var counter: Double = 0
   var verbose: Boolean = false
+  var verbose_ultra: Boolean = false
   var es_rem: Boolean = false
   var es_red: Boolean = false
   var currentfile: String = ""
@@ -44,10 +42,11 @@ class ExternalStabilityAnalysis(jarDir: File) extends MultiFileAnalysis[(Double,
   private val sym_es_rem: Symbol = Symbol("es_rem")
   private val sym_es_red: Symbol = Symbol("es_red")
   private val sym_verbose: Symbol = Symbol("verbose")
+  private val sym_verbose_ultra: Symbol = Symbol("verbose_ultra")
 
 
   /**
-   * Calculcate the ExternalStability metric
+   * Calculate the ExternalStability metric
    * as defined in the paper "Identifying evolution patterns: a metrics-based approach for
    * external library reuse" by Eleni Constantinou und Ioannis Stamelos
    *
@@ -91,6 +90,7 @@ class ExternalStabilityAnalysis(jarDir: File) extends MultiFileAnalysis[(Double,
     es_rem = customOptions.contains(sym_es_rem)
     es_red = customOptions.contains(sym_es_red)
     verbose = customOptions.contains(sym_verbose)
+    verbose_ultra = customOptions.contains(sym_verbose_ultra)
 
 
     val currentPackages: scala.collection.Set[String] = project.projectPackages
@@ -99,18 +99,28 @@ class ExternalStabilityAnalysis(jarDir: File) extends MultiFileAnalysis[(Double,
 
     //Calculate the packages which have been removed in the newer version
     val packagesRemoved = previousPackages.diff(currentPackages)
+    if(verbose_ultra)
+    {
+      log.info("removed Packages: " + packagesRemoved.size)
+      for(rem_pack <- packagesRemoved)
+      {
+        log.info("removed Packages: " + rem_pack)
+      }
+    }
 
     //Sum the number of the classes in the removed packages
     var numberOfClassesRemoved = 0
     // foreach removed packages get the size and sum all the sizes up
     packagesRemoved.foreach(p => numberOfClassesRemoved += previousPackagesSize(p))
 
+
     //calculate current round number
     counter += 1
 
-    if (verbose) {
+    if (verbose_ultra||verbose) {
       log.info("Round: " + counter)
-      log.info("previous file: " + previousfile + " current File: " + currentfile)
+      log.info("previous file: " + previousfile)
+      log.info("current File: " + currentfile)
       log.info("Number of current Packages: " + currentPackages.size)
       log.info("Number of previous Packages: " + previousPackages.size)
       log.info("Number of Classes in Project: " + currentNumberOfClasses)
@@ -129,7 +139,10 @@ class ExternalStabilityAnalysis(jarDir: File) extends MultiFileAnalysis[(Double,
       ES_rem = 1.0 - numberOfClassesRemoved.toDouble / previousNumberOfClasses.toDouble
     }
 
-    if (verbose) {
+    //if only verbose: value of es_rem is logged immediately
+    //verboseultra: output is delayed and positioned after all package names and class names have been logged
+    //verboseultra: value of es_rem is logged to together with es and es_red at a later point in time
+    if (verbose && !verbose_ultra) {
       log.info("ES_rem: " + ES_rem)
     }
 
@@ -152,6 +165,20 @@ class ExternalStabilityAnalysis(jarDir: File) extends MultiFileAnalysis[(Double,
       currentClassesInPackages = currentClassesInPackages + (curPack -> classes)
     }
 
+    if(verbose_ultra) {
+      log.info("\n\nFile: " + currentfile)
+      for (pack <- currentClassesInPackages) {
+        log.info("\n\nPackage: " + pack._1 + " size: " + pack._2.size)
+        currentClassesInPackages.get(pack._1).foreach(classes => {
+          //Sort classes before outputting them, for easier insight,
+          //only done when verboseultra is true
+          val sortedClasses = SortedSet[String]() ++ classes
+          for (cl <- sortedClasses) {
+            log.info("Class : " + cl)
+          }})
+      }
+    }
+
 
     var sum = 0
     //set a default value for ES_rem
@@ -167,6 +194,13 @@ class ExternalStabilityAnalysis(jarDir: File) extends MultiFileAnalysis[(Double,
       for (packShared <- packagesShared) {
         // calculate the classes, which where removed from a shared package
         val classesRemoved = previousClassesInPackages(packShared).diff(currentClassesInPackages(packShared))
+        if(verbose_ultra)
+          {
+            for(cl <- classesRemoved)
+              {
+                log.info("Shared Package: " + packShared + " Removed Class: " + cl)
+              }
+          }
         sum += classesRemoved.size
       }
       ES_red = 1.0 - sum.toDouble / previousNumberOfClasses.toDouble
@@ -174,7 +208,14 @@ class ExternalStabilityAnalysis(jarDir: File) extends MultiFileAnalysis[(Double,
 
     val external_stability_metric_value = ES_red * ES_rem
 
-    if (verbose) {
+
+    //ultraverbose: delayed logging of es_rem
+    //otherwise only the missing values of es_red and of es are logged
+    if (verbose && !verbose_ultra) {
+      log.info("ES_red: " + ES_red)
+      log.info("ES: " + external_stability_metric_value)
+    }else if (verbose_ultra) {
+      log.info("ES_rem: " + ES_rem)
       log.info("ES_red: " + ES_red)
       log.info("ES: " + external_stability_metric_value)
     }
@@ -216,31 +257,31 @@ class ExternalStabilityAnalysis(jarDir: File) extends MultiFileAnalysis[(Double,
     val LBUff = collection.mutable.ListBuffer[MetricsResult]()
     if (es_red && es_rem) {
       //skip first calculation does not contain a difference, consists only of a single jar information
-      for (i <- 1 until stability_values.size) {
+      for (i <- stability_values.indices) {
         LBUff.append(MetricsResult(analysisName, jarDir, success = true,
           metricValues = List(stability_values(i), removed_values(i), remained_values(i))))
       }
     }
     else if (es_red) {
-      for (i <- 1 until stability_values.size) {
+      for (i <- stability_values.indices) {
         LBUff.append(MetricsResult(analysisName, jarDir, success = true,
           metricValues = List(stability_values(i), remained_values(i))))
       }
     }
     else if (es_rem) {
-      for (i <- 1 until stability_values.size) {
+      for (i <- stability_values.indices) {
         LBUff.append(MetricsResult(analysisName, jarDir, success = true,
           metricValues = List(stability_values(i), removed_values(i))))
       }
     } else {
-      for (i <- 1 until stability_values.size) {
+      for (i <- stability_values.indices) {
         LBUff.append(MetricsResult(analysisName, jarDir, success = true,
           metricValues = List(stability_values(i))))
       }
     }
 
     val metricList: List[MetricsResult] = LBUff.toList
-    if(verbose)
+    if(verbose_ultra||verbose)
       {
         metricList.foreach(value => log.info("Metrik Result: " + value))
       }
