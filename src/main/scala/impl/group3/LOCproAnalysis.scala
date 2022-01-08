@@ -13,11 +13,28 @@ import scala.util.Try
 class LOCproAnalysis extends SingleFileAnalysis{
 
   override def analyzeProject(project: Project[URL], customOptions: OptionMap): Try[Iterable[MetricValue]] = Try {
-    //calculate the metric
-    log.info("Please implement the LOCpro metric here")
-    val metricsResult = project.codeSize // Should we calculate all the lines or only the method lines?
 
-    List(MetricValue("file", this.analysisName, metricsResult))
+    log.info("Please implement the LOCpro metric here")
+
+    var resultList = List[MetricValue]()
+    var metricsResult =  0.0
+
+    var lineCounter = 0
+
+    project.allProjectClassFiles.foreach(
+      c =>
+        c.methodsWithBody.foreach(
+          m =>
+            if(m.body.exists(_.lineNumberTable.nonEmpty)) {
+              lineCounter = lineCounter + m.body.get.lineNumberTable.get.lineNumbers.size + 1
+            }
+        )
+
+    )
+
+    metricsResult = lineCounter
+
+    List(MetricValue("File: ", this.analysisName, metricsResult))
   }
 
   /**
