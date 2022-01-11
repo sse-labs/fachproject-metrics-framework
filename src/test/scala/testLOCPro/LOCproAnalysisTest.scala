@@ -10,6 +10,7 @@ import java.io.File
 
 class LOCproAnalysisTest extends FlatSpec with Matchers{
 
+/** tested the metric Locpro with 3 files, 2 of our own class file */
 
   "The LOCproAnalysis" must "calculate valid results for single JARs" in {
 

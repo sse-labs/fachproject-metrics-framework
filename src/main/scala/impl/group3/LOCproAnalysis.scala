@@ -12,23 +12,24 @@ import scala.util.Try
 
 class LOCproAnalysis extends SingleFileAnalysis{
 
+  /** calculates all class methods, from all line number table get each method body lines, then add 1 as method itself*/
   override def analyzeProject(project: Project[URL], customOptions: OptionMap): Try[Iterable[MetricValue]] = Try {
 
     log.info("Please implement the LOCpro metric here")
 
-    var resultList = List[MetricValue]()
     var metricsResult =  0.0
 
     var lineCounter = 0
 
     project.allProjectClassFiles.foreach(
-      c =>
+      c => {
         c.methodsWithBody.foreach(
           m =>
-            if(m.body.exists(_.lineNumberTable.nonEmpty)) {
+            if (m.body.exists(_.lineNumberTable.nonEmpty)) {
               lineCounter = lineCounter + m.body.get.lineNumberTable.get.lineNumbers.size + 1
             }
         )
+      }
 
     )
 
