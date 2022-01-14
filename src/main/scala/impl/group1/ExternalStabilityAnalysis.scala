@@ -96,7 +96,6 @@ class ExternalStabilityAnalysis(jarDir: File) extends MultiFileAnalysis[(Double,
     val currentPackages: scala.collection.Set[String] = project.projectPackages
     val currentNumberOfClasses = project.projectClassFilesCount
 
-
     //Calculate the packages which have been removed in the newer version
     val packagesRemoved = previousPackages.diff(currentPackages)
     if(verbose_ultra)
@@ -109,9 +108,9 @@ class ExternalStabilityAnalysis(jarDir: File) extends MultiFileAnalysis[(Double,
     }
 
     //Sum the number of the classes in the removed packages
-    var numberOfClassesRemoved = 0
+    var numberOfClassesInRemovedPackages = 0
     // foreach removed packages get the size and sum all the sizes up
-    packagesRemoved.foreach(p => numberOfClassesRemoved += previousPackagesSize(p))
+    packagesRemoved.foreach(p => numberOfClassesInRemovedPackages += previousPackagesSize(p))
 
 
     //calculate current round number
@@ -126,7 +125,7 @@ class ExternalStabilityAnalysis(jarDir: File) extends MultiFileAnalysis[(Double,
       log.info("Number of Classes in Project: " + currentNumberOfClasses)
       log.info("Number of previousClasses in Project: " + previousNumberOfClasses)
       log.info("Number of Packages removed: " + packagesRemoved.size)
-      log.info("Number of Classes Removed: " + numberOfClassesRemoved)
+      log.info("Number of Classes in removed Packages: " + numberOfClassesInRemovedPackages)
     }
 
     //set a default value for ES_rem
@@ -136,7 +135,7 @@ class ExternalStabilityAnalysis(jarDir: File) extends MultiFileAnalysis[(Double,
     //Needs the data of two consequential jar-file versions
     //In the first round only data will be prepared for the differential analysis,starting from the second round
     if (!firstRound && previousNumberOfClasses > 0) {
-      ES_rem = 1.0 - numberOfClassesRemoved.toDouble / previousNumberOfClasses.toDouble
+      ES_rem = 1.0 - numberOfClassesInRemovedPackages.toDouble / previousNumberOfClasses.toDouble
     }
 
     //if only verbose: value of es_rem is logged immediately
@@ -203,6 +202,10 @@ class ExternalStabilityAnalysis(jarDir: File) extends MultiFileAnalysis[(Double,
           }
         sum += classesRemoved.size
       }
+      if(verbose || verbose_ultra)
+      {
+          log.info("Classes removed from packages: " + sum)
+      }
       ES_red = 1.0 - sum.toDouble / previousNumberOfClasses.toDouble
     }
 
@@ -234,8 +237,6 @@ class ExternalStabilityAnalysis(jarDir: File) extends MultiFileAnalysis[(Double,
 
     //The final StabilityMetric is calculated by ES_rem * ES_red
     //The result contains the StabilityMetric, the two partial metrics and round in which these metrics were calculated
-
-
     Try(external_stability_metric_value, ES_rem, ES_red, entity_ident)
 
   }
