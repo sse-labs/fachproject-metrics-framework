@@ -8,6 +8,7 @@ import org.tud.sse.metrics.analysis.{MetricsResult, MultiFileAnalysis}
 import org.tud.sse.metrics.input.CliParser.OptionMap
 
 import scala.util.Try
+import scala.util.control.Breaks.{break, breakable}
 
 /**
  * the Evolution metric containing External Evolution and Internal Evolution
@@ -98,14 +99,29 @@ class EvolutionAnalysis(jarDir: File) extends MultiFileAnalysis[(Double,Double,D
     val maintainedPackagesSize = maintainedPackages.size
     // calculate the nominator (interactionWithNewPackages) Packages that exist in both versions (maintainedPackages) and interact with the new added Packages (newPackages).
     // interaction of Packages = if a class in Package A uses Objects (classes) from Package B the Packages interact and vice versa. (similar to Coupling between Objects)
-    val interactionsWithNewPackages = 0
+    var interactionsWithNewPackages = 0
 
-
-
+    // iterate through classes for each Package to check if there are interactions with the classes from new Packages
+    for(maintainedPackage <- maintainedPackages){
+      val classesFromMaintainedPackage = project.classesPerPackage(maintainedPackage)
+      for(newPackage <- newPackages){
+        breakable{
+        val classesFromNewPackage = project.classesPerPackage(newPackage)
+        for(maintainedClass <- classesFromMaintainedPackage){
+          for(newClass <- classesFromNewPackage){
+            maintainedClass.methods.foreach(m => if(m.body.get.instructions.mkString.contains(newClass)){
+              interactionsWithNewPackages = interactionsWithNewPackages +1
+              break
+            })
+          }
+        }
+        }
+      }
+    }
 
     internalEvolution = interactionsWithNewPackages/maintainedPackagesSize
 
-    // Evolution = (external + internal Evolution)/2
+    // Evolution as defined in the Paper
     evolution = (externalEvolution + internalEvolution)/2
 
 
