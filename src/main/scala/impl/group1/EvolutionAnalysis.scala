@@ -67,6 +67,8 @@ class EvolutionAnalysis(jarDir: File) extends MultiFileAnalysis[(Double,Double,D
     var internalEvolution: Double = 1
     var entityIdent: String = ""
 
+    // external Evolution
+    // external evolution is the number of classes in newly introduced packages divided by the total amount of classes in the project.
     val currentPackages: scala.collection.Set[String] = project.projectPackages
     val currentNumberOfClasses = project.projectClassFilesCount
 
@@ -79,14 +81,32 @@ class EvolutionAnalysis(jarDir: File) extends MultiFileAnalysis[(Double,Double,D
 
     newPackages.foreach(p => numberOfClassesInNewPackages += project.classesPerPackage(p).size)
     log.info("Classes in new Packages Count: " + numberOfClassesInNewPackages)
+
     if(currentNumberOfClasses != 0){
       externalEvolution = numberOfClassesInNewPackages/currentNumberOfClasses
     }
-
     log.info("externalEvolution: " + externalEvolution)
 
     entityIdent = "Difference between: " + previousFile + " and " + currentFile
 
+    // internal Evolution
+    // internal Evolution is the number of Packages that exist in both versions and interact with newly added Packages divided by the Number of Packages that exist in both versions.
+
+
+    // calculate the denominator (maintainedPackagesSize) Number of Packages that exist in previous and current Project.
+    val maintainedPackages = currentPackages.intersect(previousPackages)
+    val maintainedPackagesSize = maintainedPackages.size
+    // calculate the nominator (interactionWithNewPackages) Packages that exist in both versions (maintainedPackages) and interact with the new added Packages (newPackages).
+    // interaction of Packages = if a class in Package A uses Objects (classes) from Package B the Packages interact and vice versa. (similar to Coupling between Objects)
+    val interactionsWithNewPackages = 0
+
+
+
+
+    internalEvolution = interactionsWithNewPackages/maintainedPackagesSize
+
+    // Evolution = (external + internal Evolution)/2
+    evolution = (externalEvolution + internalEvolution)/2
 
 
     Try(evolution, externalEvolution,internalEvolution,entityIdent)
