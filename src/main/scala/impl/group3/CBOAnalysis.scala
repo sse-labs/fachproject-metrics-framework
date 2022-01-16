@@ -11,7 +11,9 @@ import java.net.URL
 import scala.util.Try
 
 class CBOAnalysis extends SingleFileAnalysis{
-
+/** checked all classfile in jar and calculate the number of coupled classes, which have objects of another class
+ * and the objects are also used in the class
+ * */
    def analyzeProject(project: Project[URL], customOptions: OptionMap): Try[Iterable[MetricValue]] = Try {
      var resultList = List[MetricValue]()
      //Creating a set of all classes in the project
