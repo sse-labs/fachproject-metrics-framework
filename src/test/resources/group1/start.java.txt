@@ -1,0 +1,270 @@
+//Testklassequelltext für Nesting Metriken
+//Wird zur Erzeugung von MaximumNestingCompanion-1.0-SNAPSHOT.jar genutzt
+public class start {
+
+    public static void main(String[] args) {
+        System.out.println("Hallo Welt");
+    }
+
+    //max Tiefe:2
+    int test1(int zahl1, int zahl2, int zahl3) {
+        if (zahl1 > zahl2) {
+            if (zahl3 == zahl2) {
+                return 78;
+            }
+            return zahl1;
+        }
+        if (zahl1 * 2 > zahl3) {
+            return 345;
+        }
+        return zahl2;
+    }
+
+    //max Tiefe:3
+    int test2(int zahl1, int zahl2, int zahl3) {
+        int ergebnis = 0;
+        for (int i = 0; i < zahl3; i++) {
+            if (zahl1 > zahl2) {
+                if (zahl3 == zahl2) {
+                    ergebnis = ergebnis + 78;
+                } else {
+                    ergebnis -= 1;
+                }
+            }
+            if (zahl1 * 2 > zahl3) {
+                ergebnis = zahl2;
+            } else {
+                ergebnis -= 10;
+            }
+        }
+        for (int i = 2; i < zahl1; i++) {
+            ergebnis += 2;
+        }
+        return ergebnis;
+    }
+
+    //max Tiefe: 2
+    int test3(int zahl1, int zahl2) {
+        int ergebnis = 10;
+        switch (zahl1) {
+            case 0:
+                ergebnis = 1;
+            case 1:
+                ergebnis = zahl1;
+            case 2: {
+                if (zahl2 * 10 == 100) {
+                    zahl1 += 1;
+                }
+                ergebnis = zahl1 * zahl1;
+            }
+            case 3:
+                ergebnis = 3;
+            case 4:
+                ergebnis = 25;
+            default:
+                ergebnis = zahl1 + 1;
+        }
+
+        for (int i = 10; i < 100; i++) {
+            ergebnis += zahl2 - i * i;
+        }
+        return ergebnis;
+    }
+
+
+    //max Tiefe: 3
+    int test4(int zahl1, int zahl2) {
+        int ergebnis = 10;
+        switch (zahl1) {
+            case 0:
+                ergebnis = 1;
+            case 1:
+                ergebnis = zahl1;
+            case 2: {
+                if (zahl2 * 10 == 100) {
+                    zahl1 += 1;
+                    if (zahl1 + zahl2 > 53) {
+                        zahl1 = zahl1 + 2 * zahl2;
+                    }
+                }
+                ergebnis = zahl1 * zahl1;
+            }
+            case 3:
+                ergebnis = 3;
+            case 4:
+                ergebnis = 25;
+            default:
+                ergebnis = zahl1 + 1;
+        }
+
+        for (int i = 10; i < 100; i++) {
+            ergebnis += zahl2 - i * i;
+        }
+        return ergebnis;
+    }
+
+
+    //max Tiefe: 6
+    int test5(int zahl1, int zahl2) {
+        int ergebnis = 10;
+        switch (zahl1) {
+            case 0:
+                ergebnis = 1;
+                break;
+            case 1:
+                ergebnis = zahl1;
+                break;
+            case 2: {
+                if (zahl2 * 10 == 100) {
+                    zahl1 += 1;
+                    if (zahl1 + zahl2 > 53) {
+                        zahl1 = zahl1 + 2 * zahl2;
+                        for (int i = 10; i < 100; i++) {
+                            ergebnis += zahl2 - i * i;
+                            switch (ergebnis) {
+                                case 1:
+                                    zahl1 = 1;
+                                    break;
+                                case 2:
+                                    zahl2 = 10;
+                                    break;
+                                case 3:
+                                    if (zahl2 > zahl1) {
+                                        zahl2 = 100;
+                                    } else {
+                                        zahl2 = 50;
+                                    }
+                                    break;
+                                default:
+                                    zahl1 = 15;
+                                    break;
+                            }
+                        }
+                    }
+                }
+                ergebnis = zahl1 * zahl1;
+            }
+            break;
+            case 3:
+                ergebnis = 3;
+            case 4:
+                ergebnis = 25;
+            default:
+                ergebnis = zahl1 + 1;
+        }
+
+        for (int i = 10; i < 100; i++) {
+            ergebnis += zahl2 - i * i;
+        }
+        return ergebnis;
+    }
+
+    //max Tiefe: 2
+    int test6(int zahl1, int zahl2, int zahl3) {
+        if (zahl1 > zahl2) {
+            if (zahl3 == zahl2) {
+                return 78;
+            } else if (zahl3 > zahl2) {
+                zahl1 = zahl2 + 10;
+            }
+            return zahl1;
+        }
+        if (zahl1 * 2 > zahl3) {
+            return 345;
+        }
+        return zahl2;
+    }
+
+    //max Tiefe: 6
+    int test7(int zahl1, int zahl2) {
+        int ergebnis = 10;
+        switch (zahl1) {
+            case 0:
+                ergebnis = 1;
+                break;
+            case 1:
+                ergebnis = zahl1;
+                break;
+            case 2: {
+                if (zahl2 * 10 == 100) {
+                    zahl1 += 1;
+                    if (zahl1 + zahl2 > 53) {
+                        zahl1 = zahl1 + 2 * zahl2;
+                        for (int i = 10; i < 100; i++) {
+                            ergebnis += zahl2 - i * i;
+                            switch (ergebnis) {
+                                case 1:
+                                    zahl1 = 1;
+                                    break;
+                                case 2:
+                                    zahl2 = 10;
+                                    break;
+                                case 3:
+                                    if (zahl2 > zahl1) {
+                                        zahl2 = 100;
+                                    } else {
+                                        zahl2 = 50;
+                                    }
+                                    break;
+                                default:
+                                    zahl1 = 15;
+                                    break;
+                            }
+                        }
+                    }
+                }
+                ergebnis = zahl1 * zahl1;
+            }
+            break;
+            case 3:
+                ergebnis = 3;
+            case 4:
+                ergebnis = 25;
+            default:
+                ergebnis = zahl1 + 1;
+        }
+        return ergebnis;
+    }
+
+    int test8()
+    {
+        int max = 255;
+        int ergebnis = 20;
+        boolean loop = true;
+        while(loop)
+        {
+            ergebnis += max;
+            for(int i = 0; i < max; i++)
+            {
+                for(int j = 10; j < max * max; j++)
+                {
+                    if(j == max * max -1)
+                    {
+                        loop = false;
+                    }
+                }
+            }
+        }
+        return ergebnis;
+    }
+
+    int test9(int zahl1, int zahl2)
+    {
+        if(zahl1 >= zahl2)
+        {
+            if(zahl1 > zahl2)
+                return zahl1;
+        }
+        return zahl2;
+    }
+
+    int test10(int zahl1, int zahl2)
+    {
+        if(zahl1 >= zahl2 && zahl1 > zahl2)
+        {
+                return zahl1;
+        }
+        return zahl2;
+    }
+
+}

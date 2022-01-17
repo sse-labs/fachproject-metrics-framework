@@ -220,8 +220,6 @@ class MaximumNestingAnalysis extends ClassFileAnalysis {
       if (maximaleTiefeMethode > maximaleTiefe) {
         maximaleTiefe = maximaleTiefeMethode
       }
-      println("Methodentiefe: " + maximaleTiefeMethode)
-      tiefenDerMethoden += maximaleTiefeMethode
 
       if (!onlyClasses) {
         rlist += MetricValue("method: " + method.fullyQualifiedSignature, this.analysisName, maximaleTiefeMethode)
@@ -231,27 +229,6 @@ class MaximumNestingAnalysis extends ClassFileAnalysis {
     if (!onlyMethods) {
       rlist += MetricValue("class: " + classFile.fqn, this.analysisName, maximaleTiefe)
     }
-
-    println("Klassentiefe: " + maximaleTiefe)
-    if (tiefenDerMethoden.nonEmpty) {
-      println("durchschnittliche Methodentiefe: " + tiefenDerMethoden.sum.toDouble / tiefenDerMethoden.size.toDouble)
-    }
-    else {
-      tiefenDerMethoden += 0
-      println("durchschnittliche Methodentiefe: " + tiefenDerMethoden.head)
-    }
-    tiefenDerMethoden = tiefenDerMethoden.sorted
-    var median: Double = 0
-    if (tiefenDerMethoden.nonEmpty && tiefenDerMethoden.size % 2 == 0) {
-      val mitteR = tiefenDerMethoden.size / 2
-      val mitteL = mitteR - 1
-      median = (tiefenDerMethoden(mitteL).toDouble + tiefenDerMethoden(mitteR).toDouble) / 2.0
-    } else if (tiefenDerMethoden.nonEmpty) {
-      val mitte = tiefenDerMethoden.size / 2
-      median = tiefenDerMethoden(mitte).toDouble
-    }
-    println("Median der Methodentiefen: " + median)
-
 
     rlist.toList
   }
