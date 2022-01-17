@@ -1,13 +1,12 @@
 package org.tud.sse.metrics
-package impl
+package impl.group1
 
 import analysis.SingleFileAnalysis
 import application.SingleFileAnalysisApplication
 
-
-object SingleFileAnalysisApplication extends SingleFileAnalysisApplication {
+object MaximumNestingAnalysisApplication extends SingleFileAnalysisApplication {
 
   override protected val registeredAnalyses: Seq[SingleFileAnalysis] = Seq(
-
+    new MaximumNestingAnalysis(),
   )
 }
