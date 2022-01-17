@@ -15,7 +15,7 @@ import scala.util.Try
  */
 
 class DACAnalysis extends ClassFileAnalysis {
-  
+
   /**
    * This method calculates the value of the DAC metric by counting reference type fields in the class.
    *
