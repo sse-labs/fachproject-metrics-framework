@@ -32,7 +32,17 @@ class DACAnalysisTest extends FreeSpec with Matchers{
       assert(metricResult.metricValues.exists(value => value.entityIdent.equals("com/group4/sample/LOCphyAnalysisTest") && value.metricValue == 0.0))
     }
 
+
     "classes with primitive/reference type attributes" in {
+      assert(metricResult.metricValues.exists(value => value.entityIdent.equals("com/group4/sample/DACAnalysisTest3") && value.metricValue == 5.0))
+    }
+
+    "classes with primitive type attributes only" in {
+      assert(metricResult.metricValues.exists(value => value.entityIdent.equals("com/group4/sample/DACAnalysisTest2") && value.metricValue == 0.0))
+    }
+
+    "classes with reference type attributes only" in {
+
       assert(metricResult.metricValues.exists(value => value.entityIdent.equals("com/group4/sample/DACAnalysisTest3") && value.metricValue == 5.0))
     }
 
