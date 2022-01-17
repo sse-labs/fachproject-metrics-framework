@@ -4,7 +4,7 @@
  * Wir bedanken uns für die gute Codebasis und die freundliche Nutzungsgenehmigung
  *
  *
- *Anmerkung zu MaximumNesting:
+ *Anmerkung zu Nesting Metriken:
  *Es kann sein, dass leicht unterschiedlicher Quelltext zu identischem Bytecode führt:
  *
  *aus den beiden Java-Methoden
@@ -56,10 +56,10 @@
  *     12: iload_2
  *     13: ireturn
  *
- *Damit gibt die Metrik für beide Varianten den selben Wert von 2 aus
+ *Damit gibt errechnet die Nestingmetrik für beide Varianten den selben Wert von 2 aus
  *Erwartet hätte man doch eher unterschiedliche Werte:
- *MaximumNesting(test9) = 2
- *MaximumNesting(test10) = 1
+ *Nesting(test9) = 2
+ *Nesting(test10) = 1
  *
  *Dies scheint jedoch unerreichbar zu sein
  */
@@ -86,14 +86,13 @@ import scala.util.Try
  * Optional CLI argument:
  *  - --only-class Es wird nur das absolute Maximum einer Klasse berechnet
  *  - --only-methods es werden nur die Maxima der einzelnen Methoden ausgegeben
- *  - --all es werdend die Maxima der einzelnen Methoden als auch das absolute Maximum der Klasse ausgegeben
+ *  standardmäßig werden sowohl die Klassen, als auch die Methodenwerte ausgegeben
  *
  */
 
 class MaximumNestingAnalysis extends ClassFileAnalysis {
 
   private val onlyMethodsSymbol: Symbol = Symbol("only-methods")
-  private val allSymbol: Symbol = Symbol("all")
   private val onlyClassesSymbol: Symbol = Symbol("only-classes")
 
   /**
@@ -175,21 +174,32 @@ class MaximumNestingAnalysis extends ClassFileAnalysis {
             }
 
             if (isInstruction != null) {
+              //Bereich den die Kontrollstruktur abdeckt
               val Sprungziel = instructionPosition + isInstruction.branchoffset
+              //Neue Kontrollstruktur, die kein loop ist
               if (isInstruction.branchoffset > 0) {
+                //Kontrollstrukturen in Schicht 0
                 if (Schichten.isEmpty) {
+                  //Den Bereich abspeichern, den die Kontrollstruktur abdeckt
                   Schichten += ((instructionPosition, Sprungziel))
                   if (Schichten.size > maximaleTiefeMethode) {
                     maximaleTiefeMethode = Schichten.size
                   }
                 }
                 else {
+                  //Liegt die aktuell betrachtete Kontrollstruktur innerhalb eines Bereich, der von einer
+                  //anderen zuvor betrachteten Kontrollstruktur abgedeckt wird? Wenn ja, dann gibt es eine
+                  //neue Verschachteltungsschicht
                   if (Schichten.last._1 < instructionPosition && Sprungziel <= Schichten.last._2) {
                     Schichten += ((instructionPosition, Sprungziel))
                     if (Schichten.size > maximaleTiefeMethode) {
                       maximaleTiefeMethode = Schichten.size
                     }
                   }
+                    //Die aktuell betrachtete Kontrollstruktur liegt nach dem abgedeckten Bereich der zuletzt
+                    //betrachteten Kontrollstruktur? Dann kann die letzte Struktur von Stapel (aus der Liste) entfernt
+                    //werden, denn die beiden sind nicht in ineinander verschachtelt
+                    //Wiederhole solange nötig
                   else if (instructionPosition >= Schichten.last._2) {
                     while (Schichten.nonEmpty && (instructionPosition > Schichten.last._2)) {
                       Schichten = Schichten.dropRight(1)
@@ -242,13 +252,6 @@ class MaximumNestingAnalysis extends ClassFileAnalysis {
     }
     println("Median der Methodentiefen: " + median)
 
-
-    /* if (!noClass) {
-       if (noZeroLoopsClasses && classloops > 0.0) {
-         rlist += MetricValue("Class:" + classFile.thisType.fqn, this.analysisName, classloops)
-       }
-       else if (!noZeroLoopsClasses) rlist += MetricValue("Class:" + classFile.thisType.fqn, this.analysisName, classloops)
-     }*/
 
     rlist.toList
   }
