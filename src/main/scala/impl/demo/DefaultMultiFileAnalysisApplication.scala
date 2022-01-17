@@ -1,14 +1,14 @@
 package org.tud.sse.metrics
-package impl.group1
+package impl.demo
 
 import analysis.MultiFileAnalysis
 import application.MultiFileAnalysisApplication
 
 import java.io.File
 
-object ExternalStabilityApplication extends MultiFileAnalysisApplication {
+object DefaultMultiFileAnalysisApplication extends MultiFileAnalysisApplication {
   override protected def buildAnalyses(jarDirectory: File): Seq[MultiFileAnalysis[_]] = Seq(
-    new ExternalStabilityAnalysis(jarDirectory),
-    // new AverageNumberOfMethodsAnalysis(jarDirectory)
+    new AverageMethodDifferenceAnalysis(jarDirectory),
+    new AverageNumberOfMethodsAnalysis(jarDirectory)
   )
 }

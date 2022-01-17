@@ -1,14 +1,13 @@
 package org.tud.sse.metrics
-package impl
+package impl.demo
 
 import analysis.SingleFileAnalysis
 import application.SingleFileAnalysisApplication
 
-import impl.group5.NumberOfLoopsAnalysis
-
-object SingleFileAnalysisApplication extends SingleFileAnalysisApplication {
+object DefaultSingleFileAnalysisApplication extends SingleFileAnalysisApplication {
 
   override protected val registeredAnalyses: Seq[SingleFileAnalysis] = Seq(
-    new NumberOfLoopsAnalysis()
+    new NumberOfMethodsAnalysis(),
+    new MethodSizeAnalysis()
   )
 }
