@@ -10,15 +10,13 @@ import org.opalj.br.analyses.Project
 import java.net.URL
 import scala.util.Try
 
-
 /**
- * Lines of code simply counts the lines of source code (including line break characters and comments) of a method.
+ * LOCphy simply counts the lines of source code (including line break characters and comments) of a method.
  */
 
 class LOCphyAnalysis extends MethodAnalysis{
   /**
-   * This method is called to analyse each method individually.
-   * It calculates the value of the LOCphy Metric by subtracting the line numbers of the last and
+   * This method calculates the value of the LOCphy Metric by subtracting the line numbers of the last and
    * first elements of the line-number-table .
    *
    * @param m             is a method object in a class.
@@ -28,14 +26,13 @@ class LOCphyAnalysis extends MethodAnalysis{
    * @return Try[Iterable[MetricValue]]  object holding the intermediate result, if successful.
    */
   override def analyzeMethod(m: Method, project: Project[URL], customOptions: OptionMap): Try[Iterable[MetricValue]] = Try {
-
-    val table =  m.body.get.lineNumberTable.get.lineNumbers
-
-    if (project.isProjectType(m.classFile.thisType) && m.body.isDefined && m.body.get.lineNumberTable.isDefined) {
-      List(MetricValue(m.fullyQualifiedSignature, "method.locphy",
-       table.last.lineNumber - table.head.lineNumber))
+    if (project.isProjectType(m.classFile.thisType) && m.body.isDefined && m.body.get.lineNumberTable.isDefined && m.body.get.lineNumberTable.get.lineNumbers.size>=1) {
+      val table= m.body.get.lineNumberTable.get.lineNumbers
+      if (table.size>1) List(MetricValue(m.fullyQualifiedSignature, analysisName, table.last.lineNumber - table.head.lineNumber))
+      else List(MetricValue(m.fullyQualifiedSignature, analysisName, 1))
     }
     else List.empty}
+
   /**
    * The name for this analysis implementation. Will be used to include and exclude analyses via CLI.
    */
