@@ -117,6 +117,11 @@ class MaximumNestingAnalysis extends ClassFileAnalysis {
     var maximaleTiefe = 0
     var tiefenDerMethoden = new ListBuffer[Int]
 
+    if(methods.isEmpty)
+      {
+        tiefenDerMethoden += 0
+      }
+
     while (methods.hasNext) {
       val method = methods.next()
       val body = method.body
