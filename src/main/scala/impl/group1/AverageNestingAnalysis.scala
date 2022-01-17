@@ -78,10 +78,10 @@ import scala.collection.mutable.ListBuffer
 import scala.util.Try
 
 /**
- * Die Klasse MaximumNestingAnalysis stellt die Implementierung  der Metrik Maximum Nesting da.
+ * Die Klasse AverageNestingAnalysis stellt die Implementierung  der Metrik Average Nesting da.
  * Diese Metrik berechnet für jede Methode die Anzahl der in einander verschachtelten
- * if/else, switch und "loop" Kontrollstrukturen und gibt die maximale Schachteilungstiefe aus.
- *
+ * if/else, switch und "loop" Kontrollstrukturen und gibt die durchschnittliche Schachteilungstiefe aus.
+ * Es werden sowohl das arithmetische Mittel als auch der median der Schachtelungstiefe berechnet
  *
  * Optional CLI argument:
  *  - --only-means Es wird nur das arithmetische Mittel maximalen Tiefen einer Klasse ausgegeben
@@ -96,7 +96,7 @@ class AverageNestingAnalysis extends ClassFileAnalysis {
   private val onlyMediansSymbol: Symbol = Symbol("only-median")
 
   /**
-   * Die Methode führt die Metrik Loop aus.
+   * Die Methode führt die Metrik AverageNesting aus.
    *
    * @param classFile     Ist ein Interface von Projekt
    * @param project       Bekommt die vom Framework gelesene jar file in einer Präsentationsform
