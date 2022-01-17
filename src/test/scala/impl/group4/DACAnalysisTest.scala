@@ -41,6 +41,7 @@ class DACAnalysisTest extends FreeSpec with Matchers{
     }
 
     "classes with reference type attributes only" in {
+
       assert(metricResult.metricValues.exists(value => value.entityIdent.equals("com/group4/sample/DACAnalysisTest1") && value.metricValue == 5.0))
     }
   }
