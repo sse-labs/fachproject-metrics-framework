@@ -96,7 +96,7 @@ class MaximumNestingAnalysis extends ClassFileAnalysis {
   private val onlyClassesSymbol: Symbol = Symbol("only-classes")
 
   /**
-   * Die Methode führt die Metrik Loop aus.
+   * Die Methode führt die Metrik MaximumNesting aus.
    *
    * @param classFile     Ist ein Interface von Projekt
    * @param project       Bekommt die vom Framework gelesene jar file in einer Präsentationsform
