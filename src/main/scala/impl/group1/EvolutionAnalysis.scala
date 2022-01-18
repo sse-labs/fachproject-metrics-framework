@@ -71,20 +71,21 @@ class EvolutionAnalysis(jarDir: File) extends MultiFileAnalysis[(Double,Double,D
     if(!initialRound){
       //Calculate the new packages that doesn't exist in the previous version
       val newPackages = currentPackages.diff(previousPackages)
-      log.info("new Packages: " + newPackages.toString())
+      log.info(s"new Packages: ${newPackages.size}")
       var numberOfClassesInNewPackages = 0
 
       newPackages.foreach(p => numberOfClassesInNewPackages += project.classesPerPackage(p).size)
-      log.info("Classes in new Packages Count: " + numberOfClassesInNewPackages)
+      log.info(s"Classes in new Packages Count: $numberOfClassesInNewPackages")
 
       if(currentNumberOfClasses != 0){
         externalEvolution = numberOfClassesInNewPackages/currentNumberOfClasses
       }
-      log.info("externalEvolution: " + externalEvolution)
+      log.info(s"externalEvolution: $externalEvolution")
 
       // calculate the Number of Classes for the new Packages
 
-      entityIdent = "Difference between: " + previousFile + " and " + currentFile
+      entityIdent = s"Difference between: $previousFile and $currentFile"
+      log.info(s"entityIdent: $entityIdent")
 
       // internal Evolution
       // internal Evolution is the number of Packages that exist in both versions and interact with newly added Packages divided by the Number of Packages that exist in both versions.
@@ -93,6 +94,7 @@ class EvolutionAnalysis(jarDir: File) extends MultiFileAnalysis[(Double,Double,D
       // calculate the denominator (maintainedPackagesSize) Number of Packages that exist in previous and current Project.
       val maintainedPackages = currentPackages.intersect(previousPackages)
       val maintainedPackagesSize = maintainedPackages.size
+      log.info(s"maintainedPackages: $maintainedPackagesSize")
       // calculate the nominator (interactionWithNewPackages) Packages that exist in both versions (maintainedPackages) and interact with the new added Packages (newPackages).
       // interaction of Packages = if a class in Package A uses Objects (classes) from Package B the Packages interact and vice versa. (similar to Coupling between Objects)
       var interactionsWithNewPackages = 0
@@ -114,11 +116,18 @@ class EvolutionAnalysis(jarDir: File) extends MultiFileAnalysis[(Double,Double,D
           }
         }
       }
+
+      log.info(s"Maintained Packages interactions with new Packages: $interactionsWithNewPackages")
+
       internalEvolution = interactionsWithNewPackages/maintainedPackagesSize
+      log.info(s"internal Evolution: $internalEvolution")
+    } else{
+      log.info(s"inital Round!!!")
     }
 
     // Evolution as defined in the Paper
     evolution = (externalEvolution + internalEvolution)/2
+    log.info(s"Evolution: $evolution")
 
     previousFile = currentFile
     previousPackages = currentPackages
@@ -136,6 +145,7 @@ class EvolutionAnalysis(jarDir: File) extends MultiFileAnalysis[(Double,Double,D
    * @return List of JarFileMetricsResults
    */
   override def produceMetricValues(): List[MetricsResult] = {
+
     val evolutionMetric = analysisResultsPerFile.values.map(_.get).
       toList.map(value => MetricValue(value._4,"Evolution",value._1))
     val externalEvoMetric = analysisResultsPerFile.values.map(_.get).
