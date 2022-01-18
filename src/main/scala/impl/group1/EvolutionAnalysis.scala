@@ -35,6 +35,9 @@ class EvolutionAnalysis(jarDir: File) extends MultiFileAnalysis[(Double,Double,D
   var initialRound: Boolean = true
   var roundCounter: Integer = 0
 
+  private val sym_ext_evo: Symbol = Symbol("ext_evo")
+  private val sym_int_evo: Symbol = Symbol("int_evo")
+
   /**
    * Calculate the Evolution metric containing External Evolution and Internal Evolution
    * as defined in the paper "Identifying evolution patterns: a metrics-based approach for
@@ -62,6 +65,9 @@ class EvolutionAnalysis(jarDir: File) extends MultiFileAnalysis[(Double,Double,D
     var externalEvolution: Double = 1
     var internalEvolution: Double = 1
     var entityIdent: String = ""
+
+    ext_evo = customOptions.contains(sym_ext_evo)
+    int_evo = customOptions.contains(sym_int_evo)
 
     // external Evolution
     // external evolution is the number of classes in newly introduced packages divided by the total amount of classes in the project.
@@ -123,6 +129,9 @@ class EvolutionAnalysis(jarDir: File) extends MultiFileAnalysis[(Double,Double,D
       log.info(s"internal Evolution: $internalEvolution")
     } else{
       log.info(s"inital Round!!!")
+      log.info(s"Custom Option for external Evolution is: ${ext_evo.toString}")
+      log.info(s"Custom Option for internal Evolution is: ${int_evo.toString}")
+      log.info(s"inital Round!!!")
     }
 
     // Evolution as defined in the Paper
@@ -146,6 +155,7 @@ class EvolutionAnalysis(jarDir: File) extends MultiFileAnalysis[(Double,Double,D
    */
   override def produceMetricValues(): List[MetricsResult] = {
 
+    //value == (evolution, externalEvolution, internalEvolution, entityIdent)
     val evolutionMetric = analysisResultsPerFile.values.map(_.get).
       toList.map(value => MetricValue(value._4,"Evolution",value._1))
     val externalEvoMetric = analysisResultsPerFile.values.map(_.get).
@@ -155,10 +165,29 @@ class EvolutionAnalysis(jarDir: File) extends MultiFileAnalysis[(Double,Double,D
 
     val listBuffer = collection.mutable.ListBuffer[MetricsResult]()
 
-    for(i <- evolutionMetric.indices){
-      listBuffer.append(MetricsResult(analysisName, jarDir, success = true,
-        metricValues = List(evolutionMetric(i), externalEvoMetric(i), internalEvoMetric(i))))
+    // Calculates the metricresult depending on the custom options ext_evo and int_evo
+    if(ext_evo && int_evo){
+      for(i <- evolutionMetric.indices){
+        listBuffer.append(MetricsResult(analysisName, jarDir, success = true,
+          metricValues = List(evolutionMetric(i), externalEvoMetric(i), internalEvoMetric(i))))
+      }
+    } else if(ext_evo) {
+      for (i <- evolutionMetric.indices) {
+        listBuffer.append(MetricsResult(analysisName, jarDir, success = true,
+          metricValues = List(evolutionMetric(i), externalEvoMetric(i))))
+      }
+    }else if(int_evo){
+        for(i <- evolutionMetric.indices){
+          listBuffer.append(MetricsResult(analysisName, jarDir, success = true,
+            metricValues = List(evolutionMetric(i), externalEvoMetric(i))))
+      }
+    } else{
+      for(i <- evolutionMetric.indices){
+        listBuffer.append(MetricsResult(analysisName, jarDir, success = true,
+          metricValues = List(evolutionMetric(i))))
+      }
     }
+
     val metricResultList: List[MetricsResult] = listBuffer.toList
 
     metricResultList
