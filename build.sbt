@@ -18,7 +18,4 @@ libraryDependencies ++= Seq(
 libraryDependencies += "ch.qos.logback" % "logback-classic" % "1.2.3"
 libraryDependencies += "org.scalatest" %% "scalatest" % "3.0.4" % "test"
 
-libraryDependencies += "de.skuzzle" % "semantic-version" % "2.1.0"
-
-
 
