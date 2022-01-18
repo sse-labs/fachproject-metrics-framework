@@ -19,3 +19,4 @@ libraryDependencies += "ch.qos.logback" % "logback-classic" % "1.2.3"
 libraryDependencies += "org.scalatest" %% "scalatest" % "3.0.4" % "test"
 
 
+
