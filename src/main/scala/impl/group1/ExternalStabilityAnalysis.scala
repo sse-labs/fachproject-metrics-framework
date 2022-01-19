@@ -99,11 +99,9 @@ class ExternalStabilityAnalysis(jarDir: File) extends MultiFileAnalysis[(Double,
 
     //Calculate the packages which have been removed in the newer version
     val packagesRemoved = previousPackages.diff(currentPackages)
-    if(verbose_ultra)
-    {
+    if (verbose_ultra) {
       log.info("removed Packages: " + packagesRemoved.size)
-      for(rem_pack <- packagesRemoved)
-      {
+      for (rem_pack <- packagesRemoved) {
         log.info("removed Packages: " + rem_pack)
       }
     }
@@ -117,7 +115,7 @@ class ExternalStabilityAnalysis(jarDir: File) extends MultiFileAnalysis[(Double,
     //calculate current round number
     counter += 1
 
-    if (verbose_ultra||verbose) {
+    if (verbose_ultra || verbose) {
       log.info("Round: " + counter)
       log.info("previous file: " + previousfile)
       log.info("current File: " + currentfile)
@@ -165,7 +163,7 @@ class ExternalStabilityAnalysis(jarDir: File) extends MultiFileAnalysis[(Double,
       currentClassesInPackages = currentClassesInPackages + (curPack -> classes)
     }
 
-    if(verbose_ultra) {
+    if (verbose_ultra) {
       log.info("\n\nFile: " + currentfile)
       for (pack <- currentClassesInPackages) {
         log.info("\n\nPackage: " + pack._1 + " size: " + pack._2.size)
@@ -175,7 +173,8 @@ class ExternalStabilityAnalysis(jarDir: File) extends MultiFileAnalysis[(Double,
           val sortedClasses = SortedSet[String]() ++ classes
           for (cl <- sortedClasses) {
             log.info("Class : " + cl)
-          }})
+          }
+        })
       }
     }
 
@@ -194,19 +193,17 @@ class ExternalStabilityAnalysis(jarDir: File) extends MultiFileAnalysis[(Double,
       for (packShared <- packagesShared) {
         // calculate the classes, which where removed from a shared package
         val classesRemoved = previousClassesInPackages(packShared).diff(currentClassesInPackages(packShared))
-        if(verbose_ultra)
-          {
-            for(cl <- classesRemoved)
-              {
-                log.info("Shared Package: " + packShared + " Removed Class: " + cl)
-              }
+        if (verbose_ultra) {
+          for (cl <- classesRemoved) {
+            log.info("Shared Package: " + packShared + " Removed Class: " + cl)
           }
+        }
         sum += classesRemoved.size
       }
-      if(verbose || verbose_ultra) {
+      if (verbose || verbose_ultra) {
         log.info("Classes removed from packages: " + sum)
       }
-          ES_red = 1.0 - sum.toDouble / previousNumberOfClasses.toDouble
+      ES_red = 1.0 - sum.toDouble / previousNumberOfClasses.toDouble
     }
 
     val external_stability_metric_value = ES_red * ES_rem
@@ -217,7 +214,7 @@ class ExternalStabilityAnalysis(jarDir: File) extends MultiFileAnalysis[(Double,
     if (verbose && !verbose_ultra) {
       log.info("ES_red: " + ES_red)
       log.info("ES: " + external_stability_metric_value)
-    }else if (verbose_ultra) {
+    } else if (verbose_ultra) {
       log.info("ES_rem: " + ES_rem)
       log.info("ES_red: " + ES_red)
       log.info("ES: " + external_stability_metric_value)
@@ -257,38 +254,24 @@ class ExternalStabilityAnalysis(jarDir: File) extends MultiFileAnalysis[(Double,
       .map(value => MetricValue(value._4, "ES_Remained", value._3))
 
 
-    val LBUff = collection.mutable.ListBuffer[MetricsResult]()
-    if (es_red && es_rem) {
-      //skip first calculation does not contain a difference, consists only of a single jar information
-      for (i <- stability_values.indices) {
-        LBUff.append(MetricsResult(analysisName, jarDir, success = true,
-          metricValues = List(stability_values(i), removed_values(i), remained_values(i))))
-      }
+    val MetricsResultBuffer = collection.mutable.ListBuffer[MetricsResult]()
+    val MetricValueBffer = collection.mutable.ListBuffer[MetricValue]()
+
+    MetricValueBffer.appendAll(stability_values)
+    if (es_rem) {
+      MetricValueBffer.appendAll(removed_values)
     }
-    else if (es_red) {
-      for (i <- stability_values.indices) {
-        LBUff.append(MetricsResult(analysisName, jarDir, success = true,
-          metricValues = List(stability_values(i), remained_values(i))))
-      }
-    }
-    else if (es_rem) {
-      for (i <- stability_values.indices) {
-        LBUff.append(MetricsResult(analysisName, jarDir, success = true,
-          metricValues = List(stability_values(i), removed_values(i))))
-      }
-    } else {
-      for (i <- stability_values.indices) {
-        LBUff.append(MetricsResult(analysisName, jarDir, success = true,
-          metricValues = List(stability_values(i))))
-      }
+    if (es_red) {
+      MetricValueBffer.appendAll(remained_values)
     }
 
-    val metricList: List[MetricsResult] = LBUff.toList
-    if(verbose_ultra||verbose)
-      {
-        metricList.foreach(value => log.info("Metrik Result: " + value))
-      }
-    metricList
+    MetricsResultBuffer.append(MetricsResult(analysisName, jarDir, success = true, metricValues = MetricValueBffer.toList))
+
+    if (verbose_ultra || verbose) {
+      MetricsResultBuffer.head.metricValues.foreach(value => log.info("Metrik Result: " + value))
+    }
+
+    MetricsResultBuffer.toList
   }
 
   override def analysisName: String = "External Stability"

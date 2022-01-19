@@ -22,7 +22,7 @@ class ExternalStabilityTest extends FlatSpec with Matchers{
     val optionsMap : Map[Symbol,Any]  = Map(Symbol("es_red") -> "es_red", Symbol("es_rem")-> "es_rem")
     val result  = AnalysisTestUtils.runMultiFileAnalysis(_ => analysisToTest,filesToTest,appConfig,optionsMap)
 
-    assert(result.size > 1)
+    assert(result.size == 1)
 
     val metricResult = result.head
     assert(metricResult.success)
