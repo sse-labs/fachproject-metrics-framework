@@ -96,8 +96,6 @@ class ExternalStabilityAnalysis(jarDir: File) extends MultiFileAnalysis[(Double,
     val currentPackages: scala.collection.Set[String] = project.projectPackages
     val currentNumberOfClasses = project.projectClassFilesCount
 
-    println(currentPackages)
-
 
     //Calculate the packages which have been removed in the newer version
     val packagesRemoved = previousPackages.diff(currentPackages)
@@ -205,8 +203,10 @@ class ExternalStabilityAnalysis(jarDir: File) extends MultiFileAnalysis[(Double,
           }
         sum += classesRemoved.size
       }
-      log.info("Classes removed from packages: " + sum)
-      ES_red = 1.0 - sum.toDouble / previousNumberOfClasses.toDouble
+      if(verbose || verbose_ultra) {
+        log.info("Classes removed from packages: " + sum)
+      }
+          ES_red = 1.0 - sum.toDouble / previousNumberOfClasses.toDouble
     }
 
     val external_stability_metric_value = ES_red * ES_rem
