@@ -16,6 +16,12 @@ import scala.util.Try
  * as defined in the paper "Identifying evolution patterns: a metrics-based approach for
  * external library reuse" by Eleni Constantinou und Ioannis Stamelos
  *
+ * External_Stability = External_Removed * External_Remained
+ * External_Removed = (number of classes contained in removed packages from Genreation i to (i+1))/(NUmber of all Classes
+ * in generation i)
+ * External_Remained = (number of all removed classes of remained packages from generation i to (i+1)/
+ * (number of all Classes in generation i)
+ *
  * @param jarDir directory containing the different jar-file versions of a software to analyze
  *               Optional CLI arguments:
  *  - --es_rem outputs values for partial metric es_removed: metric for classes of removed packages
@@ -49,6 +55,12 @@ class ExternalStabilityAnalysis(jarDir: File) extends MultiFileAnalysis[(Double,
    * Calculate the ExternalStability metric
    * as defined in the paper "Identifying evolution patterns: a metrics-based approach for
    * external library reuse" by Eleni Constantinou und Ioannis Stamelos
+   *
+   * External_Stability = External_Removed * External_Remained
+   * External_Removed = (number of classes contained in removed packages from Genreation i to (i+1))/(NUmber of all Classes
+   * in generation i)
+   * External_Remained = (number of all removed classes of remained packages from generation i to (i+1)/
+   * (number of all Classes in generation i)
    *
    * @param project       Fully initialized OPAL project representing the JAR file under analysis
    * @param lastResult    Option that contains the intermediate result for the previous JAR file, if
