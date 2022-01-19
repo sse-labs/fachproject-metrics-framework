@@ -72,18 +72,19 @@ class EvolutionAnalysis(jarDir: File) extends MultiFileAnalysis[(Double,Double,D
     // external Evolution
     // external evolution is the number of classes in newly introduced packages divided by the total amount of classes in the project.
     val currentPackages: scala.collection.Set[String] = project.projectPackages
-    val currentNumberOfClasses = project.projectClassFilesCount
+    val currentNumberOfClasses:Double = project.projectClassFilesCount
 
     if(!initialRound){
       //Calculate the new packages that doesn't exist in the previous version
       val newPackages = currentPackages.diff(previousPackages)
       log.info(s"new Packages: ${newPackages.size}")
-      var numberOfClassesInNewPackages = 0
+      var numberOfClassesInNewPackages: Double = 0
 
       newPackages.foreach(p => numberOfClassesInNewPackages += project.classesPerPackage(p).size)
       log.info(s"Classes in new Packages Count: $numberOfClassesInNewPackages")
 
       if(currentNumberOfClasses != 0){
+        log.info(s"Number of Classes: $currentNumberOfClasses")
         externalEvolution = numberOfClassesInNewPackages/currentNumberOfClasses
       }
       log.info(s"externalEvolution: $externalEvolution")
@@ -99,24 +100,32 @@ class EvolutionAnalysis(jarDir: File) extends MultiFileAnalysis[(Double,Double,D
 
       // calculate the denominator (maintainedPackagesSize) Number of Packages that exist in previous and current Project.
       val maintainedPackages = currentPackages.intersect(previousPackages)
-      val maintainedPackagesSize = maintainedPackages.size
+      val maintainedPackagesSize:Double = maintainedPackages.size
       log.info(s"maintainedPackages: $maintainedPackagesSize")
       // calculate the nominator (interactionWithNewPackages) Packages that exist in both versions (maintainedPackages) and interact with the new added Packages (newPackages).
       // interaction of Packages = if a class in Package A uses Objects (classes) from Package B the Packages interact and vice versa. (similar to Coupling between Objects)
-      var interactionsWithNewPackages = 0
+      var interactionsWithNewPackages:Double = 0
 
       // iterate through classes for each Package to check if there are interactions with the classes from new Packages
+
       for(maintainedPackage <- maintainedPackages){
-        val classesFromMaintainedPackage = project.classesPerPackage(maintainedPackage)
         for(newPackage <- newPackages){
+          val classesFromMaintainedPackage = project.classesPerPackage(maintainedPackage)
           breakable{
             val classesFromNewPackage = project.classesPerPackage(newPackage)
             for(maintainedClass <- classesFromMaintainedPackage){
               for(newClass <- classesFromNewPackage){
-                maintainedClass.methods.foreach(m => if(m.body.get.instructions.mkString.contains(newClass)){
-                  interactionsWithNewPackages = interactionsWithNewPackages +1
-                  break
-                })
+                maintainedClass.methods.foreach(m =>
+                  if(m.body.isDefined){
+                    if(m.body.get.instructions.mkString.contains(newClass.thisType.simpleName)){
+                      log.info(s"maintainedPackageName: $maintainedPackage")
+                      log.info(s"newPackageName: $newPackage")
+                      log.info(s"Klasseninteraktion von maintainedClass: ${maintainedClass.thisType.fqn} und newClass: ${newClass.thisType.fqn}")
+                      interactionsWithNewPackages = interactionsWithNewPackages +1
+                      break
+                    }
+                  }
+                  )
               }
             }
           }
