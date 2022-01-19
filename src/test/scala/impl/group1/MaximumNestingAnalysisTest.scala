@@ -36,8 +36,8 @@ class MaximumNestingAnalysisTest extends FlatSpec with Matchers{
     assert(metricResult.metricValues.exists(value => value.entityIdent.contains("method: int start.test2(int,int,int)") && value.metricValue == 3))
     assert(metricResult.metricValues.exists(value => value.entityIdent.contains("method: int start.test1(int,int,int)") && value.metricValue == 2))
     assert(metricResult.metricValues.exists(value => value.entityIdent.contains("method: int start.test8()") && value.metricValue == 3))
-    assert(metricResult.metricValues.exists(value => value.entityIdent.contains("method: int start.test8()") && value.metricValue == 3))
-    assert(metricResult.metricValues.exists(value => value.entityIdent.contains("method: int start.test8()") && value.metricValue == 3))
+    assert(metricResult.metricValues.exists(value => value.entityIdent.contains("method: int start.test9(int,int)") && value.metricValue == 2))
+    assert(metricResult.metricValues.exists(value => value.entityIdent.contains("method: int start.test10(int,int)") && value.metricValue == 2))
 
 
   }
