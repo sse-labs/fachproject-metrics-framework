@@ -38,7 +38,8 @@ class EvolutionAnalysis(jarDir: File) extends MultiFileAnalysis[(Double,Double,D
 
   /**
    * Calculate the Evolution metric containing External Evolution and Internal Evolution
-   * as defined in the paper "Identifying evolution patterns: a metrics-based approach for
+   * as defined in the paper (!!! internal Evolution uses a more logical Definition to normalize the values betwenn [0,1] as intended)
+   * "Identifying evolution patterns: a metrics-based approach for
    * external library reuse" by Eleni Constantinou und Ioannis Stamelos
    *
    * external Evolution def:
@@ -47,7 +48,7 @@ class EvolutionAnalysis(jarDir: File) extends MultiFileAnalysis[(Double,Double,D
    *
    * internal Evolution def:
    * internal Evolution is the number of Packages that exist in both versions and interact with newly added Packages
-   * divided by the count of Packages as union from both jars.
+   * divided by the count of Packages as union from both jars. (!!!! in the paper the definition is an intersection, slight change here)
    * (interaction between packages is calculated on class level)
    *
    * Evolution is (internal Evolution + external Evolution) divided by 2
