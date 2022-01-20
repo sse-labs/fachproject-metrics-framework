@@ -175,7 +175,7 @@ class MaximumNestingAnalysis extends ClassFileAnalysis {
 
             if (isInstruction != null) {
               //Bereich den die Kontrollstruktur abdeckt
-              val Sprungziel = instructionPosition + isInstruction.branchoffset
+              var Sprungziel = instructionPosition + isInstruction.branchoffset
               //Neue Kontrollstruktur, die kein loop ist
               if (isInstruction.branchoffset > 0) {
                 //Kontrollstrukturen in Schicht 0
@@ -211,12 +211,39 @@ class MaximumNestingAnalysis extends ClassFileAnalysis {
                   }
                 }
               }
+              //Lösung für zusammengefasste Instruktionen: Existenz des Phänomens noch nicht abschließend geklärt
+              else if(isInstruction.branchoffset < 0 && !isInstruction.isGotoInstruction)
+              {
+                if (Schichten.isEmpty) {
+                  //Den Bereich abspeichern, den die Kontrollstruktur abdeckt
+                  //Wird zurückgesprungen, dann liegt das Sprungziel vor der instructionPosition
+                  Schichten += ((Sprungziel,instructionPosition))
+                  if (Schichten.size > maximaleTiefeMethode) {
+                    maximaleTiefeMethode = Schichten.size
+                  }
+                }
+                else {
+                  //Wird zurückgesprungen bei einer zusammengefassten Anweisung, dann wird nach dem ursprünglichem
+                  //Sprungziel in den vorherigen Verzweigungen gesucht
+                  var currentItemPos = Schichten.size-1
+                  while (currentItemPos > 0 && (Sprungziel > Schichten(currentItemPos)._1)) {
+                  currentItemPos -= 1
+                }
+                  Sprungziel = Schichten(currentItemPos)._2
+                  //Liegt die aktuell betrachtete Kontrollstruktur innerhalb eines Bereich, der von einer
+                  //anderen zuvor betrachteten Kontrollstruktur abgedeckt wird? Wenn ja, dann gibt es eine
+                  //neue Verschachteltungsschicht
+                    Schichten += ((instructionPosition,Schichten.last._2))
+                    if (Schichten.size > maximaleTiefeMethode) {
+                      maximaleTiefeMethode = Schichten.size
+                    }
+                }
+              }
             }
           }
           instructionPosition += 1
         }
       }
-
       if (maximaleTiefeMethode > maximaleTiefe) {
         maximaleTiefe = maximaleTiefeMethode
       }
