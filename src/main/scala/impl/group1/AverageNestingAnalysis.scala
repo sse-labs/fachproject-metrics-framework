@@ -235,9 +235,8 @@ class AverageNestingAnalysis extends ClassFileAnalysis {
                     currentItemPos -= 1
                   }
                   Sprungziel = Schichten(currentItemPos)._2
-                  //Liegt die aktuell betrachtete Kontrollstruktur innerhalb eines Bereich, der von einer
-                  //anderen zuvor betrachteten Kontrollstruktur abgedeckt wird? Wenn ja, dann gibt es eine
-                  //neue Verschachteltungsschicht
+                  //Der errechnete Bereich der Kontrollstruktur liegt garantiert innerhalb eines Bereich, der von einer
+                  //anderen zuvor betrachteten Kontrollstruktur abgedeckt wird
                   Schichten += ((instructionPosition,Schichten.last._2))
                   if (Schichten.size > maximaleTiefeMethode) {
                     maximaleTiefeMethode = Schichten.size
