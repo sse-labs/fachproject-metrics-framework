@@ -232,7 +232,7 @@ class MaximumNestingAnalysis extends ClassFileAnalysis {
                   Sprungziel = Schichten(currentItemPos)._2
                   //Der errechnete Bereich der Kontrollstruktur liegt garantiert innerhalb eines Bereich, der von einer
                   //anderen zuvor betrachteten Kontrollstruktur abgedeckt wird
-                    Schichten += ((instructionPosition,Schichten.last._2))
+                    Schichten += ((instructionPosition,Sprungziel))
                     if (Schichten.size > maximaleTiefeMethode) {
                       maximaleTiefeMethode = Schichten.size
                     }
