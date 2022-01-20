@@ -1,26 +1,34 @@
 package org.tud.sse.metrics
 package impl.group1
 
-import analysis.{MetricValue, SingleFileAnalysis}
+import analysis.{ClassFileAnalysis, MetricValue}
 import input.CliParser.OptionMap
 
+import org.opalj.br.ClassFile
 import org.opalj.br.analyses.Project
 
 import java.net.URL
-import scala.collection.mutable.ListBuffer
 import scala.util.Try
 
+class DepthOfInheritanceTreeAnalysis extends ClassFileAnalysis {
 
-class DepthOfInheritanceTreeAnalysis extends SingleFileAnalysis {
-
-override def analyzeProject(project: Project[URL], customOptions: OptionMap): Try[Iterable[MetricValue]] = Try {
-val list = new ListBuffer[MetricValue]()
-project.allProjectClassFiles.foreach(c => {
-val supertypes = project.classHierarchy.directSupertypes(c.thisType).size
-list += MetricValue(c.fqn, this.analysisName, supertypes)
-})
-list.toList
+/**
+ *  Counts the direct supertypes for each class. Based on the Definition from "A Metrics Suite for Object Oriented Design" from Chidamber and Kemerer.
+ *  "Definition: DIT = maximum length from node to root of the inheritance tree"
+ *
+ * @param classFile class that the DIT metric is calculated from
+ * @param project jar project file that includes the classes for the metric
+ * @param customOptions custom settings for the Analysis (not needed for this Metric)
+ * @return iterable MetricValue for all classes
+ */
+override def analyzeClassFile(classFile: ClassFile, project: Project[URL], customOptions: OptionMap): Try[Iterable[MetricValue]] = Try{
+val supertypes = project.classHierarchy.directSupertypes(classFile.thisType).size
+val className = classFile.thisType.fqn
+List(MetricValue(className,this.analysisName,supertypes))
 }
 
-override def analysisName: String = "class.inheritancetree"
+/**
+ * The name for this analysis implementation. Named dit
+ */
+override def analysisName: String = "class.dit"
 }
