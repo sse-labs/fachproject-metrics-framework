@@ -41,13 +41,32 @@ class EvolutionAnalysis(jarDir: File) extends MultiFileAnalysis[(Double,Double,D
    * as defined in the paper "Identifying evolution patterns: a metrics-based approach for
    * external library reuse" by Eleni Constantinou und Ioannis Stamelos
    *
+   * external Evolution def:
+   * external evolution is the number of classes in newly introduced packages (@numberOfClassesInNewPackages)
+   * divided by the total amount of classes in the project (@currentNumberOfClasses).
+   *
+   * internal Evolution def:
+   * internal Evolution is the number of Packages that exist in both versions and interact with newly added Packages
+   * divided by the Number of Packages that exist in both versions.
+   * (interaction between packages is calculated on class level)
+   *
+   * Evolution is (internal Evolution + external Evolution) divided by 2
+   *
    * @param project       Fully initialized OPAL project representing the JAR file under analysis
    * @param lastResult    Option that contains the intermediate result for the previous JAR file, if
    *                      available. This makes differential analyses easier to implement. This argument
    *                      may be None if either this is the first JAR file or the last calculation failed.
    * @param customOptions Custom analysis options taken from the CLI. Can be used to modify behavior
    *                      of the analysis via command-line
+   *                      ext_evo: optional Output for external Evolution
+   *                      int_evo: optional Output for internal Evolution
+   *
    * @return Try[T] object holding the intermediate result, if successful
+   *         Try[T] = Try[(Double,Double,Double,String)]
+   *         Double: Evolution
+   *         Double: External Evolution
+   *         Double: Internal Evolution
+   *         String: entityIdent
    */
   override protected def produceAnalysisResultForJAR(project: Project[URL],file: File,
                                                      lastResult: Option[(Double,Double,Double,String)],
@@ -76,7 +95,6 @@ class EvolutionAnalysis(jarDir: File) extends MultiFileAnalysis[(Double,Double,D
     if(!initialRound){
       //Calculate the new packages that doesn't exist in the previous version
       val newPackages = currentPackages.diff(previousPackages)
-      log.info(s"new Packages: ${newPackages.size}")
       var numberOfClassesInNewPackages: Double = 0
 
       newPackages.foreach(p => numberOfClassesInNewPackages += project.classesPerPackage(p).size)
@@ -96,11 +114,11 @@ class EvolutionAnalysis(jarDir: File) extends MultiFileAnalysis[(Double,Double,D
       // divided by the Number of Packages that exist in both versions.
       // interaction between packages is calculated on class level
 
-
       // calculate the denominator (maintainedPackagesSize) Number of Packages that exist in previous and current Project.
       val maintainedPackages = currentPackages.intersect(previousPackages)
       val maintainedPackagesSize:Double = maintainedPackages.size
       log.info(s"maintainedPackages: $maintainedPackagesSize")
+      log.info(s"newPackages: ${newPackages.size}")
       // calculate the nominator (interactionWithNewPackages) Packages that exist in both versions (maintainedPackages) and interact with the new added Packages (newPackages).
       // interaction of Packages = if a class in Package A uses Objects (classes) from Package B the Packages interact and vice versa. (similar to Coupling between Objects)
       var interactionsWithNewPackages:Double = 0
@@ -124,7 +142,7 @@ class EvolutionAnalysis(jarDir: File) extends MultiFileAnalysis[(Double,Double,D
                       log.info(s"Klasseninteraktion von maintainedClass: ${maintainedClass.thisType.fqn} und newClass: ${newClass.thisType.fqn}")
                       interactionsWithNewPackages = interactionsWithNewPackages +1
                       // if there is an interaction between the maintained and new Package it will be counted once and the rest of the iterations
-                      // can be stopped, interaction between the packages is only counted once.
+                      // for the package can be skipped, interaction between the packages is only counted once.
                       break
                     }
                   }
