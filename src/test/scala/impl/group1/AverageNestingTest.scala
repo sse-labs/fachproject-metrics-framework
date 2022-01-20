@@ -40,7 +40,7 @@ class AverageNestingTest extends FlatSpec with Matchers{
     assert(metricResult.metricValues.exists(value => value.entityIdent.contains("mean of: org/apache/commons/collections/buffer/BoundedBuffer") && value.metricValue == 0.3333333333333333))
     assert(metricResult.metricValues.exists(value => value.entityIdent.contains("median of: org/apache/commons/collections/map/AbstractReferenceMap$ReferenceKeySetIterator") && value.metricValue == 0.0))
     assert(metricResult.metricValues.exists(value => value.entityIdent.contains("mean of: org/apache/commons/collections/StaticBucketMap$Node") && value.metricValue == 0.42857142857142855))
-    assert(metricResult.metricValues.exists(value => value.entityIdent.contains("mean of: org/apache/commons/collections/FastArrayList") && value.metricValue == 0.9705882352941176))
+    assert(metricResult.metricValues.exists(value => value.entityIdent.contains("mean of: org/apache/commons/collections/FastArrayList") && value.metricValue == 1.0))
 
 
 
