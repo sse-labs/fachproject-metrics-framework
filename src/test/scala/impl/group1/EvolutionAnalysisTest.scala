@@ -32,6 +32,8 @@ class EvolutionAnalysisTest extends FlatSpec with Matchers{
 
 
   // Targeted Testing for single Values of evolution, internal evolution or external evolution.
+  // Tests with no new Packages and all values zero are the following (00 to 01, 03 to 04, 04 to 05, 05 to 06, 07 to 08, 08 to 09, 09 to 10, 10 to 11)
+  // only from 00 to 01 added to show 0 results.
   for(metricValueToTest <- results.head.metricValues){
     // Tests for Evolution value Evolution = (internal evolution + external evolution)/2
     if(metricValueToTest.metricName == "Evolution"){
@@ -42,18 +44,18 @@ class EvolutionAnalysisTest extends FlatSpec with Matchers{
         assert(metricValueToTest.metricValue == 0.0)
       } else if(metricValueToTest.entityIdent.contains("02-commons-collections-2.0.20020914.015953.jar") &&
         metricValueToTest.entityIdent.contains("03-commons-collections-2.0.20020914.020746")){
-        // Internal Evolution = 0.3333333333333333, external evolution = 0.06808510638297872
-        assert(metricValueToTest.metricValue == 0.200709219858156)
+        // Internal Evolution = 0.25, external evolution = 0.06808510638297872
+        assert(metricValueToTest.metricValue == 0.15904255319148936)
       }
     }
     // Tests for Internal Evolution value
     // internal Evolution is the number of Packages that exist in both versions and interact with newly added Packages
-    // divided by the Number of Packages that exist in both versions.
+    // divided by the count of Packages as union from both jars.
     else if(metricValueToTest.metricName == "Internal Evolution"){
       if(metricValueToTest.entityIdent.contains("02-commons-collections-2.0.20020914.015953.jar") &&
         metricValueToTest.entityIdent.contains("03-commons-collections-2.0.20020914.020746")){
-        // maintained Packages: 3, new Packages 1 with 1 interaction from maintained Packages (1/3)
-        assert(metricValueToTest.metricValue == 0.3333333333333333)
+        // all Packages: 4, new Packages 1 with 1 interaction from maintained Packages (1/4)
+        assert(metricValueToTest.metricValue == 0.25)
       }
       // Change from 00 to 01 is minimal and contains no new Packages
       else if(metricValueToTest.entityIdent.contains("00-commons-collections-1.0.jar") &&

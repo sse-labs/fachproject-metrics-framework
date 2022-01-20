@@ -47,7 +47,7 @@ class EvolutionAnalysis(jarDir: File) extends MultiFileAnalysis[(Double,Double,D
    *
    * internal Evolution def:
    * internal Evolution is the number of Packages that exist in both versions and interact with newly added Packages
-   * divided by the Number of Packages that exist in both versions.
+   * divided by the count of Packages as union from both jars.
    * (interaction between packages is calculated on class level)
    *
    * Evolution is (internal Evolution + external Evolution) divided by 2
@@ -111,12 +111,14 @@ class EvolutionAnalysis(jarDir: File) extends MultiFileAnalysis[(Double,Double,D
 
       // internal Evolution
       // internal Evolution is the number of Packages that exist in both versions and interact with newly added Packages
-      // divided by the Number of Packages that exist in both versions.
+      // divided by the count of Packages as union from both jars.
       // interaction between packages is calculated on class level
 
       // calculate the denominator (maintainedPackagesSize) Number of Packages that exist in previous and current Project.
       val maintainedPackages = currentPackages.intersect(previousPackages)
+      val allPackages = currentPackages.union(previousPackages)
       val maintainedPackagesSize:Double = maintainedPackages.size
+      log.info(s"allpackages: ${allPackages.size}")
       log.info(s"maintainedPackages: $maintainedPackagesSize")
       log.info(s"newPackages: ${newPackages.size}")
       // calculate the nominator (interactionWithNewPackages) Packages that exist in both versions (maintainedPackages) and interact with the new added Packages (newPackages).
@@ -156,7 +158,7 @@ class EvolutionAnalysis(jarDir: File) extends MultiFileAnalysis[(Double,Double,D
       log.info(s"Maintained Packages interactions with new Packages: $interactionsWithNewPackages")
 
       if(maintainedPackagesSize!=0){
-        internalEvolution = interactionsWithNewPackages/maintainedPackagesSize
+        internalEvolution = interactionsWithNewPackages/allPackages.size
       }
       log.info(s"internal Evolution: $internalEvolution")
     } else{
