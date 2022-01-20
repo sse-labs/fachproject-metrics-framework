@@ -1,10 +1,9 @@
 package org.tud.sse.metrics
 package impl.group1
 
-import java.io.File
-
+import testutils.AnalysisTestUtils
 import org.scalatest.{FlatSpec, Matchers}
-import org.tud.sse.metrics.testutils.AnalysisTestUtils
+import java.io.File
 
 /**
  * Tests for the class DepthOfInheritanceTreeAnalysis [[DepthOfInheritanceTreeAnalysis]]
@@ -26,18 +25,18 @@ private val resultDITMetric = result.head
 
 assert(resultDITMetric.success)
 assert(resultDITMetric.metricValues.nonEmpty)
-assert(resultDITMetric.metricValues.exists(value => value.entityIdent.equals("org/sejda/model/exception/ConfigurationException") && value.metricValue == 0.0))
-assert(resultDITMetric.metricValues.exists(value => value.entityIdent.equals("org/sejda/model/exception/InvalidTaskParametersException") && value.metricValue == 0.0))
-assert(resultDITMetric.metricValues.exists(value => value.entityIdent.equals("org/sejda/model/exception/NotificationContextException") && value.metricValue == 0.0))
+assert(resultDITMetric.metricValues.exists(value => value.entityIdent.equals("org/sejda/model/exception/ConfigurationException") && value.metricValue == 1.0))
+assert(resultDITMetric.metricValues.exists(value => value.entityIdent.equals("org/sejda/model/exception/InvalidTaskParametersException") && value.metricValue == 1.0))
+assert(resultDITMetric.metricValues.exists(value => value.entityIdent.equals("org/sejda/model/exception/NotificationContextException") && value.metricValue == 1.0))
 assert(resultDITMetric.metricValues.exists(value => value.entityIdent.equals("org/sejda/model/exception/SejdaRuntimeException") && value.metricValue == 1.0))
-assert(resultDITMetric.metricValues.exists(value => value.entityIdent.equals("org/sejda/model/exception/TaskCancelledException") && value.metricValue == 0.0))
-assert(resultDITMetric.metricValues.exists(value => value.entityIdent.equals("org/sejda/model/exception/TaskException") && value.metricValue == 7.0))
+assert(resultDITMetric.metricValues.exists(value => value.entityIdent.equals("org/sejda/model/exception/TaskCancelledException") && value.metricValue == 1.0))
+assert(resultDITMetric.metricValues.exists(value => value.entityIdent.equals("org/sejda/model/exception/TaskException") && value.metricValue == 1.0))
 assert(resultDITMetric.metricValues.exists(value => value.entityIdent.equals("org/sejda/model/exception/TaskExecutionException") && value.metricValue == 1.0))
-assert(resultDITMetric.metricValues.exists(value => value.entityIdent.equals("org/sejda/model/exception/TaskIOException") && value.metricValue == 2.0))
-assert(resultDITMetric.metricValues.exists(value => value.entityIdent.equals("org/sejda/model/exception/TaskNonLenientExecutionException") && value.metricValue == 0.0))
-assert(resultDITMetric.metricValues.exists(value => value.entityIdent.equals("org/sejda/model/exception/TaskNotFoundException") && value.metricValue == 0.0))
-assert(resultDITMetric.metricValues.exists(value => value.entityIdent.equals("org/sejda/model/exception/TaskOutputVisitException") && value.metricValue == 0.0))
-assert(resultDITMetric.metricValues.exists(value => value.entityIdent.equals("org/sejda/model/exception/TaskPermissionsException") && value.metricValue == 0.0))
-assert(resultDITMetric.metricValues.exists(value => value.entityIdent.equals("org/sejda/model/exception/TaskWrongPasswordException") && value.metricValue == 0.0))
-assert(resultDITMetric.metricValues.exists(value => value.entityIdent.equals("org/sejda/model/exception/UnsupportedTextException") && value.metricValue == 0.0))
+assert(resultDITMetric.metricValues.exists(value => value.entityIdent.equals("org/sejda/model/exception/TaskIOException") && value.metricValue == 1.0))
+assert(resultDITMetric.metricValues.exists(value => value.entityIdent.equals("org/sejda/model/exception/TaskNonLenientExecutionException") && value.metricValue == 1.0))
+assert(resultDITMetric.metricValues.exists(value => value.entityIdent.equals("org/sejda/model/exception/TaskNotFoundException") && value.metricValue == 1.0))
+assert(resultDITMetric.metricValues.exists(value => value.entityIdent.equals("org/sejda/model/exception/TaskOutputVisitException") && value.metricValue == 1.0))
+assert(resultDITMetric.metricValues.exists(value => value.entityIdent.equals("org/sejda/model/exception/TaskPermissionsException") && value.metricValue == 1.0))
+assert(resultDITMetric.metricValues.exists(value => value.entityIdent.equals("org/sejda/model/exception/TaskWrongPasswordException") && value.metricValue == 1.0))
+assert(resultDITMetric.metricValues.exists(value => value.entityIdent.equals("org/sejda/model/exception/UnsupportedTextException") && value.metricValue == 1.0))
 }
