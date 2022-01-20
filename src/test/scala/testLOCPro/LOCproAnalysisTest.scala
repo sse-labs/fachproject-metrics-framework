@@ -68,6 +68,26 @@ class LOCproAnalysisTest extends FlatSpec with Matchers{
     println(metricResult2.metricValues)
 
 
+
+    val fileToTest3 = new File(getClass.getResource("/demo/testVoid.jar").getPath)
+    val analysisToTest3 = new LOCproAnalysis()
+
+
+    val result3 = AnalysisTestUtils.runSingleFileAnalysis(analysisToTest3, fileToTest3, appConfig, Map.empty[Symbol, Any])
+
+    assert(result3.size == 1)
+
+    val metricResult3 = result3.head
+
+    assert(metricResult3.success)
+    assert(metricResult3.metricValues.nonEmpty)
+
+    assert(metricResult3.metricValues.exists(value => value.metricValue == 13.0))
+
+
+
+
+
   }
 
 

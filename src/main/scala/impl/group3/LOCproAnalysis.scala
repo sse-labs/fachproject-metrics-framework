@@ -26,7 +26,14 @@ class LOCproAnalysis extends SingleFileAnalysis{
         c.methodsWithBody.foreach(
           m =>
             if (m.body.exists(_.lineNumberTable.nonEmpty)) {
-              lineCounter = lineCounter + m.body.get.lineNumberTable.get.lineNumbers.size + 1
+
+              if(m.returnType != null){
+
+                lineCounter = lineCounter + m.body.get.lineNumberTable.get.lineNumbers.size + 1
+              }
+
+              else lineCounter = lineCounter + m.body.get.lineNumberTable.get.lineNumbers.size
+
             }
         )
       }
