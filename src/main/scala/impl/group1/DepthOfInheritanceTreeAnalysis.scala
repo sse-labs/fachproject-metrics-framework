@@ -1,13 +1,11 @@
 package org.tud.sse.metrics
 package impl.group1
 
-import org.opalj.br.analyses.Project
 import analysis.{MetricValue, SingleFileAnalysis}
-import org.opalj.br.ObjectType
-import org.tud.sse.metrics.analysis.SingleFileAnalysis
-import org.tud.sse.metrics.input.CliParser.OptionMap
+import input.CliParser.OptionMap
 
-import java.io.File
+import org.opalj.br.analyses.Project
+
 import java.net.URL
 import scala.collection.mutable.ListBuffer
 import scala.util.Try
