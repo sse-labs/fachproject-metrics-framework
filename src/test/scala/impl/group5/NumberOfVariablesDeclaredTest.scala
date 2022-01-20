@@ -39,7 +39,7 @@ class NumberOfVariablesDeclaredTest extends FlatSpec with Matchers{
 
     val resultDemoOnlyMethods = AnalysisTestUtils.runSingleFileAnalysis(analysisToTest, fileToTestDemo, appConfig, Map(Symbol("no-class") -> true))
     val metricsResultDemoOnlyMethods = resultDemoOnlyMethods.head
-    //Konstruktor variablen werden hier nicht gezählt, zählt Konstruktor als methode?
+
     assert(metricsResultDemoOnlyMethods.metricValues.exists(value => value.entityIdent.equals("Anzahl von lokalen Variablen in allen Methoden von testclass") && value.metricValue == 13.0))
     assert(metricsResultDemoOnlyMethods.metricValues.exists(value => value.entityIdent.equals("Anzahl lokaler Variablen in java.lang.String testclass.welcome(java.lang.String)") && value.metricValue == 2.0))
 
@@ -58,7 +58,7 @@ class NumberOfVariablesDeclaredTest extends FlatSpec with Matchers{
 
     val resultDemoWrongOptions = AnalysisTestUtils.runSingleFileAnalysis(analysisToTest, fileToTestDemo, appConfig, Map(Symbol("no-class") -> true, Symbol("no-method") -> true))
     val metricsResultDemoWrongOptions = resultDemoWrongOptions.head
-    assert(!metricsResultDemoWrongOptions.metricValues.exists(value => value.entityIdent.equals("Anzahl von Klassenvariablen in testclass") && value.metricValue == 17.0))
+    assert(metricsResultDemoWrongOptions.metricValues.exists(value => value.entityIdent.equals("Anzahl von Klassenvariablen in testclass") && value.metricValue == 3.0))
 
     //Undefined
     val resultDemoUndefinedVariables = AnalysisTestUtils.runSingleFileAnalysis(analysisToTest, fileToTestDemo, appConfig, Map(Symbol("undefined-variables") -> true))
@@ -71,8 +71,51 @@ class NumberOfVariablesDeclaredTest extends FlatSpec with Matchers{
 
     val resultDemoUndefinedVariablesOnlyClass = AnalysisTestUtils.runSingleFileAnalysis(analysisToTest, fileToTestDemo, appConfig, Map(Symbol("undefined-variables") -> true,Symbol("no-method") -> true))
     val metricsResultDemoUndefinedVariablesOnlyClass = resultDemoUndefinedVariablesOnlyClass.head
-    assert(!metricsResultDemoUndefinedVariablesOnlyClass.metricValues.exists(value => value.entityIdent.equals("Anzahl von Klassenvariablen in testclassUndev") && value.metricValue == 1.0))
+    assert(metricsResultDemoUndefinedVariablesOnlyClass.metricValues.exists(value => value.entityIdent.equals("Anzahl von Klassenvariablen in testclassUndev") && value.metricValue == 5.0))
 
+
+    val fileToTest1 = new File(getClass.getResource("/group5/pdfbox-2.0.24.jar").getPath)
+    val resultPdf = AnalysisTestUtils.runSingleFileAnalysis(analysisToTest, fileToTest1, appConfig, Map.empty[Symbol, Any])
+    val metricResultPdf = resultPdf.head
+    assert(metricResultPdf.metricValues.exists(value => value.entityIdent.equals("Anzahl von lokalen Variablen in allen Methoden von org/apache/pdfbox/pdmodel/graphics/shading/PDShadingType1") && value.metricValue == 7.0))
+    assert(metricResultPdf.metricValues.exists(value => value.entityIdent.equals("Anzahl lokaler Variablen in java.awt.geom.Rectangle2D org.apache.pdfbox.pdmodel.graphics.shading.PDMeshBasedShadingType.getBounds(java.awt.geom.AffineTransform,org.apache.pdfbox.util.Matrix,int)") && value.metricValue == 6.0))
+    assert(metricResultPdf.metricValues.exists(value => value.entityIdent.equals("Ungenutzte Field in der Klasse org/apache/pdfbox/pdmodel/documentinterchange/logicalstructure/PDStructureTreeRoot") && value.metricValue == 1.0))
+    assert(metricResultPdf.metricValues.exists(value => value.entityIdent.equals("void org.apache.pdfbox.cos.UnmodifiableCOSDictionary.setBoolean(java.lang.String,boolean)Anzahl nicht benuzte Methoden Argumente:") && value.metricValue == 3.0))
+    assert(metricResultPdf.metricValues.exists(value => value.entityIdent.equals("Anzahl von Klassenvariablen in org/apache/pdfbox/cos/COSInteger") && value.metricValue == 11.0))
+    assert(metricResultPdf.metricValues.exists(value => value.entityIdent.equals("Ungenutzte Field in der Klasse org/apache/pdfbox/pdmodel/interactive/form/PDRadioButton") && value.metricValue == 1.0))
+
+    val resultPdfIncompatibleOptions = AnalysisTestUtils.runSingleFileAnalysis(analysisToTest, fileToTest1, appConfig, Map(Symbol("no-class") -> true, Symbol("no-method") -> true))
+    //Falls back to default options since they would return no results at all
+    val metricResultPdfIncompatibleOptions = resultPdfIncompatibleOptions.head
+    assert(metricResultPdfIncompatibleOptions.metricValues.exists(value => value.entityIdent.equals("Anzahl von lokalen Variablen in allen Methoden von org/apache/pdfbox/pdmodel/graphics/shading/PDShadingType1") && value.metricValue == 7.0))
+    assert(metricResultPdfIncompatibleOptions.metricValues.exists(value => value.entityIdent.equals("Anzahl lokaler Variablen in java.awt.geom.Rectangle2D org.apache.pdfbox.pdmodel.graphics.shading.PDMeshBasedShadingType.getBounds(java.awt.geom.AffineTransform,org.apache.pdfbox.util.Matrix,int)") && value.metricValue == 6.0))
+    assert(metricResultPdfIncompatibleOptions.metricValues.exists(value => value.entityIdent.equals("Ungenutzte Field in der Klasse org/apache/pdfbox/pdmodel/documentinterchange/logicalstructure/PDStructureTreeRoot") && value.metricValue == 1.0))
+    assert(metricResultPdfIncompatibleOptions.metricValues.exists(value => value.entityIdent.equals("void org.apache.pdfbox.cos.UnmodifiableCOSDictionary.setBoolean(java.lang.String,boolean)Anzahl nicht benuzte Methoden Argumente:") && value.metricValue == 3.0))
+    assert(metricResultPdfIncompatibleOptions.metricValues.exists(value => value.entityIdent.equals("Anzahl von Klassenvariablen in org/apache/pdfbox/cos/COSInteger") && value.metricValue == 11.0))
+
+
+    val resultPdfNoMethods = AnalysisTestUtils.runSingleFileAnalysis(analysisToTest, fileToTest1, appConfig, Map(Symbol("no-method") -> true))
+    val metricResultPdfNoMethods = resultPdfNoMethods.head
+
+    assert(!metricResultPdfNoMethods.metricValues.exists(value => value.entityIdent.equals("Anzahl von lokalen Variablen in allen Methoden von org/apache/pdfbox/pdmodel/graphics/shading/PDShadingType1") && value.metricValue == 7.0))
+    assert(!metricResultPdfNoMethods.metricValues.exists(value => value.entityIdent.equals("Anzahl lokaler Variablen in java.awt.geom.Rectangle2D org.apache.pdfbox.pdmodel.graphics.shading.PDMeshBasedShadingType.getBounds(java.awt.geom.AffineTransform,org.apache.pdfbox.util.Matrix,int)") && value.metricValue == 6.0))
+    assert(metricResultPdfNoMethods.metricValues.exists(value => value.entityIdent.equals("Ungenutzte Field in der Klasse org/apache/pdfbox/pdmodel/documentinterchange/logicalstructure/PDStructureTreeRoot") && value.metricValue == 1.0))
+    assert(metricResultPdfNoMethods.metricValues.exists(value => value.entityIdent.equals("void org.apache.pdfbox.cos.UnmodifiableCOSDictionary.setBoolean(java.lang.String,boolean)Anzahl nicht benuzte Methoden Argumente:") && value.metricValue == 3.0))
+    assert(metricResultPdfNoMethods.metricValues.exists(value => value.entityIdent.equals("Anzahl von Klassenvariablen in org/apache/pdfbox/cos/COSInteger") && value.metricValue == 11.0))
+
+
+
+    val resultPdfOnlyMethods = AnalysisTestUtils.runSingleFileAnalysis(analysisToTest, fileToTest1, appConfig, Map(Symbol("no-class") -> true))
+    val metricsResultPdfOnlyMethods = resultPdfOnlyMethods.head
+
+    assert(!metricsResultPdfOnlyMethods.metricValues.exists(value => value.entityIdent.equals("Anzahl von Klassenvariablen in org/apache/pdfbox/cos/COSInteger") && value.metricValue == 11.0))
+    assert(metricResultPdf.metricValues.exists(value => value.entityIdent.equals("Anzahl von lokalen Variablen in allen Methoden von org/apache/pdfbox/pdmodel/graphics/shading/PDShadingType1") && value.metricValue == 7.0))
+
+
+    val resultPdfNoUnusedFields = AnalysisTestUtils.runSingleFileAnalysis(analysisToTest, fileToTest1, appConfig, Map(Symbol("no-unusedfield") -> true))
+    val metricsResultNoUnusedField = resultPdfNoUnusedFields.head
+
+    assert(!metricsResultNoUnusedField.metricValues.exists(value => value.entityIdent.equals("Ungenutzte Field in der Klasse org/apache/pdfbox/pdmodel/interactive/form/PDRadioButton") && value.metricValue == 1.0))
 
 
 
@@ -88,12 +131,13 @@ class NumberOfVariablesDeclaredTest extends FlatSpec with Matchers{
 
     val resultH2 = AnalysisTestUtils.runSingleFileAnalysis(analysisToTest, fileToTest2, appConfig, Map.empty[Symbol, Any])
     val metricResultH2 = resultH2.head
-    assert(!metricResultH2.metricValues.exists(value => value.entityIdent.equals("Anzahl lokaler Variablen in boolean org.h2.index.Index.mayHaveNullDuplicates(org.h2.result.SearchRow)") && value.metricValue == 5.0))
-    assert(!metricResultH2.metricValues.exists(value => value.entityIdent.equals("Anzahl lokaler Variablen in java.lang.String org.h2.jdbc.JdbcConnection.translateSQLImpl(java.lang.String)") && value.metricValue == 6.0))
-    assert(!metricResultH2.metricValues.exists(value => value.entityIdent.equals("Anzahl lokaler Variablen in void org.h2.server.TcpServer.shutdown(java.lang.String,java.lang.String,boolean,boolean)") && value.metricValue == 7.0))
-    assert(!metricResultH2.metricValues.exists(value => value.entityIdent.equals("Anzahl von Klassenvariablen in org/h2/engine/Setting") && value.metricValue == 14.0))
+    //h2 doesn't supply local variable tables so all options relying on this return 0, a error message is given in console
+    assert(metricResultH2.metricValues.exists(value => value.entityIdent.equals("Anzahl lokaler Variablen in boolean org.h2.index.Index.mayHaveNullDuplicates(org.h2.result.SearchRow)") && value.metricValue == 0.0))
+    assert(metricResultH2.metricValues.exists(value => value.entityIdent.equals("Anzahl von Klassenvariablen in org/h2/util/geometry/EWKBUtils") && value.metricValue == 3.0))
+    assert(metricResultH2.metricValues.exists(value => value.entityIdent.equals("Anzahl von Klassenvariablen in org/h2/command/ddl/AlterTableAddConstraint") && value.metricValue == 17.0))
+    assert(metricResultH2.metricValues.exists(value => value.entityIdent.equals("Anzahl von Klassenvariablen in org/h2/engine/Setting") && value.metricValue == 2.0))
 
-    val resultH2ClassOnly = AnalysisTestUtils.runSingleFileAnalysis(analysisToTest, fileToTest2, appConfig, Map.empty[Symbol, Any])
+
 
 
 
