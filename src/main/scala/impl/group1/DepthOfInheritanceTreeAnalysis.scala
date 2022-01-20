@@ -1,0 +1,28 @@
+package org.tud.sse.metrics
+package impl.group1
+
+import org.opalj.br.analyses.Project
+import analysis.{MetricValue, SingleFileAnalysis}
+import org.opalj.br.ObjectType
+import org.tud.sse.metrics.analysis.SingleFileAnalysis
+import org.tud.sse.metrics.input.CliParser.OptionMap
+
+import java.io.File
+import java.net.URL
+import scala.collection.mutable.ListBuffer
+import scala.util.Try
+
+
+class DepthOfInheritanceTreeAnalysis extends SingleFileAnalysis {
+
+override def analyzeProject(project: Project[URL], customOptions: OptionMap): Try[Iterable[MetricValue]] = Try {
+val list = new ListBuffer[MetricValue]()
+project.allProjectClassFiles.foreach(c => {
+val supertypes = project.classHierarchy.directSupertypes(c.thisType).size
+list += MetricValue(c.fqn, this.analysisName, supertypes)
+})
+list.toList
+}
+
+override def analysisName: String = "class.inheritancetree"
+}
