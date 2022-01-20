@@ -33,7 +33,7 @@ class NumberOfVariablesDeclaredAnalysis extends SingleFileAnalysis {
   private val noClassSymbol: Symbol = Symbol("no-class")
   private val noUnusedFields: Symbol = Symbol("no-unusedfield")
 
-//TODO Varaiblen werden doppelt gezählt.
+
   override def analyzeProject(project: Project[URL], customOptions: OptionMap): Try[Iterable[MetricValue]] = Try {
 
     var noMethod = customOptions.contains(noMethodSymbol)
@@ -42,7 +42,7 @@ class NumberOfVariablesDeclaredAnalysis extends SingleFileAnalysis {
 
     val rlist = new ListBuffer[MetricValue]()
     if (noMethod && noClass) {
-      log.warn("Nur Methodenvariablen und keine Methodenvaraiblen können nicht zusammen ausgewählt werden. Das Ergebnis wird mit Standart Optionen ausgegeben.")
+      log.warn("Nur Methodenvariablen und keine Methodenvariablen können nicht zusammen ausgewählt werden. Das Ergebnis wird mit Standart Optionen ausgegeben.")
       noMethod = false
       noClass = false
     }
@@ -101,6 +101,7 @@ class NumberOfVariablesDeclaredAnalysis extends SingleFileAnalysis {
               }
             }
             var temporaryFieldVariables = 0
+            //Check if we get the localVariableTable
             if(localVariableTable.isEmpty) log.warn("Die Metrik braucht die Infos der localVariableTable, um korrekt zu arbeiten")
             if (fieldList.nonEmpty) temporaryFieldVariables = fieldList.size
             if (localVariableTable.nonEmpty) {
@@ -110,7 +111,7 @@ class NumberOfVariablesDeclaredAnalysis extends SingleFileAnalysis {
                 if (y.name == "this") {
                   thisIndex = 1
                 })
-
+              //Gathering info for current Method and sum of all
               numberOfMethodVariables = numberOfMethodVariables + localVariableTable.get.size
               temporaryMethodVariables = localVariableTable.get.size
               temporaryMethodVariables -= thisIndex
