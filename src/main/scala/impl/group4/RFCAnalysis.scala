@@ -15,6 +15,8 @@ import scala.util.Try
  */
 class RFCAnalysis extends ClassFileAnalysis {
 
+  private val countPublicMethodsOnlySymbol: Symbol = Symbol("count-public-only")
+
   /**
    * Calculates the value of the RFC Metric by adding the number of methods in the class to the number of method invocations in each method
    *
@@ -25,8 +27,12 @@ class RFCAnalysis extends ClassFileAnalysis {
    * @return Try[Iterable[MetricValue]]  object holding the intermediate result, if successful.
    */
   override def analyzeClassFile(classFile: ClassFile, project: Project[URL], customOptions: OptionMap): Try[Iterable[MetricValue]] = Try {
-    var rfc = classFile.methods.length
+    val onlyCountPublicMethods = customOptions.contains(countPublicMethodsOnlySymbol)
+    var rfc = 0
     classFile.methods.foreach(m=> {
+      if((!onlyCountPublicMethods & m.isPrivate)||(m.isPublic) ){
+        rfc=rfc+1
+      }
       if(m.body.isDefined) m.body.get.instructions.foreach(i => {
         if(i!=null) if (i.isMethodInvocationInstruction) rfc = rfc + 1
       })
