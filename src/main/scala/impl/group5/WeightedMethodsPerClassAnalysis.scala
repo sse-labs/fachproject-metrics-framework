@@ -12,41 +12,46 @@ import java.net.URL
 import scala.collection.mutable.ListBuffer
 import scala.util.Try
 
-class WeightedMethodsPerClassAnalysis extends ClassFileAnalysis{
+class WeightedMethodsPerClassAnalysis extends SingleFileAnalysis{
 
 
-  override def analyzeClassFile(classFile: ClassFile, project: Project[URL], customOptions: OptionMap): Try[Iterable[MetricValue]] = Try {
+  override def analyzeProject(project: Project[URL], customOptions: OptionMap): Try[Iterable[MetricValue]] = Try {
 
-
-    val methods = classFile.methodsWithBody
-    var WMC = 0
+    val classes = project.allProjectClassFiles
+    var WMCProjectSum = 0
+    val classesCount = classes.size
     val rlist = new ListBuffer[MetricValue]()
-    while (methods.hasNext) {
-      val method = methods.next()
-      val body = method.body
-      //McAbe complexity von Gruppe 4
-      var e = 0
-      var n = 0
-      body.get.instructions.foreach { instruction =>
-        Try {
-          if (instruction.isCompoundConditionalBranchInstruction) {
-            e = e + instruction.asCompoundConditionalBranchInstruction.jumpOffsets.size
+
+    for ( classFile <-  classes) {
+      val methods = classFile.methodsWithBody
+      var WMC = 0
+
+      while (methods.hasNext) {
+        val method = methods.next()
+        val body = method.body
+        //McAbe complexity von Gruppe 4
+        var e = 0
+        var n = 0
+        body.get.instructions.foreach { instruction =>
+          Try {
+            if (instruction.isCompoundConditionalBranchInstruction) e = e + instruction.asCompoundConditionalBranchInstruction.jumpOffsets.size
+            else if (instruction.isSimpleConditionalBranchInstruction) e = e + 2
+            else if (!instruction.isReturnInstruction) e = e + 1
+            n = n + 1
           }
-          else if (instruction.isSimpleConditionalBranchInstruction) {
-            e = e + 2
-          }
-          else {
-            if (!instruction.isReturnInstruction) e = e + 1
-          }
-          n = n + 1
         }
+        //Complexity for current method
+        val complexity = e - n + 2
+        WMC = WMC + complexity
+
       }
-      //Complexity for current method
-      val complexity = e - n + 2
-      WMC = WMC + complexity
+      WMCProjectSum = WMCProjectSum + WMC
+      rlist += MetricValue("WMC von " + classFile.thisType.fqn, this.analysisName, WMC)
 
     }
-    rlist += MetricValue("WMC von "+classFile.thisType.fqn, this.analysisName, WMC)
+    rlist += MetricValue("WMC von dem kompletten Projekt: ",this.analysisName, WMCProjectSum)
+    val WMCAverage = WMCProjectSum/classesCount
+    rlist += MetricValue("WMC Durschnitt von allen Projekt Klassen: ",this.analysisName, WMCAverage)
 
 
   }
