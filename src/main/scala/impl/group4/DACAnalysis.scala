@@ -9,6 +9,7 @@ import org.opalj.br.analyses.Project
 
 import java.net.URL
 import scala.util.Try
+import scala.collection.mutable.ListBuffer
 
 /**
  * DACAnalysis implements the DAC metric as described in https://ieeexplore.ieee.org/document/748920
@@ -27,8 +28,12 @@ class DACAnalysis extends ClassFileAnalysis {
    */
   override def analyzeClassFile(classFile: ClassFile, project: Project[URL], customOptions: OptionMap): Try[Iterable[MetricValue]] = Try {
     var metric = 0
+    var classes = new ListBuffer[String]()
     classFile.fields.foreach(f=>{
-      if (f.fieldType.isReferenceType) metric=metric+1
+      if (f.fieldType.isReferenceType & !classes.contains(f.asField.fieldType.toString)) {
+        classes.append(f.asField.fieldType.toString)
+        metric = metric + 1
+      }
     })
     List(MetricValue(classFile.fqn, "class.dac", metric))
   }
