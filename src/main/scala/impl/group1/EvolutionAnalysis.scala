@@ -25,8 +25,9 @@ class EvolutionAnalysis(jarDir: File) extends MultiFileAnalysis[(Double,Double,D
 
   var previousFile: String = ""
   var currentFile: String = ""
-  var ext_evo: Boolean = true
-  var int_evo: Boolean = true
+  var ext_evo: Boolean = false
+  var int_evo: Boolean = false
+  var originalMetric: Boolean = false
   var previousPackages: scala.collection.Set[String] = Set[String]()
 
   var currentClassesInPackages: Map[String, Set[String]] = Map[String, Set[String]]()
@@ -34,6 +35,7 @@ class EvolutionAnalysis(jarDir: File) extends MultiFileAnalysis[(Double,Double,D
   var roundCounter: Integer = 0
 
   private val sym_ext_evo: Symbol = Symbol("ext_evo")
+  private val sym_original: Symbol = Symbol("original")
   private val sym_int_evo: Symbol = Symbol("int_evo")
 
   /**
@@ -47,9 +49,14 @@ class EvolutionAnalysis(jarDir: File) extends MultiFileAnalysis[(Double,Double,D
    * divided by the total amount of classes in the project (@currentNumberOfClasses).
    *
    * internal Evolution def:
-   * internal Evolution is the number of Packages that exist in both versions and interact with newly added Packages
-   * divided by the count of Packages as union from both jars. (!!!! in the paper the definition is an intersection, slight change here)
-   * (interaction between packages is calculated on class level)
+   *
+   * Internal Evolution Original (as intended in the Paper)
+   * internal Evolution Original counts if a maintainedPackage interacts with newly added Packages (counts only once)
+   * divided by the count of maintained Packages
+   *
+   * Internal Evolution without original flag
+   * internal Evolution is the number of Packages that exist in both versions (maintainedPackages) and interact with newly added Packages
+   * divided by the count of possible interactions between maintained Packages and new Packages
    *
    * Evolution is (internal Evolution + external Evolution) divided by 2
    *
@@ -61,7 +68,7 @@ class EvolutionAnalysis(jarDir: File) extends MultiFileAnalysis[(Double,Double,D
    *                      of the analysis via command-line
    *                      ext_evo: optional Output for external Evolution
    *                      int_evo: optional Output for internal Evolution
-   *
+   *                      original: optional Output for the Internal Evolution Metric as intended in the Paper
    * @return Try[T] object holding the intermediate result, if successful
    *         Try[T] = Try[(Double,Double,Double,String)]
    *         Double: Evolution
@@ -86,6 +93,7 @@ class EvolutionAnalysis(jarDir: File) extends MultiFileAnalysis[(Double,Double,D
 
     ext_evo = customOptions.contains(sym_ext_evo)
     int_evo = customOptions.contains(sym_int_evo)
+    originalMetric = customOptions.contains(sym_original)
 
     // external Evolution
     // external evolution is the number of classes in newly introduced packages (@numberOfClassesInNewPackages)
@@ -110,11 +118,6 @@ class EvolutionAnalysis(jarDir: File) extends MultiFileAnalysis[(Double,Double,D
       // calculate the Number of Classes for the new Packages
       log.info(s"entityIdent: $entityIdent")
 
-      // internal Evolution
-      // internal Evolution is the number of Packages that exist in both versions and interact with newly added Packages
-      // divided by the count of Packages as union from both jars.
-      // interaction between packages is calculated on class level
-
       // calculate the denominator (maintainedPackagesSize) Number of Packages that exist in previous and current Project.
       val maintainedPackages = currentPackages.intersect(previousPackages)
       val allPackages = currentPackages.union(previousPackages)
@@ -129,43 +132,91 @@ class EvolutionAnalysis(jarDir: File) extends MultiFileAnalysis[(Double,Double,D
       // iterate through classes for each Package to check if there are interactions with the classes from new Packages
       // interaction between two classes is detected on the class level
 
-      for(maintainedPackage <- maintainedPackages){
-        for(newPackage <- newPackages){
-          val classesFromMaintainedPackage = project.classesPerPackage(maintainedPackage)
+      // Internal Evolution Original
+      // internal Evolution Original counts if a maintainedPackage interacts with newly added Packages (counts only once)
+      // divided by the count of maintained Packages
+      if(originalMetric){
+        for(maintainedPackage <- maintainedPackages){
           breakable{
-            val classesFromNewPackage = project.classesPerPackage(newPackage)
-            for(maintainedClass <- classesFromMaintainedPackage){
-              for(newClass <- classesFromNewPackage){
-                maintainedClass.methods.foreach(m =>
-                  if(m.body.isDefined){
-                    // interaction between two classes
-                    if(m.body.get.instructions.mkString.contains(newClass.thisType.simpleName)){
-                      log.info(s"maintainedPackageName: $maintainedPackage")
-                      log.info(s"newPackageName: $newPackage")
-                      log.info(s"Klasseninteraktion von maintainedClass: ${maintainedClass.thisType.fqn} und newClass: ${newClass.thisType.fqn}")
-                      interactionsWithNewPackages = interactionsWithNewPackages +1
-                      // if there is an interaction between the maintained and new Package it will be counted once and the rest of the iterations
-                      // for the package can be skipped, interaction between the packages is only counted once.
-                      break
+          for(newPackage <- newPackages){
+            val classesFromMaintainedPackage = project.classesPerPackage(maintainedPackage)
+              val classesFromNewPackage = project.classesPerPackage(newPackage)
+              for(maintainedClass <- classesFromMaintainedPackage){
+                for(newClass <- classesFromNewPackage){
+                  maintainedClass.methods.foreach(m =>
+                    if(m.body.isDefined){
+                      // interaction between two classes
+                      if(m.body.get.instructions.mkString.contains(newClass.thisType.simpleName)){
+                        log.info(s"maintainedPackageName: $maintainedPackage")
+                        log.info(s"newPackageName: $newPackage")
+                        log.info(s"Klasseninteraktion von maintainedClass: ${maintainedClass.thisType.fqn} und newClass: ${newClass.thisType.fqn}")
+                        interactionsWithNewPackages = interactionsWithNewPackages +1
+                        // if there is an interaction between the maintained and new Package it will be counted once and the rest of the iterations
+                        // for the package can be skipped, interaction between the packages is only counted once.
+                        break
+                      }
                     }
-                  }
                   )
+                }
               }
             }
           }
         }
+
+        log.info(s"Maintained Packages interactions with new Packages: $interactionsWithNewPackages")
+
+        if(maintainedPackagesSize!=0){
+          internalEvolution = interactionsWithNewPackages/maintainedPackages.size
+        }
+      }
+      // Internal Evolution
+      // internal Evolution is the number of Packages that exist in both versions and interact with newly added Packages
+      // divided by the count of possible interactions between maintained Packages and new Packages
+        else{
+        for(maintainedPackage <- maintainedPackages){
+          for(newPackage <- newPackages){
+            val classesFromMaintainedPackage = project.classesPerPackage(maintainedPackage)
+            breakable{
+              val classesFromNewPackage = project.classesPerPackage(newPackage)
+              for(maintainedClass <- classesFromMaintainedPackage){
+                for(newClass <- classesFromNewPackage){
+                  maintainedClass.methods.foreach(m =>
+                    if(m.body.isDefined){
+                      // interaction between two classes
+                      if(m.body.get.instructions.mkString.contains(newClass.thisType.simpleName)){
+                        log.info(s"maintainedPackageName: $maintainedPackage")
+                        log.info(s"newPackageName: $newPackage")
+                        log.info(s"Klasseninteraktion von maintainedClass: ${maintainedClass.thisType.fqn} und newClass: ${newClass.thisType.fqn}")
+                        interactionsWithNewPackages = interactionsWithNewPackages +1
+                        // if there is an interaction between the maintained and new Package it will be counted once and the rest of the iterations
+                        // for the package can be skipped, interaction between the packages is only counted once.
+                        break
+                      }
+                    }
+                  )
+                }
+              }
+            }
+          }
+        }
+
+        log.info(s"Maintained Packages interactions with new Packages: $interactionsWithNewPackages")
+
+        if(maintainedPackagesSize!=0 && newPackages.nonEmpty){
+          internalEvolution = interactionsWithNewPackages/(maintainedPackages.size*newPackages.size)
+          log.info(s"maximalPossibleInteractionsWithNewPackages: ${maintainedPackages.size*newPackages.size}")
+        }
       }
 
-      log.info(s"Maintained Packages interactions with new Packages: $interactionsWithNewPackages")
 
-      if(maintainedPackagesSize!=0){
-        internalEvolution = interactionsWithNewPackages/allPackages.size
-      }
       log.info(s"internal Evolution: $internalEvolution")
+
     } else{
       log.info(s"inital Round!!!")
+      log.info(s"Original Metric is: ${originalMetric.toString}")
       log.info(s"Custom Option for external Evolution is: ${ext_evo.toString}")
       log.info(s"Custom Option for internal Evolution is: ${int_evo.toString}")
+
     }
 
     entityIdent = s"Difference between: $previousFile and $currentFile "
