@@ -15,7 +15,7 @@ class AVGFanInAnalysisTest extends FlatSpec with Matchers {
   "The AVGFanInAnalysis" must "calculate valid results for single JARs" in {
 
     val filesToTest = List(
-      new File(getClass.getResource("/group2/fanin/fanin.jar").getPath),
+      new File(getClass.getResource("/group2/fanin.jar").getPath),
       new File(getClass.getResource("/demo/utils-3.5-beta76.jar").getPath)
     )
     val analysisToTest = new AVGFanInAnalysis()
