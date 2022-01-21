@@ -21,6 +21,8 @@ class WeightedMethodsPerClassAnalysis extends SingleFileAnalysis{
     var WMCProjectSum = 0
     val classesCount = classes.size
     val rlist = new ListBuffer[MetricValue]()
+    var WMCMax = 0
+    var WMCMaxName = ""
 
     for ( classFile <-  classes) {
       val methods = classFile.methodsWithBody
@@ -45,10 +47,15 @@ class WeightedMethodsPerClassAnalysis extends SingleFileAnalysis{
         WMC = WMC + complexity
 
       }
+      if(WMC > WMCMax) {
+        WMCMax = WMC
+        WMCMaxName = classFile.fqn
+      }
       WMCProjectSum = WMCProjectSum + WMC
       rlist += MetricValue("WMC von " + classFile.thisType.fqn, this.analysisName, WMC)
 
     }
+    rlist += MetricValue("Höchster WMC Wert im Projekt ist in Klasse: "+WMCMaxName,this.analysisName,WMCMax)
     rlist += MetricValue("WMC von dem kompletten Projekt: ",this.analysisName, WMCProjectSum)
     val WMCAverage = WMCProjectSum/classesCount
     rlist += MetricValue("WMC Durschnitt von allen Projekt Klassen: ",this.analysisName, WMCAverage)
