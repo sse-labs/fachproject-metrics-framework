@@ -9,13 +9,13 @@ import org.opalj.br.analyses.Project
 
 import java.net.URL
 import scala.util.Try
-
+// ClassFileAnalysis is used to determine the inheritance tree between classes
 class DepthOfInheritanceTreeAnalysis extends ClassFileAnalysis {
 
 /**
- *  Counts the direct supertypes for each class. Based on the Definition from "A Metrics Suite for Object Oriented Design" from Chidamber and Kemerer.
+ *  Counts supertypes for each class. Based on the Definition from "A Metrics Suite for Object Oriented Design" from Chidamber and Kemerer.
  *  "Definition: DIT = maximum length from node to root of the inheritance tree"
- *
+ * @author feho243
  * @param classFile class that the DIT metric is calculated from
  * @param project jar project file that includes the classes for the metric
  * @param customOptions custom settings for the Analysis (not needed for this Metric)
