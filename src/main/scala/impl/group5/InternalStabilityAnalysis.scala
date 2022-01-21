@@ -115,14 +115,34 @@ class InternalStabilityAnalysis(jarDir: File) extends MultiFileAnalysis[(Double,
         })
       })
       //Vereinigung Berechnen
+      var betrag = 0
       workPreviousPackage.foreach(Package =>{
         Package._2.foreach(list =>
         {
+          workCurrentPackage.get(Package._1).foreach(rlist => rlist.foreach(listC =>{
+            if(listC._1.equals(list._1)&&listC._2.equals(list._2)&&listC._3.equals(list._3))
+              {
+                betrag +=1
+              }
+          }))
+
+          })
 
 
-        })
+
       })
+      println(betrag)
+      var betragAdd = 0
+      workCurrentPackage.foreach(Package => {betragAdd+=Package._2.size})
 
+      var betragRemove = 0
+      workPreviousPackage.foreach(Package => {betragRemove+=Package._2.size})
+      //Todo Behebe Rechnenungsfehler
+      val PrelA = 1- (betrag/betragAdd)
+      val PrelR = 1-(betrag/betragRemove)
+      val sum = (PrelA+PrelR)/2
+      val IS = sum/betrag
+      println(IS)
 
     }
 
