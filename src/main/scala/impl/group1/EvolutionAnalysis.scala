@@ -55,7 +55,7 @@ class EvolutionAnalysis(jarDir: File) extends MultiFileAnalysis[(Double,Double,D
    * divided by the count of maintained Packages
    *
    * Internal Evolution without original flag
-   * internal Evolution is the number of Packages that exist in both versions (maintainedPackages) and interact with newly added Packages
+   * internal Evolution counts the interactions between maintained Packages and new Packages.
    * divided by the count of possible interactions between maintained Packages and new Packages
    *
    * Evolution is (internal Evolution + external Evolution) divided by 2
