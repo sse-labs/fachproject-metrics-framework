@@ -170,8 +170,8 @@ class EvolutionAnalysis(jarDir: File) extends MultiFileAnalysis[(Double,Double,D
         }
       }
       // Internal Evolution
-      // internal Evolution is the number of Packages that exist in both versions and interact with newly added Packages
-      // divided by the count of possible interactions between maintained Packages and new Packages
+      // internal Evolution counts the interactions between maintained Packages and new Packages.
+      // divided by the count of possible interactions between maintained Packages and new Packages.
         else{
         for(maintainedPackage <- maintainedPackages){
           for(newPackage <- newPackages){

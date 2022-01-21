@@ -109,6 +109,5 @@ class EvolutionAnalysisOriginalTest extends FlatSpec with Matchers{
     }
   }
 
-  resultsOriginal.foreach(item => println(item.metricValues))
 
 }
