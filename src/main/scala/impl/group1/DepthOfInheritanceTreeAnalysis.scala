@@ -22,7 +22,7 @@ class DepthOfInheritanceTreeAnalysis extends ClassFileAnalysis {
  * @return iterable MetricValue for all classes
  */
 override def analyzeClassFile(classFile: ClassFile, project: Project[URL], customOptions: OptionMap): Try[Iterable[MetricValue]] = Try{
-val supertypes = project.classHierarchy.directSupertypes(classFile.thisType).size
+val supertypes = project.classHierarchy.allSupertypes(classFile.thisType).size
 val className = classFile.thisType.fqn
 List(MetricValue(className,this.analysisName,supertypes))
 }
