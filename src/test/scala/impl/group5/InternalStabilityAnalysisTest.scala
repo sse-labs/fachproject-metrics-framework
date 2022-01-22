@@ -15,6 +15,12 @@ class InternalStabilityAnalysisTest extends FlatSpec with Matchers{
 
   val analysisToTest = new InternalStabilityAnalysis(filesToTest)
   val result  = AnalysisTestUtils.runMultiFileAnalysis(_ => analysisToTest,filesToTest,appConfig,Map.empty[Symbol, Any])
+
+
+
+  val filesToTestGson = new File(getClass.getResource("/group5/gson").getPath)
+  val analysisToTestGson = new InternalStabilityAnalysis(filesToTestGson)
+  val resultGson  = AnalysisTestUtils.runMultiFileAnalysis(_ => analysisToTestGson,filesToTestGson,appConfig,Map.empty[Symbol, Any])
   println("Bye")
 
 }
