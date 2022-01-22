@@ -92,7 +92,7 @@ import scala.util.Try
  *
  */
 
-class AverageNestingAnalysis extends ClassFileAnalysis {
+class AverageMaximumNestingAnalysis extends ClassFileAnalysis {
 
   private val onlyMeansSymbol: Symbol = Symbol("only-mean")
   private val onlyMediansSymbol: Symbol = Symbol("only-median")

@@ -7,12 +7,12 @@ import org.scalatest.{FlatSpec, Matchers}
 
 import java.io.File
 
-class AverageNestingTest extends FlatSpec with Matchers{
+class AverageMaximumNestingTest extends FlatSpec with Matchers{
 
   "The AverageNestingAnalysis" must "calculate valid results for single JARs" in {
 
     val fileToTest = new File(getClass.getResource("/group1/11-commons-collections-3.2.2.jar").getPath)
-    val analysisToTest = new AverageNestingAnalysis()
+    val analysisToTest = new AverageMaximumNestingAnalysis()
 
     val appConfig = new ApplicationConfiguration(inputFilePath = "", treatFilesAsLibrary = true, outFileOption = None,
       opalLoggingEnabled = false, batchModeEnabled = Some(false), excludedAnalysesNames = List(), includedAnalysesNames = List(),

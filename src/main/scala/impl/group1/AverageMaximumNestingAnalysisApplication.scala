@@ -4,9 +4,9 @@ package impl.group1
 import analysis.SingleFileAnalysis
 import application.SingleFileAnalysisApplication
 
-object AverageNestingAnalysisApplication extends SingleFileAnalysisApplication {
+object AverageMaximumNestingAnalysisApplication extends SingleFileAnalysisApplication {
 
   override protected val registeredAnalyses: Seq[SingleFileAnalysis] = Seq(
-    new AverageNestingAnalysis(),
+    new AverageMaximumNestingAnalysis(),
   )
 }
