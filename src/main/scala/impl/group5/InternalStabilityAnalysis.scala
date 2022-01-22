@@ -12,12 +12,15 @@ import java.net.URL
 import scala.collection.{Map, Set}
 import scala.collection.mutable.ListBuffer
 import scala.util.Try
+import scala.util.control.Breaks.{break, breakable}
 
 class InternalStabilityAnalysis(jarDir: File) extends MultiFileAnalysis[(Double, Double, Double, String)](jarDir) {
 
+  private val sym_all: Symbol = Symbol("all_value")
   var previousPackagesEdgePackages: Map[String, ListBuffer[(String,String,String)]] = Map[String, ListBuffer[(String,String,String)]]()
   var currentfile: String = ""
   var previousfile: String = ""
+  var all =false
 
   override def produceAnalysisResultForJAR(project: Project[URL], file: File,
                                            lastResult: Option[(Double, Double, Double, String)],
@@ -28,7 +31,10 @@ class InternalStabilityAnalysis(jarDir: File) extends MultiFileAnalysis[(Double,
 
   override def produceAnalysisResultForJAR(project: Project[URL], lastResult: Option[(Double, Double, Double, String)], customOptions: OptionMap): Try[(Double, Double, Double, String)] = {
 
-
+    all = customOptions.contains(sym_all)
+    var IS =0.0
+    var PrelA = 0.0
+    var PrelR = 0.0
     var currentPackagesEdgePackages: Map[String, ListBuffer[(String,String,String)]] = Map[String, ListBuffer[(String,String,String)]]()
     val currentPackage = project.classesPerPackage
     currentPackage.foreach(Package =>{
@@ -132,16 +138,86 @@ class InternalStabilityAnalysis(jarDir: File) extends MultiFileAnalysis[(Double,
 
       })
       println(betrag)
-      var betragAdd = 0
-      workCurrentPackage.foreach(Package => {betragAdd+=Package._2.size})
 
-      var betragRemove = 0
-      workPreviousPackage.foreach(Package => {betragRemove+=Package._2.size})
-      //Todo Behebe Rechnenungsfehler
-      val PrelA = 1- (betrag/betragAdd)
-      val PrelR = 1-(betrag/betragRemove)
+
+      //Berechne die einzelnen Werte der Relationship zwischen zwei Packages
+      workPreviousPackage.foreach(Package1 => {
+
+          var relSchnitt = 0.0
+
+          var sumP = 0.0
+          var sumC = 0.0
+          val p1p2PrevBuffer = collection.mutable.ListBuffer[(String,String,String)]()
+          val p1p2CurBuffer = collection.mutable.ListBuffer[(String,String,String)]()
+          val P2buffer = collection.mutable.ListBuffer[(String)]()
+          val list = Package1._2
+
+        //Berechne die Anzahl der Verbindunngen zwischen zwei Packages
+
+        //
+        list.foreach(elem => {
+            breakable {
+              if(P2buffer.contains(elem._3))break
+              list.foreach(elem2 =>
+                if (elem2._3.equals(elem._3)) {
+                  //Gefunden Elemente werden gespeichert
+                  p1p2PrevBuffer += elem2
+                  sumP +=1
+                }
+              )
+              P2buffer += elem._3
+            }
+          })
+        P2buffer.clear()
+          workCurrentPackage.get(Package1._1).foreach(list =>
+            list.foreach(elem =>
+              breakable {
+                if(P2buffer.contains(elem._3))break
+                list.foreach(elem2 =>
+                  if (elem2._3.equals(elem._3)) {
+                    //Gefunden Elemente werden gespeichert
+                    p1p2CurBuffer += elem2
+                    sumC += 1
+                  }
+                )
+                P2buffer += elem._3
+              }
+            )
+
+          )
+
+
+        //Berechne den Betrag der des Schnitts der in beiden Versionen vorhanden verbindungen
+        p1p2PrevBuffer.foreach(elem => p1p2CurBuffer.foreach(elem2 =>
+          if(elem._1.equals(elem2._1)&& elem._2.equals(elem2._2))
+            {
+                relSchnitt +=1
+            }
+          )
+        )
+
+
+
+
+
+        //Nach der Formel im Paper wird PRELa und PRELr berechnet
+          if(relSchnitt !=0) {
+            PrelA += 1 - (relSchnitt / sumC)
+            PrelR += 1 - (relSchnitt / sumP)
+          }
+
+
+
+
+
+      })
+
+
+
+      //Am Ende wird IS berechnet aus den PRELa und PRELr und den betrag aller Reletionships
       val sum = (PrelA+PrelR)/2
-      val IS = sum/betrag
+      IS = sum/betrag
+      println(PrelR+PrelA)
       println(IS)
 
     }
@@ -153,13 +229,33 @@ class InternalStabilityAnalysis(jarDir: File) extends MultiFileAnalysis[(Double,
     previousPackagesEdgePackages = currentPackagesEdgePackages
     var entity_ident: String = "Difference between: " + previousfile + " and " + currentfile
     previousfile =currentfile
-    Try(1.0, 2,3, entity_ident)
+    Try(IS, PrelR,PrelA, entity_ident)
   }
 
 
   override def produceMetricValues(): List[MetricsResult] = {
 
+    val stability = analysisResultsPerFile.values.map(_.get)
+      .toList
+      .map(value => MetricValue(value._4, "Internal_stability", value._1))
+    val removed = analysisResultsPerFile.values.map(_.get)
+      .toList
+      .map(value => MetricValue(value._4, "PREL_Remove", value._2))
+    val append = analysisResultsPerFile.values.map(_.get)
+      .toList
+      .map(value => MetricValue(value._4, "PREL_Append", value._3))
+
+
     val MetricsResultBuffer = collection.mutable.ListBuffer[MetricsResult]()
+    val valueMetrik = collection.mutable.ListBuffer[MetricValue]()
+
+    if(all) {
+      valueMetrik.appendAll(removed)
+      valueMetrik.appendAll(append)
+    }
+    valueMetrik.appendAll(stability)
+
+    MetricsResultBuffer.append(MetricsResult(analysisName, jarDir, success = true, metricValues = valueMetrik.toList))
 
 
 
