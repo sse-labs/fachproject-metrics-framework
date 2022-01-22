@@ -143,14 +143,14 @@ class InternalStabilityAnalysis(jarDir: File) extends MultiFileAnalysis[(Double,
       //Berechne die einzelnen Werte der Relationship zwischen zwei Packages
       workPreviousPackage.foreach(Package1 => {
 
-          var relSchnitt = 0.0
 
-          var sumP = 0.0
-          var sumC = 0.0
+
+
           val p1p2PrevBuffer = collection.mutable.ListBuffer[(String,String,String)]()
           val p1p2CurBuffer = collection.mutable.ListBuffer[(String,String,String)]()
           val P2buffer = collection.mutable.ListBuffer[(String)]()
           val list = Package1._2
+          val listCur = workCurrentPackage(Package1._1)
 
         //Berechne die Anzahl der Verbindunngen zwischen zwei Packages
 
@@ -158,6 +158,9 @@ class InternalStabilityAnalysis(jarDir: File) extends MultiFileAnalysis[(Double,
         list.foreach(elem => {
             breakable {
               if(P2buffer.contains(elem._3))break
+              var sumP = 0.0
+              var sumC = 0.0
+              var relSchnitt = 0.0
               list.foreach(elem2 =>
                 if (elem2._3.equals(elem._3)) {
                   //Gefunden Elemente werden gespeichert
@@ -165,46 +168,41 @@ class InternalStabilityAnalysis(jarDir: File) extends MultiFileAnalysis[(Double,
                   sumP +=1
                 }
               )
+
+              listCur.foreach(elem2 =>
+                if (elem2._3.equals(elem._3)) {
+                  //Gefunden Elemente werden gespeichert
+                  p1p2CurBuffer += elem2
+                  sumC += 1
+                }
+              )
               P2buffer += elem._3
+              //Berechne den Betrag der des Schnitts der in beiden Versionen vorhanden verbindungen
+              p1p2PrevBuffer.foreach(tuple => p1p2CurBuffer.foreach(elem2 =>
+                if(tuple._1.equals(elem2._1)&& tuple._2.equals(elem2._2))
+                {
+                  relSchnitt +=1
+                }
+                )
+              )
+
+
+
+
+
+              //Nach der Formel im Paper wird PRELa und PRELr berechnet
+              if(relSchnitt !=0) {
+                PrelA += 1 - (relSchnitt / sumC)
+                PrelR += 1 - (relSchnitt / sumP)
+              }
+              p1p2CurBuffer.clear()
+              p1p2PrevBuffer.clear()
             }
           })
-        P2buffer.clear()
-          workCurrentPackage.get(Package1._1).foreach(list =>
-            list.foreach(elem =>
-              breakable {
-                if(P2buffer.contains(elem._3))break
-                list.foreach(elem2 =>
-                  if (elem2._3.equals(elem._3)) {
-                    //Gefunden Elemente werden gespeichert
-                    p1p2CurBuffer += elem2
-                    sumC += 1
-                  }
-                )
-                P2buffer += elem._3
-              }
-            )
-
-          )
-
-
-        //Berechne den Betrag der des Schnitts der in beiden Versionen vorhanden verbindungen
-        p1p2PrevBuffer.foreach(elem => p1p2CurBuffer.foreach(elem2 =>
-          if(elem._1.equals(elem2._1)&& elem._2.equals(elem2._2))
-            {
-                relSchnitt +=1
-            }
-          )
-        )
 
 
 
 
-
-        //Nach der Formel im Paper wird PRELa und PRELr berechnet
-          if(relSchnitt !=0) {
-            PrelA += 1 - (relSchnitt / sumC)
-            PrelR += 1 - (relSchnitt / sumP)
-          }
 
 
 
@@ -217,7 +215,7 @@ class InternalStabilityAnalysis(jarDir: File) extends MultiFileAnalysis[(Double,
       //Am Ende wird IS berechnet aus den PRELa und PRELr und den betrag aller Reletionships
       val sum = (PrelA+PrelR)/2
       IS = sum/betrag
-      println(PrelR+PrelA)
+      //println(PrelR+PrelA)
       println(IS)
 
     }
