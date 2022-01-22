@@ -78,10 +78,12 @@ import scala.collection.mutable.ListBuffer
 import scala.util.Try
 
 /**
- * Die Klasse AverageNestingAnalysis stellt die Implementierung  der Metrik Average Nesting da.
- * Diese Metrik berechnet für jede Methode die Anzahl der in einander verschachtelten
- * if/else, switch und "loop" Kontrollstrukturen und gibt die durchschnittliche Schachteilungstiefe aus.
- * Es werden sowohl das arithmetische Mittel als auch der median der Schachtelungstiefe berechnet
+ * Die Klasse AverageNestingAnalysis stellt die Implementierung der Metrik AvgMaxNesting aus
+ * dem paper "Software Metrics as Indicators of Security Vulnerabilities"
+ * von Nádia Medeiros, Naghmeh Ivaki, Pedro Costa und Marco Vieira dar
+ * Diese Metrik berechnet für jede Methode die maximale Anzahl der in einander verschachtelten
+ * if/else, switch und "loop" Kontrollstrukturen und gibt die durchschnittliche maximale Schachteilungstiefe aus.
+ * Es werden sowohl das arithmetische Mittel als auch der median der maximalen Schachtelungstiefe berechnet
  *
  * Optional CLI argument:
  *  - --only-means Es wird nur das arithmetische Mittel maximalen Tiefen einer Klasse ausgegeben

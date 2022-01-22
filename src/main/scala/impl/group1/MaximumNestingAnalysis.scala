@@ -78,7 +78,9 @@ import scala.collection.mutable.ListBuffer
 import scala.util.Try
 
 /**
- * Die Klasse MaximumNestingAnalysis stellt die Implementierung  der Metrik Maximum Nesting da.
+ * Die Klasse MaximumNestingAnalysis stellt die Implementierung der Metrik Maximum Nesting (NEST) aus dem paper
+ * "An Empirical Evaluation of Fault-Proneness Models" von Giovanni Denaro und Mauro Pezze dar.
+ *
  * Diese Metrik berechnet für jede Methode die Anzahl der in einander verschachtelten
  * if/else, switch und "loop" Kontrollstrukturen und gibt die maximale Schachteilungstiefe aus.
  *
