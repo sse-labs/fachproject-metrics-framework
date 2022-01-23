@@ -52,7 +52,7 @@ class InternalStabilityAnalysis(jarDir: File) extends MultiFileAnalysis[(Double,
   override def produceAnalysisResultForJAR(project: Project[URL], file: File,
                                            lastResult: Option[(Double, Double, Double, String)],
                                            customOptions: OptionMap): Try[(Double, Double, Double, String)] = {
-    currentfile = file.toString
+    currentfile = file.getName
     produceAnalysisResultForJAR(project, lastResult, customOptions)
   }
 
@@ -290,6 +290,7 @@ class InternalStabilityAnalysis(jarDir: File) extends MultiFileAnalysis[(Double,
       //Am Ende wird IS berechnet aus den PRELa und PRELr und den betrag aller Reletionships
       val sum = (PrelA+PrelR)/2
       IS = sum/betrag
+
 
 
     }
