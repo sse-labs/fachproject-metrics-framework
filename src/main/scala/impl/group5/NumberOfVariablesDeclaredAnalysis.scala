@@ -102,7 +102,7 @@ class NumberOfVariablesDeclaredAnalysis extends SingleFileAnalysis {
               }
             }
             var temporaryFieldVariables = 0
-            //Check if we get the localVariableTable
+            //Check if we get the localVariableTable, all features using the table don't work if it isn't included
             if(localVariableTable.isEmpty) log.warn("Die Metrik braucht die Infos der localVariableTable, um korrekt zu arbeiten")
             if (fieldList.nonEmpty) temporaryFieldVariables = fieldList.size
             if (localVariableTable.nonEmpty) {
@@ -130,6 +130,7 @@ class NumberOfVariablesDeclaredAnalysis extends SingleFileAnalysis {
 
               rlist += MetricValue("Anzahl lokaler Variablen in " + m.fullyQualifiedSignature, this.analysisName, temporaryMethodVariables)
             }
+            //Counting unused variables in a methods local variable table
             if (localVariableTable.nonEmpty) {
               var unusedarguments = 0
               localVariableTable.get.foreach(y => {
@@ -154,7 +155,6 @@ class NumberOfVariablesDeclaredAnalysis extends SingleFileAnalysis {
         c.fields.foreach(field => {
           if(field.isPrivate)  privateFields.append(field)
         })
-
         var neverUsedField = 0
         privateFields.foreach(field => {
           if (!usedFields.exists(y => {
