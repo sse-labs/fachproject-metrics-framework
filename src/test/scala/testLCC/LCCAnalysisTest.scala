@@ -57,10 +57,11 @@ class LCCAnalysisTest extends FlatSpec with Matchers {
   val fileToTest3 = new File(getClass.getResource("/demo/empty.jar").getPath)
   val analysisToTest3 = new LCCAnalysis()
   val result3 = AnalysisTestUtils.runSingleFileAnalysis(analysisToTest3, fileToTest3, appConfig, Map.empty[Symbol, Any])
-  private val metricResult3 = result2.head
+  private val metricResult3 = result3.head
 
   assert(metricResult3.success)
   assert(metricResult3.metricValues.nonEmpty)
+  assert(metricResult3.metricValues.exists(value => value.entityIdent.equals("empty") && value.metricValue == 0.0))
 
 }
 
