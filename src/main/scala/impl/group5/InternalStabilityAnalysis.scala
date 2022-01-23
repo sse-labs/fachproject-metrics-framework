@@ -4,16 +4,31 @@ package impl.group5
 import analysis.{MetricValue, MetricsResult, MultiFileAnalysis}
 
 import org.opalj.br.analyses.Project
-import org.opalj.br.instructions.{INVOKEDYNAMIC, INVOKESTATIC, INVOKEVIRTUAL, InvocationInstruction}
-import org.tud.sse.metrics.input.CliParser.OptionMap
+import org.opalj.br.instructions.{INVOKESPECIAL, INVOKESTATIC, INVOKEVIRTUAL}
+import input.CliParser.OptionMap
+
+
 
 import java.io.File
 import java.net.URL
-import scala.collection.{Map, Set}
+import scala.collection.Map
 import scala.collection.mutable.ListBuffer
 import scala.util.Try
 import scala.util.control.Breaks.{break, breakable}
 
+/**
+ *
+ * Die Klasse stellt die Implementierung der Metrik Internal Stability da.
+ *
+ * Die Metrik Internal Stability zählt die Verbindungen zwischen zwei Packages. Ruft eine Klasse eine andere Klasse im
+ * anderen Package auf wird diese Verbindung gezählt. Wird diese mehrmals von der selben Klasse aufgerufen so werden diese aufrufe nicht gezählt.
+ *
+ * Eine Klasse im Package A kann mehre Verbindungen nach Package B haben aber jede Verbindung wird einmal gezählt, egal wie oft sie verwendet wird.
+ *
+ *
+ * Optional CLI argument:
+ *  --all_value: Gibt die aufsummierten Prel A und PrelR mit aus.
+ */
 class InternalStabilityAnalysis(jarDir: File) extends MultiFileAnalysis[(Double, Double, Double, String)](jarDir) {
 
   private val sym_all: Symbol = Symbol("all_value")
@@ -22,6 +37,18 @@ class InternalStabilityAnalysis(jarDir: File) extends MultiFileAnalysis[(Double,
   var previousfile: String = ""
   var all =false
 
+  /**
+   * Diese Funktion berechnet die Internal Stability nach dem Paper "Constantinou, E. and Stamelos, I. - Identifying evolution patterns: a metrics-based approach for external library reuse"
+   *
+   * @param project Fully initialized OPAL project representing the JAR file under analysis
+   * @param file The file object for which the OPAL project has been generated
+   * @param lastResult Option that contains the intermediate result for the previous JAR file, if
+   *                   available. This makes differential analyses easier to implement. This argument
+   *                   may be None if either this is the first JAR file or the last calculation failed.
+   * @param customOptions Custom analysis options taken from the CLI. Can be used to modify behavior
+   *                      of the analysis via command-line
+   *  @return Try[T] object holding the intermediate result, if successful
+   */
   override def produceAnalysisResultForJAR(project: Project[URL], file: File,
                                            lastResult: Option[(Double, Double, Double, String)],
                                            customOptions: OptionMap): Try[(Double, Double, Double, String)] = {
@@ -29,6 +56,17 @@ class InternalStabilityAnalysis(jarDir: File) extends MultiFileAnalysis[(Double,
     produceAnalysisResultForJAR(project, lastResult, customOptions)
   }
 
+  /**
+   * Diese Funktion berechnet die Internal Stability nach dem Paper "Constantinou, E. and Stamelos, I. - Identifying evolution patterns: a metrics-based approach for external library reuse"
+   *
+   * @param project Fully initialized OPAL project representing the JAR file under analysis
+   * @param lastResult Option that contains the intermediate result for the previous JAR file, if
+   *                   available. This makes differential analyses easier to implement. This argument
+   *                   may be None if either this is the first JAR file or the last calculation failed.
+   * @param customOptions Custom analysis options taken from the CLI. Can be used to modify behavior
+   *                      of the analysis via command-line
+   *  @return Try[T] object holding the intermediate result, if successful
+   */
   override def produceAnalysisResultForJAR(project: Project[URL], lastResult: Option[(Double, Double, Double, String)], customOptions: OptionMap): Try[(Double, Double, Double, String)] = {
 
     all = customOptions.contains(sym_all)
@@ -36,27 +74,36 @@ class InternalStabilityAnalysis(jarDir: File) extends MultiFileAnalysis[(Double,
     var PrelA = 0.0
     var PrelR = 0.0
     var currentPackagesEdgePackages: Map[String, ListBuffer[(String,String,String)]] = Map[String, ListBuffer[(String,String,String)]]()
-    val currentPackage = project.classesPerPackage
-    currentPackage.foreach(Package =>{
-      val currentEdgeClass = collection.mutable.ListBuffer[(String,String,String)]()
-      Package._2.foreach(classFile =>{
+    val projektPackage: scala.collection.Set[String] =project.projectPackages
 
+
+    projektPackage.foreach(packageName =>{
+      val currentEdgeClass = collection.mutable.ListBuffer[(String,String,String)]()
+      project.classesPerPackage(packageName).foreach(classFile =>{
+
+        //Prüft in allen Methoden nach Verbindungen zu anderen Packages und speichert die Ergebnisse ab
         classFile.methods.foreach(method =>{
           method.body match {
             case None =>
             case Some(code) =>code.instructions.foreach {
-              case invokestatic: INVOKESTATIC =>{
-                if(!invokestatic.declaringClass.packageName.equals(Package._1))
-                  {
-                    val tuple = (classFile.fqn,invokestatic.declaringClass.fqn,invokestatic.declaringClass.packageName)
-                    if(!currentEdgeClass.contains(tuple))
-                      {
-                        currentEdgeClass += tuple
-                      }
+              case invokestatic: INVOKESTATIC =>
+                if(!invokestatic.declaringClass.packageName.equals(packageName)) {
+                  val tuple = (classFile.fqn, invokestatic.declaringClass.fqn, invokestatic.declaringClass.packageName)
+                  if (!currentEdgeClass.contains(tuple)) {
+                    currentEdgeClass += tuple
                   }
-              }
-              case invokevirtual : INVOKEVIRTUAL => {
-                if(!invokevirtual.declaringClass.mostPreciseObjectType.packageName.equals(Package._1))
+                }
+
+              case invokespecial:INVOKESPECIAL =>
+                if(!invokespecial.declaringClass.packageName.equals(packageName)) {
+                  val tuple = (classFile.fqn, invokespecial.declaringClass.fqn, invokespecial.declaringClass.packageName)
+                  if (!currentEdgeClass.contains(tuple)) {
+                    currentEdgeClass += tuple
+                  }
+                }
+
+              case invokevirtual : INVOKEVIRTUAL =>
+                if(!invokevirtual.declaringClass.mostPreciseObjectType.packageName.equals(packageName))
                 {
                   val tuple = (classFile.fqn,invokevirtual.declaringClass.mostPreciseObjectType.fqn,invokevirtual.declaringClass.mostPreciseObjectType.packageName)
                   if(!currentEdgeClass.contains(tuple))
@@ -64,10 +111,7 @@ class InternalStabilityAnalysis(jarDir: File) extends MultiFileAnalysis[(Double,
                     currentEdgeClass += tuple
                   }
                 }
-              }
-              case invokedynamic: INVOKEDYNAMIC =>{
-                println(invokedynamic.name)
-              }
+
               case _=>
             }
 
@@ -75,22 +119,24 @@ class InternalStabilityAnalysis(jarDir: File) extends MultiFileAnalysis[(Double,
         })
 
       })
-        currentPackagesEdgePackages = currentPackagesEdgePackages + (Package._1 -> currentEdgeClass)
+        currentPackagesEdgePackages = currentPackagesEdgePackages + (packageName -> currentEdgeClass)
     })
+
+    //Vorbreitungen für die weiteren Berchnungen
     var workPreviousPackage: Map[String, ListBuffer[(String,String,String)]] = Map[String, ListBuffer[(String,String,String)]]()
     workPreviousPackage= previousPackagesEdgePackages
     var workCurrentPackage: Map[String, ListBuffer[(String,String,String)]] = Map[String, ListBuffer[(String,String,String)]]()
     workCurrentPackage= currentPackagesEdgePackages
-    val current = collection.mutable.ListBuffer[(String)]()
+    val current = collection.mutable.ListBuffer[String]()
     if(!previousfile.equals(""))
     {
 
-      //Filter zuerst die Entfernte oder neu hinzugefügt Package raus
+      //Filter zuerst die Entfernte oder neu hinzugefügt Package raus, da sie in der Metrik nicht betrachtet werden
         previousPackagesEdgePackages.keys.foreach(Package =>{
           if(!currentPackagesEdgePackages.contains(Package))
             {
-              workPreviousPackage-=(Package)
-              workCurrentPackage -=(Package)
+              workPreviousPackage-=Package
+              workCurrentPackage -=Package
               current += Package
 
             }
@@ -99,11 +145,12 @@ class InternalStabilityAnalysis(jarDir: File) extends MultiFileAnalysis[(Double,
           if(!previousPackagesEdgePackages.contains(Package))
           {
             current += Package
-            workPreviousPackage-=(Package)
-            workCurrentPackage -=(Package)
+            workPreviousPackage-=Package
+            workCurrentPackage -=Package
 
           }
         })
+      //Da alle Realtionships zu denn entfernten Package werden hier entfernt.
       current.foreach(Package =>{
         workPreviousPackage.foreach(Edges =>{
           Edges._2.foreach(list => {
@@ -123,23 +170,32 @@ class InternalStabilityAnalysis(jarDir: File) extends MultiFileAnalysis[(Double,
         })
       })
       //Vereinigung Berechnen
+      // Der Betrag zeigt an wie viele Verbindunen im Projekt gibt. Eine Realtionship hier ist wenn Package A eine Verbindung zu Package B hat.
       var betrag = 0
+
+      val packageReletionship = ListBuffer[(String,String)]()
       workPreviousPackage.foreach(Package =>{
-        Package._2.foreach(list =>
+        Package._2.foreach(elem1 =>
         {
-          workCurrentPackage.get(Package._1).foreach(rlist => rlist.foreach(listC =>{
-            if(listC._1.equals(list._1)&&listC._2.equals(list._2)&&listC._3.equals(list._3))
+          workCurrentPackage.get(Package._1).foreach(lists=> lists.foreach(elem2 =>{
+            val tuple = (Package._1,elem1._3)
+            if(!packageReletionship.contains(tuple))
               {
-                betrag +=1
+                if(elem1._3.equals(elem2._3))
+                  {
+                    packageReletionship +=tuple
+                  }
+
               }
-          }))
 
           })
-
+          )
+        })
 
 
       })
-      println(betrag)
+      betrag = packageReletionship.size
+
 
 
       //Berechne die einzelnen Werte der Relationship zwischen zwei Packages
@@ -150,7 +206,7 @@ class InternalStabilityAnalysis(jarDir: File) extends MultiFileAnalysis[(Double,
 
           val p1p2PrevBuffer = collection.mutable.ListBuffer[(String,String,String)]()
           val p1p2CurBuffer = collection.mutable.ListBuffer[(String,String,String)]()
-          val P2buffer = collection.mutable.ListBuffer[(String)]()
+          val P2buffer = collection.mutable.ListBuffer[String]()
           val list = Package1._2
           val listCur = workCurrentPackage(Package1._1)
 
@@ -162,7 +218,6 @@ class InternalStabilityAnalysis(jarDir: File) extends MultiFileAnalysis[(Double,
               if(P2buffer.contains(elem._3))break
               var sumP = 0.0
               var sumC = 0.0
-              var relSchnitt = 0.0
               list.foreach(elem2 =>
                 if (elem2._3.equals(elem._3)) {
                   //Gefunden Elemente werden gespeichert
@@ -179,15 +234,8 @@ class InternalStabilityAnalysis(jarDir: File) extends MultiFileAnalysis[(Double,
                 }
               )
               P2buffer += elem._3
-              //Berechne den Betrag der des Schnitts der in beiden Versionen vorhanden verbindungen
-/*              p1p2PrevBuffer.foreach(tuple => p1p2CurBuffer.foreach(elem2 =>
-                if(tuple._1.equals(elem2._1)&& tuple._2.equals(elem2._2))
-                {
-                  relSchnitt +=1
-                }
-                )
-              )*/
 
+              //Hier Werden die gleichen Elemente entfernt. Am Ende bleiben nur die Realtionships übrig die nicht in beiden Packages sind
               val workp1p2Cur = p1p2CurBuffer.clone()
               val workp1p2Prev = p1p2PrevBuffer.clone()
               p1p2PrevBuffer.foreach(tuple => workp1p2Cur.foreach(elem2 =>
@@ -223,7 +271,9 @@ class InternalStabilityAnalysis(jarDir: File) extends MultiFileAnalysis[(Double,
               p1p2CurBuffer.clear()
               p1p2PrevBuffer.clear()
             }
+
           })
+
 
 
 
@@ -238,10 +288,9 @@ class InternalStabilityAnalysis(jarDir: File) extends MultiFileAnalysis[(Double,
 
 
       //Am Ende wird IS berechnet aus den PRELa und PRELr und den betrag aller Reletionships
-      val sum = (PrelA+PrelR)
+      val sum = (PrelA+PrelR)/2
       IS = sum/betrag
-      //println(PrelR+PrelA)
-      println(IS)
+
 
     }
 
@@ -250,12 +299,16 @@ class InternalStabilityAnalysis(jarDir: File) extends MultiFileAnalysis[(Double,
 
 
     previousPackagesEdgePackages = currentPackagesEdgePackages
-    var entity_ident: String = "Difference between: " + previousfile + " and " + currentfile
+    val entity_ident: String = "Difference between: " + previousfile + " and " + currentfile
     previousfile =currentfile
     Try(IS, PrelR,PrelA, entity_ident)
   }
 
 
+  /**
+   * Erstellt die Ausgabe
+   *  @return List of JarFileMetricsResults
+   */
   override def produceMetricValues(): List[MetricsResult] = {
 
     val stability = analysisResultsPerFile.values.map(_.get)
@@ -287,6 +340,8 @@ class InternalStabilityAnalysis(jarDir: File) extends MultiFileAnalysis[(Double,
     MetricsResultBuffer.toList
   }
 
-
+  /**
+   * The name for this analysis implementation. Will be used to include and exclude analyses via CLI.
+   */
   override def analysisName: String = "Internal Stability"
 }
