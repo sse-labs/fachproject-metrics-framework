@@ -178,12 +178,30 @@ class InternalStabilityAnalysis(jarDir: File) extends MultiFileAnalysis[(Double,
               )
               P2buffer += elem._3
               //Berechne den Betrag der des Schnitts der in beiden Versionen vorhanden verbindungen
-              p1p2PrevBuffer.foreach(tuple => p1p2CurBuffer.foreach(elem2 =>
+/*              p1p2PrevBuffer.foreach(tuple => p1p2CurBuffer.foreach(elem2 =>
                 if(tuple._1.equals(elem2._1)&& tuple._2.equals(elem2._2))
                 {
                   relSchnitt +=1
                 }
                 )
+              )*/
+
+              val workp1p2Cur = p1p2CurBuffer.clone()
+              val workp1p2Prev = p1p2PrevBuffer.clone()
+              p1p2PrevBuffer.foreach(tuple => workp1p2Cur.foreach(elem2 =>
+                if(tuple._1.equals(elem2._1)&& tuple._2.equals(elem2._2))
+                {
+                  workp1p2Cur -= elem2
+                }
+              )
+              )
+
+              p1p2CurBuffer.foreach(tuple => workp1p2Prev.foreach(elem2 =>
+                if(tuple._1.equals(elem2._1)&& tuple._2.equals(elem2._2))
+                {
+                  workp1p2Prev -= elem2
+                }
+              )
               )
 
 
@@ -191,10 +209,10 @@ class InternalStabilityAnalysis(jarDir: File) extends MultiFileAnalysis[(Double,
 
 
               //Nach der Formel im Paper wird PRELa und PRELr berechnet
-              if(relSchnitt !=0) {
-                PrelA += 1 - (relSchnitt / sumC)
-                PrelR += 1 - (relSchnitt / sumP)
-              }
+
+                PrelA += 1 - (workp1p2Cur.size.toDouble / sumC)
+                PrelR += 1 - (workp1p2Prev.size.toDouble / sumP)
+
               p1p2CurBuffer.clear()
               p1p2PrevBuffer.clear()
             }
