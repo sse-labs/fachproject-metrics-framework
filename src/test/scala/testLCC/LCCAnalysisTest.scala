@@ -52,9 +52,15 @@ class LCCAnalysisTest extends FlatSpec with Matchers {
   assert(metricResult2.metricValues.nonEmpty)
 
   // util file has many different classes with different values, can not identify exact value of each
-  println(metricResult2.metricValues)
+  // reference test: println(metricResult2.metricValues)
 
+  val fileToTest3 = new File(getClass.getResource("/demo/empty.jar").getPath)
+  val analysisToTest3 = new LCCAnalysis()
+  val result3 = AnalysisTestUtils.runSingleFileAnalysis(analysisToTest3, fileToTest3, appConfig, Map.empty[Symbol, Any])
+  private val metricResult3 = result2.head
 
+  assert(metricResult3.success)
+  assert(metricResult3.metricValues.nonEmpty)
 
 }
 

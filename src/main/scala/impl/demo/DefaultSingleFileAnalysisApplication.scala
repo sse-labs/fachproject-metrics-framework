@@ -12,7 +12,7 @@ object DefaultSingleFileAnalysisApplication extends SingleFileAnalysisApplicatio
   override protected val registeredAnalyses: Seq[SingleFileAnalysis] = Seq(
 //    new NumberOfMethodsAnalysis(),
 //    new MethodSizeAnalysis(),
-      new LCCAnalysis()
-    new CBOAnalysis()
+      new LCCAnalysis(),
+      new CBOAnalysis()
   )
 }
