@@ -41,6 +41,7 @@ class NumberOfVariablesDeclaredAnalysis extends SingleFileAnalysis {
     val noUnUsedField = customOptions.contains(noUnusedFields)
 
     val rlist = new ListBuffer[MetricValue]()
+    //Error for incompatible custum options and fallback to default settings
     if (noMethod && noClass) {
       log.warn("Nur Methodenvariablen und keine Methodenvariablen können nicht zusammen ausgewählt werden. Das Ergebnis wird mit Standart Optionen ausgegeben.")
       noMethod = false
@@ -65,7 +66,7 @@ class NumberOfVariablesDeclaredAnalysis extends SingleFileAnalysis {
 
       numberOfClassVariables += c.fields.size
 
-
+      //Getting count of class variables through its field size
       if (!noClass) {
 
         rlist += MetricValue("Anzahl von Klassenvariablen in " +c.fqn,this.analysisName,c.fields.size )
@@ -118,6 +119,7 @@ class NumberOfVariablesDeclaredAnalysis extends SingleFileAnalysis {
               temporaryMethodVariablesSum = temporaryMethodVariablesSum + temporaryMethodVariables
 
             }
+            //Creating a list of used fields
             fieldList.foreach(field => {
               if (!usedFields.exists(y => {
                 y.name == field.name
@@ -145,8 +147,9 @@ class NumberOfVariablesDeclaredAnalysis extends SingleFileAnalysis {
         rlist += MetricValue("Anzahl von lokalen Variablen in allen Methoden von "+c.fqn, this.analysisName, temporaryMethodVariablesSum)
 
       }
+
+      //Checking if our unused Fields are private because we can't tell if public fields are used out of class
       if(!noUnUsedField) {
-        //Test for Unused Field only on private Fields
         val privateFields = new ListBuffer[Field]()
         c.fields.foreach(field => {
           if(field.isPrivate)  privateFields.append(field)
