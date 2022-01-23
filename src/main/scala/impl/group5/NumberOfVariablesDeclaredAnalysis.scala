@@ -82,14 +82,15 @@ class NumberOfVariablesDeclaredAnalysis extends SingleFileAnalysis {
             val localVariableTable = m.body.get.localVariableTable
             val loadIn = new ListBuffer[LoadLocalVariableInstruction]()
             val fieldList = new ListBuffer[FieldAccess]()
+            //Going through the method body to check for Variable load ins and Field access
             m.body match {
               case None =>
               case Some(code) => code.instructions.foreach {
-
+                //This checks for use of local variables (Method variables)
                 case loadInstruction: LoadLocalVariableInstruction => if (!loadIn.exists(y => {
                     y.lvIndex == loadInstruction.lvIndex
                   })) loadIn.append(loadInstruction)
-
+                //This checks for use of field variables (Class variables)
                 case fieldAccess: FieldAccess =>
                   if (!fieldList.exists(y => {
                     y.name == fieldAccess.name
