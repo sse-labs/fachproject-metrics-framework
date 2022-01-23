@@ -27,15 +27,25 @@ class DACAnalysis extends ClassFileAnalysis {
    * @return Try[Iterable[MetricValue]]  object holding the intermediate result, if successful.
    */
   override def analyzeClassFile(classFile: ClassFile, project: Project[URL], customOptions: OptionMap): Try[Iterable[MetricValue]] = Try {
-    var metric = 0
     var classes = new ListBuffer[String]()
+
+    //search for ADTs defined in fields
     classFile.fields.foreach(f=>{
       if (f.fieldType.isReferenceType & !classes.contains(f.asField.fieldType.toString)) {
         classes.append(f.asField.fieldType.toString)
-        metric = metric + 1
       }
     })
-    List(MetricValue(classFile.fqn, "class.dac", metric))
+
+    //search for ADTs defined in methods
+    classFile.methods.foreach(method=>Try{
+      method.body.get.localVariableTable.foreach(lv=>Try{
+        lv.foreach(v=> {
+          if (v.fieldType.isReferenceType & !classes.contains(v.fieldType.toString)) classes.append(v.fieldType.toString)
+        })
+      })
+    })
+
+    List(MetricValue(classFile.fqn, analysisName, classes.size))
   }
 
   override def analysisName: String = "dac"
