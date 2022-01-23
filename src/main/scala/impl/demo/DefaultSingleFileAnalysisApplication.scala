@@ -4,6 +4,8 @@ package impl.demo
 import analysis.SingleFileAnalysis
 import application.SingleFileAnalysisApplication
 import impl.group3.LCCAnalysis
+import impl.group3.CBOAnalysis
+
 
 object DefaultSingleFileAnalysisApplication extends SingleFileAnalysisApplication {
 
@@ -11,5 +13,6 @@ object DefaultSingleFileAnalysisApplication extends SingleFileAnalysisApplicatio
 //    new NumberOfMethodsAnalysis(),
 //    new MethodSizeAnalysis(),
       new LCCAnalysis()
+    new CBOAnalysis()
   )
 }
