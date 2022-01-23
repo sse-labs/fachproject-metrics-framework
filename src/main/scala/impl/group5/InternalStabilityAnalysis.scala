@@ -77,8 +77,10 @@ class InternalStabilityAnalysis(jarDir: File) extends MultiFileAnalysis[(Double,
       })
         currentPackagesEdgePackages = currentPackagesEdgePackages + (Package._1 -> currentEdgeClass)
     })
-    var workPreviousPackage = previousPackagesEdgePackages
-    var workCurrentPackage = currentPackagesEdgePackages
+    var workPreviousPackage: Map[String, ListBuffer[(String,String,String)]] = Map[String, ListBuffer[(String,String,String)]]()
+    workPreviousPackage= previousPackagesEdgePackages
+    var workCurrentPackage: Map[String, ListBuffer[(String,String,String)]] = Map[String, ListBuffer[(String,String,String)]]()
+    workCurrentPackage= currentPackagesEdgePackages
     val current = collection.mutable.ListBuffer[(String)]()
     if(!previousfile.equals(""))
     {
@@ -210,8 +212,13 @@ class InternalStabilityAnalysis(jarDir: File) extends MultiFileAnalysis[(Double,
 
               //Nach der Formel im Paper wird PRELa und PRELr berechnet
 
-                PrelA += 1 - (workp1p2Cur.size.toDouble / sumC)
+              if(sumC !=0.0)
+                {
+                  PrelA += 1 - (workp1p2Cur.size.toDouble / sumC)
+                }
+              if(sumP !=0.0) {
                 PrelR += 1 - (workp1p2Prev.size.toDouble / sumP)
+              }
 
               p1p2CurBuffer.clear()
               p1p2PrevBuffer.clear()
