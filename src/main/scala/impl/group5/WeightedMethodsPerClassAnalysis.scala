@@ -13,8 +13,6 @@ import scala.collection.mutable.ListBuffer
 import scala.util.Try
 
 class WeightedMethodsPerClassAnalysis extends SingleFileAnalysis{
-  //Makes use of group 4s Analysis directly, should be the default option once both are merged
-  //Requires manually copying MCCCAnalysis atm
   private val useCCSymbol: Symbol = Symbol("use-CC")
 
   /**
@@ -73,7 +71,7 @@ class WeightedMethodsPerClassAnalysis extends SingleFileAnalysis{
         }
 
       }
-      //Checking if new max value found
+      //Checkinf if new max value found
       if(WMC > WMCMax) {
         WMCMax = WMC
         WMCMaxName = classFile.fqn
