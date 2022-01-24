@@ -63,10 +63,9 @@ class NumberOfVariablesDeclaredAnalysis extends SingleFileAnalysis {
       //Liste mit Fields
       val usedFields = new ListBuffer[FieldAccess]()
 
-
+      //Getting count of class variables through its field size
       numberOfClassVariables += c.fields.size
 
-      //Getting count of class variables through its field size
       if (!noClass) {
 
         rlist += MetricValue("Anzahl von Klassenvariablen in " +c.fqn,this.analysisName,c.fields.size )
