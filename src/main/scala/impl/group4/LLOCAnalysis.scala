@@ -1,4 +1,4 @@
-package org.tud.sse.metrics
+package org.tud.sse.metrics 
 package impl.group4
 
 import analysis.{MethodAnalysis, MetricValue}
