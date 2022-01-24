@@ -21,20 +21,26 @@ class TCCAnalysis extends SingleFileAnalysis {
      * divided by the number of maximal possible number of connections between the visible methods of a class NP(C).
      */
     var resultList = List[MetricValue]()
-    project.allProjectClassFiles.foreach(  // search for all class files, check one by one, c represents one of them
+    project.allProjectClassFiles.foreach(
       c => {
         val className = c.thisType.simpleName
-        val publicMethodsCount = c.methods.filter(_.isPublic).size       //get the size of public methods
-        val numberOfPossibleConnections = (publicMethodsCount * (publicMethodsCount-1) / 2).toDouble   //definition
 
-        val allPublicMethods= c.methods.filter(_.isPublic)         // public method itself
+        /**
+         * calculating the number of possible connections
+         */
+        val publicMethodsCount = c.methods.filter(_.isPublic).size
+        val numberOfPossibleConnections = (publicMethodsCount * (publicMethodsCount-1) / 2).toDouble
+
+        /**
+         * calculating the number of directly connected method pairs
+         */
+        val allPublicMethods= c.methods.filter(_.isPublic)
 //        println("All public method's body: " + c.methods.filter(_.isPublic).foreach(m => println(m.body + "\n")))
-
         var directlyConnectedMethodPairs = 0.toDouble
-        if(c.fields.nonEmpty){           // according to definition, fields (variables) is what need to calculate for TCC
-          allPublicMethods.combinations(2).foreach(seq =>      //random combination(not repeated) of 2 methods
+        if(c.fields.nonEmpty && numberOfPossibleConnections!=0){
+          allPublicMethods.combinations(2).foreach(seq =>
               breakable{
-                c.fields.foreach(field =>              //also definition, check if 2 method using same field
+                c.fields.foreach(field =>
                   if(seq.forall( method => method.body.get.toString().contains(className.concat("." + field.name)))){
                     directlyConnectedMethodPairs = directlyConnectedMethodPairs + 1
   //                  println("sequence: " +seq + "\n" + "field: "+ className.concat("." + field.name + "\ncounter: " +directlyConnectedMethodPairs)) // for debugging
@@ -42,9 +48,16 @@ class TCCAnalysis extends SingleFileAnalysis {
                   }
                 )
               }
-          )    //below form calculates the final TCC result, and save the method pairs in list
+          )
+
+          /**
+           * calculating the final TCC result, and save the method pairs in list
+           */
           resultList = MetricValue(className, this.analysisName, directlyConnectedMethodPairs/numberOfPossibleConnections)::resultList
         }else {
+          /**
+           * in case there are no fields or public methods in a class, there will be 0 possible connections and that will be set as the TCC of the class
+           */
           resultList = MetricValue(className, this.analysisName, 0)::resultList
         }
       }
