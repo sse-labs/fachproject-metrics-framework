@@ -1,7 +1,6 @@
 package org.tud.sse.metrics
-package testCBO
+package impl.group3
 
-import impl.group3.CBOAnalysis
 import testutils.AnalysisTestUtils
 
 import org.scalatest.{FlatSpec, Matchers}
@@ -36,7 +35,7 @@ class CBOAnalysisTest extends FlatSpec with Matchers{
 
 
 
-    val fileToTest1 = new File(getClass.getResource("/demo/Animal.jar").getPath)
+    val fileToTest1 = new File(getClass.getResource("/group3/Animal.jar").getPath)
 
     val analysisToTest1 = new CBOAnalysis()
 

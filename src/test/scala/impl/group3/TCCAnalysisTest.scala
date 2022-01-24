@@ -1,15 +1,15 @@
 package org.tud.sse.metrics
-package testTCC
+package impl.group3
+
+import testutils.AnalysisTestUtils
 
 import org.scalatest.{FlatSpec, Matchers}
-import impl.group3.TCCAnalysis
-import testutils.AnalysisTestUtils
 
 import java.io.File
 
 class TCCAnalysisTest extends FlatSpec with Matchers{
   /** give path of the file being tested */
-  val fileToTest = new File(getClass.getResource("/demo/HelloWorld.jar").getPath)
+  val fileToTest = new File(getClass.getResource("/group3/HelloWorld.jar").getPath)
   val analysisToTest = new TCCAnalysis()
 
   val appConfig = new ApplicationConfiguration(inputFilePath = "", treatFilesAsLibrary = true, outFileOption = None,
@@ -30,7 +30,7 @@ class TCCAnalysisTest extends FlatSpec with Matchers{
 
   /** use 2nd file to test */
 
-  val fileToTest1 = new File(getClass.getResource("/demo/Hello1.jar").getPath)
+  val fileToTest1 = new File(getClass.getResource("/group3/Hello1.jar").getPath)
   val analysisToTest1 = new TCCAnalysis()
 
 
@@ -47,7 +47,7 @@ class TCCAnalysisTest extends FlatSpec with Matchers{
 
   /** use 3rd file to test, this project has no directly connected methods */
 
-  val fileToTest2 = new File(getClass.getResource("/demo/empty.jar").getPath)
+  val fileToTest2 = new File(getClass.getResource("/group3/empty.jar").getPath)
   val analysisToTest2 = new TCCAnalysis()
 
 
