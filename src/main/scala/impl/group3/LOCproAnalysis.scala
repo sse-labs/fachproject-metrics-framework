@@ -13,12 +13,10 @@ import scala.util.Try
 class LOCproAnalysis extends SingleFileAnalysis{
 
   /** calculates all class methods, from all line number table get each method body lines, then add 1 as method itself
-   * for void method which ist without return value will not add 1 (as in review suggested)*/
+   * for void method which ist without return value will not add 1 (as in review suggested)
+   *
+   */
   override def analyzeProject(project: Project[URL], customOptions: OptionMap): Try[Iterable[MetricValue]] = Try {
-
-   // log.info("Please implement the LOCpro metric here")
-
-    var metricsResult =  0.0
 
     var lineCounter = 0
 
@@ -41,9 +39,7 @@ class LOCproAnalysis extends SingleFileAnalysis{
 
     )
 
-    metricsResult = lineCounter
-
-    List(MetricValue("File: ", this.analysisName, metricsResult))
+    List(MetricValue("File: ", this.analysisName, lineCounter))
   }
 
   /**
