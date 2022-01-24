@@ -1,21 +1,20 @@
 package org.tud.sse.metrics
 package impl.group5
 
-
-import analysis.{MetricValue, SingleFileAnalysis}
-import impl.group4.MCCCAnalysis
+import analysis.{ClassFileAnalysis, MetricValue, SingleFileAnalysis}
 import input.CliParser.OptionMap
 
+import org.opalj.br.ClassFile
 import org.opalj.br.analyses.Project
+import org.opalj.br.instructions.{ALOAD, FieldAccess}
 
 import java.net.URL
 import scala.collection.mutable.ListBuffer
 import scala.util.Try
 
 class WeightedMethodsPerClassAnalysis extends SingleFileAnalysis{
-  //Makes use of group 4s Analysis directly, should be the default option once both are merged
-  //Requires manually copying MCCCAnalysis atm
-  private val useCCSymbol: Symbol = Symbol("use-CC")
+
+
 
   /**
    * Die Methode führt die Metrik WMC aus.
@@ -28,52 +27,37 @@ class WeightedMethodsPerClassAnalysis extends SingleFileAnalysis{
   override def analyzeProject(project: Project[URL], customOptions: OptionMap): Try[Iterable[MetricValue]] = Try {
 
     val classes = project.allProjectClassFiles
-    var WMCProjectSum = 0.0
+    var WMCProjectSum = 0
     val classesCount = classes.size
     val rlist = new ListBuffer[MetricValue]()
-    var WMCMax = 0.0
+    var WMCMax = 0
     var WMCMaxName = ""
-    val useCC = customOptions.contains(useCCSymbol)
-
-
-
 
     //Iterating over all classes in project
     for ( classFile <-  classes) {
       val methods = classFile.methodsWithBody
-      var WMC = 0.0
+      var WMC = 0
       //iterating over all methods in class
       while (methods.hasNext) {
-
         val method = methods.next()
-        //Get Value directly from Group4's metric
-        if(useCC) {
-          val CC = new MCCCAnalysis()
-          val methodCC = CC.analyzeMethod(method, project, Map.empty[Symbol, Any])
-          val methodCCMetric = methodCC.get.head.metricValue
-          WMC = WMC + methodCCMetric
-        }else{
-          //Otherwise use the copied code to ensure functionality in case CC is not merged in time
-
-          val body = method.body
-          //McAbe complexity von Gruppe 4
-          var e = 0
-          var n = 0
-          body.get.instructions.foreach { instruction =>
-            Try {
-              if (instruction.isCompoundConditionalBranchInstruction) e = e + instruction.asCompoundConditionalBranchInstruction.jumpOffsets.size
-              else if (instruction.isSimpleConditionalBranchInstruction) e = e + 2
-              else if (!instruction.isReturnInstruction) e = e + 1
-              n = n + 1
-            }
+        val body = method.body
+        //McAbe complexity von Gruppe 4
+        var e = 0
+        var n = 0
+        body.get.instructions.foreach { instruction =>
+          Try {
+            if (instruction.isCompoundConditionalBranchInstruction) e = e + instruction.asCompoundConditionalBranchInstruction.jumpOffsets.size
+            else if (instruction.isSimpleConditionalBranchInstruction) e = e + 2
+            else if (!instruction.isReturnInstruction) e = e + 1
+            n = n + 1
           }
-          //Complexity for current method
-          val complexity = e - n + 2
-          WMC = WMC + complexity
         }
+        //Complexity for current method
+        val complexity = e - n + 2
+        WMC = WMC + complexity
 
       }
-      //Checking if new max value found
+      //Checkinf if new max value found
       if(WMC > WMCMax) {
         WMCMax = WMC
         WMCMaxName = classFile.fqn
