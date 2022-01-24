@@ -257,7 +257,6 @@ class InternalStabilityAnalysis(jarDir: File) extends MultiFileAnalysis[(Double,
 
 
 
-
               //Nach der Formel im Paper wird PRELa und PRELr berechnet
 
               if(sumC !=0.0)
@@ -273,19 +272,7 @@ class InternalStabilityAnalysis(jarDir: File) extends MultiFileAnalysis[(Double,
             }
 
           })
-
-
-
-
-
-
-
-
-
-
       })
-
-
 
       //Am Ende wird IS berechnet aus den PRELa und PRELr und den betrag aller Reletionships
       val sum = (PrelA+PrelR)/2
