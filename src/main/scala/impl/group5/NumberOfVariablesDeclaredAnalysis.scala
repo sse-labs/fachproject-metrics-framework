@@ -41,6 +41,7 @@ class NumberOfVariablesDeclaredAnalysis extends SingleFileAnalysis {
     val noUnUsedField = customOptions.contains(noUnusedFields)
 
     val rlist = new ListBuffer[MetricValue]()
+    //Error for incompatible custum options and fallback to default settings
     if (noMethod && noClass) {
       log.warn("Nur Methodenvariablen und keine Methodenvariablen können nicht zusammen ausgewählt werden. Das Ergebnis wird mit Standart Optionen ausgegeben.")
       noMethod = false
@@ -62,9 +63,8 @@ class NumberOfVariablesDeclaredAnalysis extends SingleFileAnalysis {
       //Liste mit Fields
       val usedFields = new ListBuffer[FieldAccess]()
 
-
+      //Getting count of class variables through its field size
       numberOfClassVariables += c.fields.size
-
 
       if (!noClass) {
 
@@ -81,14 +81,15 @@ class NumberOfVariablesDeclaredAnalysis extends SingleFileAnalysis {
             val localVariableTable = m.body.get.localVariableTable
             val loadIn = new ListBuffer[LoadLocalVariableInstruction]()
             val fieldList = new ListBuffer[FieldAccess]()
+            //Going through the method body to check for Variable load ins and Field access
             m.body match {
               case None =>
               case Some(code) => code.instructions.foreach {
-
+                //This checks for use of local variables (Method variables)
                 case loadInstruction: LoadLocalVariableInstruction => if (!loadIn.exists(y => {
                     y.lvIndex == loadInstruction.lvIndex
                   })) loadIn.append(loadInstruction)
-
+                //This checks for use of field variables (Class variables)
                 case fieldAccess: FieldAccess =>
                   if (!fieldList.exists(y => {
                     y.name == fieldAccess.name
@@ -101,7 +102,7 @@ class NumberOfVariablesDeclaredAnalysis extends SingleFileAnalysis {
               }
             }
             var temporaryFieldVariables = 0
-            //Check if we get the localVariableTable
+            //Check if we get the localVariableTable, all features using the table don't work if it isn't included
             if(localVariableTable.isEmpty) log.warn("Die Metrik braucht die Infos der localVariableTable, um korrekt zu arbeiten")
             if (fieldList.nonEmpty) temporaryFieldVariables = fieldList.size
             if (localVariableTable.nonEmpty) {
@@ -118,6 +119,7 @@ class NumberOfVariablesDeclaredAnalysis extends SingleFileAnalysis {
               temporaryMethodVariablesSum = temporaryMethodVariablesSum + temporaryMethodVariables
 
             }
+            //Creating a list of used fields
             fieldList.foreach(field => {
               if (!usedFields.exists(y => {
                 y.name == field.name
@@ -128,6 +130,7 @@ class NumberOfVariablesDeclaredAnalysis extends SingleFileAnalysis {
 
               rlist += MetricValue("Anzahl lokaler Variablen in " + m.fullyQualifiedSignature, this.analysisName, temporaryMethodVariables)
             }
+            //Counting unused variables in a methods local variable table
             if (localVariableTable.nonEmpty) {
               var unusedarguments = 0
               localVariableTable.get.foreach(y => {
@@ -145,13 +148,13 @@ class NumberOfVariablesDeclaredAnalysis extends SingleFileAnalysis {
         rlist += MetricValue("Anzahl von lokalen Variablen in allen Methoden von "+c.fqn, this.analysisName, temporaryMethodVariablesSum)
 
       }
+
+      //Checking if our unused Fields are private because we can't tell if public fields are used out of class
       if(!noUnUsedField) {
-        //Test for Unused Field only on private Fields
         val privateFields = new ListBuffer[Field]()
         c.fields.foreach(field => {
           if(field.isPrivate)  privateFields.append(field)
         })
-
         var neverUsedField = 0
         privateFields.foreach(field => {
           if (!usedFields.exists(y => {
