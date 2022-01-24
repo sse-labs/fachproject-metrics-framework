@@ -8,7 +8,7 @@ import impl.group5.{NumberOfLoopsAnalysis, NumberOfVariablesDeclaredAnalysis, We
 import org.tud.sse.metrics.impl.group1.{AverageMaximumNestingAnalysis, DepthOfInheritanceTreeAnalysis, MaximumNestingAnalysis, NumberOfChildrenAnalysis}
 import impl.group2.{AVGFanInAnalysis, AVGFanOutAnalysis, ClassesReferencedAnalysis, FanInAnalysis, LackOfCohesionInMethodsAnalysis, NumberOfFunctionsAnalysis}
 
-import org.tud.sse.metrics.impl.group3.{CBOAnalysis, LCCAnalysis, TCCAnalysis}
+import org.tud.sse.metrics.impl.group3.{CBOAnalysis, LCCAnalysis, LOCproAnalysis, TCCAnalysis}
 import org.tud.sse.metrics.impl.group4.{LOCphyAnalysis, MCCCAnalysis}
 
 object SingleFileAnalysisApplication extends SingleFileAnalysisApplication {
@@ -23,6 +23,7 @@ object SingleFileAnalysisApplication extends SingleFileAnalysisApplication {
     new TCCAnalysis(),
     new LCCAnalysis(),
     new CBOAnalysis(),
+    new LOCproAnalysis(),
     new NumberOfChildrenAnalysis(),
     new MaximumNestingAnalysis(),
     new DepthOfInheritanceTreeAnalysis(),
