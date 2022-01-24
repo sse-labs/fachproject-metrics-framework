@@ -48,7 +48,7 @@ abstract class MultiFileAnalysis[T](directory: File) extends NamedAnalysis {
    */
   final def analyzeNext(project:Project[URL], file: File, customOptions: OptionMap): Try[T] = {
 
-    val result = produceAnalysisResultForJAR(project, file, lastResult, customOptions)
+    val result = produceAnalysisResultForJAR(project, lastResult, customOptions)
 
     analysisResultsPerFile.put(file, result)
 
@@ -70,28 +70,7 @@ abstract class MultiFileAnalysis[T](directory: File) extends NamedAnalysis {
    *                      of the analysis via command-line
    * @return Try[T] object holding the intermediate result, if successful
    */
-  protected def produceAnalysisResultForJAR(project: Project[URL], lastResult: Option[T],
-                                            customOptions: OptionMap): Try[T]
-
-
-  /**
-   * This method is called to execute the analysis for each JAR file individually.
-   * It calculates the intermediate results of type Try[T], which will be stored in the
-   * analysisResultsPerFile map automatically by the enclosing analyzeNext call.
-   *
-   * @param project Fully initialized OPAL project representing the JAR file under analysis
-   * @param file The file object for which the OPAL project has been generated
-   * @param lastResult Option that contains the intermediate result for the previous JAR file, if
-   *                   available. This makes differential analyses easier to implement. This argument
-   *                   may be None if either this is the first JAR file or the last calculation failed.
-   * @param customOptions Custom analysis options taken from the CLI. Can be used to modify behavior
-   *                      of the analysis via command-line
-   * @return Try[T] object holding the intermediate result, if successful
-   */
-  protected def produceAnalysisResultForJAR(project: Project[URL], file: File,
-                                            lastResult: Option[T], customOptions: OptionMap): Try[T] = {
-    produceAnalysisResultForJAR(project, lastResult, customOptions)
-  }
+  protected def produceAnalysisResultForJAR(project: Project[URL], lastResult: Option[T], customOptions: OptionMap): Try[T]
 
   /**
    * This method is called after all individual intermediate results have been calculated. It may
