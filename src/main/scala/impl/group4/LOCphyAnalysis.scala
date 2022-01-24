@@ -12,6 +12,10 @@ import scala.util.Try
 
 /**
  * LOCphy simply counts the lines of source code (including line break characters and comments) of a method.
+ *
+ * Note: this analysis uses the line number table instead of the source code, that's why it's not possible to count
+ * empty lines and comments at the beginning of the source code (and at the end for non void type methods)
+ *
  */
 
 class LOCphyAnalysis extends MethodAnalysis{
@@ -28,8 +32,13 @@ class LOCphyAnalysis extends MethodAnalysis{
   override def analyzeMethod(m: Method, project: Project[URL], customOptions: OptionMap): Try[Iterable[MetricValue]] = Try {
     if (project.isProjectType(m.classFile.thisType) && m.body.isDefined && m.body.get.lineNumberTable.isDefined && m.body.get.lineNumberTable.get.lineNumbers.size>=1) {
       val table= m.body.get.lineNumberTable.get.lineNumbers
+
       if (table.size>1) List(MetricValue(m.fullyQualifiedSignature, analysisName, table.last.lineNumber - table.head.lineNumber))
-      else List(MetricValue(m.fullyQualifiedSignature, analysisName, 1))
+      else {
+        // default constructors have 0 locphy
+        if (m.returnType.isVoidType) List(MetricValue(m.fullyQualifiedSignature, analysisName, 0))
+        else List(MetricValue(m.fullyQualifiedSignature, analysisName, 1))
+      }
     }
     else List.empty}
 
