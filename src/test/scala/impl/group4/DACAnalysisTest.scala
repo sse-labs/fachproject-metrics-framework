@@ -38,19 +38,19 @@ class DACAnalysisTest extends FreeSpec with Matchers{
 
     "test project classes" in {
       //class with no attributes
-      assert(metricResult1.metricValues.exists(value => value.entityIdent.equals("com/group4/sample/LOCphyAnalysisTest") && value.metricValue == 2.0))
+      assert(metricResult1.metricValues.exists(value => value.entityIdent.equals("com/group4/sample/LOCphyAnalysisTest") && value.metricValue == 1.0))
       //class with primitive/reference type attributes
-      assert(metricResult1.metricValues.exists(value => value.entityIdent.equals("com/group4/sample/DACAnalysisTest3") && value.metricValue == 5.0))
+      assert(metricResult1.metricValues.exists(value => value.entityIdent.equals("com/group4/sample/DACAnalysisTest3") && value.metricValue == 4.0))
       //class with primitive type attributes only
-      assert(metricResult1.metricValues.exists(value => value.entityIdent.equals("com/group4/sample/DACAnalysisTest2") && value.metricValue == 1.0))
+      assert(metricResult1.metricValues.exists(value => value.entityIdent.equals("com/group4/sample/DACAnalysisTest2") && value.metricValue == 0.0))
       //class with reference type attributes only
-        assert(metricResult1.metricValues.exists(value => value.entityIdent.equals("com/group4/sample/DACAnalysisTest1") && value.metricValue == 5.0))
+        assert(metricResult1.metricValues.exists(value => value.entityIdent.equals("com/group4/sample/DACAnalysisTest1") && value.metricValue == 4.0))
     }
 
     "classes from renjin.utils" in {
-      assert(metricResult2.metricValues.exists(value => value.entityIdent.equals("org/renjin/utils/Interactive") && value.metricValue == 3.0))
-      assert(metricResult2.metricValues.exists(value => value.entityIdent.equals("org/renjin/utils/DoublePrinter") && value.metricValue == 6.0))
-      assert(metricResult2.metricValues.exists(value => value.entityIdent.equals("org/renjin/utils/LogicalPrinter") && value.metricValue == 4.0))
+      assert(metricResult2.metricValues.exists(value => value.entityIdent.equals("org/renjin/utils/Interactive") && value.metricValue == 2.0))
+      assert(metricResult2.metricValues.exists(value => value.entityIdent.equals("org/renjin/utils/DoublePrinter") && value.metricValue == 5.0))
+      assert(metricResult2.metricValues.exists(value => value.entityIdent.equals("org/renjin/utils/LogicalPrinter") && value.metricValue == 3.0))
       assert(metricResult2.metricValues.exists(value => value.entityIdent.equals("org/renjin/utils/Tables$1") && value.metricValue == 0.0))
     }
 

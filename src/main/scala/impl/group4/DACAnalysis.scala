@@ -38,12 +38,16 @@ class DACAnalysis extends ClassFileAnalysis {
 
     //search for ADTs defined in methods
     classFile.methods.foreach(method=>Try{
-      method.body.get.localVariableTable.foreach(lv=>Try{
-        lv.foreach(v=> {
-          if (v.fieldType.isReferenceType & !classes.contains(v.fieldType.toString)) classes.append(v.fieldType.toString)
+        method.body.get.localVariableTable.foreach(lv => Try {
+          lv.foreach(v => {
+            if (v.fieldType.isReferenceType & !classes.contains(v.fieldType.toString) & method.classFile.thisType.toString()!=v.fieldType.toString) {
+              classes.append(v.fieldType.toString)
+            }
+          })
         })
-      })
-    })
+    }
+
+    )
 
     List(MetricValue(classFile.fqn, analysisName, classes.size))
   }
