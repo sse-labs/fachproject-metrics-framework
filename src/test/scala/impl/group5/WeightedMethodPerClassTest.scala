@@ -39,7 +39,7 @@ class WeightedMethodPerClassTest extends FlatSpec with Matchers{
   assert(metricsResultGson.metricValues.exists(value => value.entityIdent.equals("WMC von com/google/gson/FieldNamingStrategy") && value.metricValue == 0.0))
 
 
-  private val resultGrp4 = AnalysisTestUtils.runSingleFileAnalysis(analysisToTest, fileToTestGrp4, appConfig, Map(Symbol("use-CC") -> true))
+  private val resultGrp4 = AnalysisTestUtils.runSingleFileAnalysis(analysisToTest, fileToTestGrp4, appConfig, Map.empty[Symbol, Any])
   private val metricsResultGrp4 = resultGrp4.head
   assert(metricsResultGrp4.metricValues.exists(value => value.entityIdent.equals("WMC von com/group4/sample/MCCCAnalysisTest") && value.metricValue == 12.0))
   assert(metricsResultGrp4.metricValues.exists(value => value.entityIdent.equals("WMC von com/group4/sample/RFCAnalysisTest1") && value.metricValue == 4.0))
@@ -50,7 +50,7 @@ class WeightedMethodPerClassTest extends FlatSpec with Matchers{
   assert(metricsResultGrp4.metricValues.exists(value => value.entityIdent.equals("WMC von com/group4/sample/DACAnalysisTest3") && value.metricValue == 2.0))
   assert(metricsResultGrp4.metricValues.exists(value => value.entityIdent.equals("WMC von com/group4/sample/LOCphyAnalysisTest") && value.metricValue == 7.0))
   assert(metricsResultGrp4.metricValues.exists(value => value.entityIdent.equals("WMC von dem kompletten Projekt: ") && value.metricValue == 35.0))
-  assert(metricsResultGrp4.metricValues.exists(value => value.entityIdent.equals("WMC Durschnitt von allen Projekt Klassen: ") && value.metricValue == 4.375))
+  assert(metricsResultGrp4.metricValues.exists(value => value.entityIdent.equals("WMC Durschnitt von allen Projekt Klassen: ") && value.metricValue == 4.0))
   assert(metricsResultGrp4.metricValues.exists(value => value.entityIdent.equals("Höchster WMC Wert im Projekt ist in Klasse: com/group4/sample/MCCCAnalysisTest") && value.metricValue == 12.0))
 
 
