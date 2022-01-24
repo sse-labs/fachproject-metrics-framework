@@ -1,5 +1,5 @@
 package org.tud.sse.metrics
-package testLOCPro
+package group3
 
 import impl.group3.LOCproAnalysis
 import testutils.AnalysisTestUtils
@@ -14,7 +14,7 @@ class LOCproAnalysisTest extends FlatSpec with Matchers{
 
   "The LOCproAnalysis" must "calculate valid results for single JARs" in {
 
-    val fileToTest = new File(getClass.getResource("/demo/empty.jar").getPath)
+    val fileToTest = new File(getClass.getResource("/group3/empty.jar").getPath) // is same as testVoid only no last method
     val analysisToTest = new LOCproAnalysis()
 
     val appConfig = new ApplicationConfiguration(inputFilePath = "", treatFilesAsLibrary = true, outFileOption = None,
@@ -33,7 +33,7 @@ class LOCproAnalysisTest extends FlatSpec with Matchers{
 
 
     // 2te file to test
-    val fileToTest1 = new File(getClass.getResource("/demo/HelloWorld.jar").getPath)
+    val fileToTest1 = new File(getClass.getResource("/group3/HelloWorld.jar").getPath)
     val analysisToTest1 = new LOCproAnalysis()
 
 
@@ -69,7 +69,7 @@ class LOCproAnalysisTest extends FlatSpec with Matchers{
 
 
 
-    val fileToTest3 = new File(getClass.getResource("/demo/testVoid.jar").getPath)
+    val fileToTest3 = new File(getClass.getResource("/group3/testVoid.jar").getPath)
     val analysisToTest3 = new LOCproAnalysis()
 
 
