@@ -27,12 +27,16 @@ class LCCAnalysis extends SingleFileAnalysis {
     project.allProjectClassFiles.foreach(
       c => {
         val className = c.thisType.simpleName
+
+        //calculating all the possible connections to use with the above formula
         val publicMethodsCount = c.methods.filter(_.isPublic).size
         val numberOfPossibleConnections = (publicMethodsCount * (publicMethodsCount-1) / 2).toDouble
+
+        //calculating the direct connections and save all of them in the map in order to find the indirect connections in the next step
         val allPublicMethods= c.methods.filter(_.isPublic)
         var directlyConnectedMethodPairs = 0.toDouble
         val map = scala.collection.mutable.Map[String, List[String]]()
-        if(c.fields.nonEmpty){
+        if(c.fields.nonEmpty && numberOfPossibleConnections!=0){
           allPublicMethods.combinations(2).foreach(seq =>{
             breakable{
               c.fields.foreach(field =>
@@ -57,9 +61,9 @@ class LCCAnalysis extends SingleFileAnalysis {
 
           var indirectConnectionsCount = 0.toDouble
           val indirectConnMap = scala.collection.mutable.Map[String, Set[String]]()
+
           /**
-           * Find the amount of indirect connections from the map (If A->B & B->C then A,C are indirectly connected)
-           * Needs extra testing!
+           * Finding the amount of indirect connections from the map (If A->B & B->C then A,C are indirectly connected)
            */
             map.foreach(mapEntry1 =>
               map.foreach(mapEntry2 =>
@@ -82,9 +86,12 @@ class LCCAnalysis extends SingleFileAnalysis {
           indirectConnMap.foreach(entry => {
             indirectConnectionsCount += entry._2.size
           })
+
+          //calculating the metric result according to the formal definition
           val resultForThisClass = (directlyConnectedMethodPairs+indirectConnectionsCount/2)/numberOfPossibleConnections
           resultList = MetricValue(className, this.analysisName, resultForThisClass)::resultList
         }else {
+          //this line executes when there are no fields or no public method in a class which results in 0 number of possible connections
           resultList = MetricValue(className, this.analysisName, 0)::resultList
         }
       }
