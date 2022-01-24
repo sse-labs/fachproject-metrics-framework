@@ -3,7 +3,7 @@ package impl.demo
 
 import analysis.SingleFileAnalysis
 import application.SingleFileAnalysisApplication
-import impl.group3.{CBOAnalysis, TCCAnalysis}
+import impl.group3._
 
 
 object DefaultSingleFileAnalysisApplication extends SingleFileAnalysisApplication {
@@ -11,7 +11,6 @@ object DefaultSingleFileAnalysisApplication extends SingleFileAnalysisApplicatio
   override protected val registeredAnalyses: Seq[SingleFileAnalysis] = Seq(
    // new NumberOfMethodsAnalysis(),
     //new MethodSizeAnalysis(),
-    new TCCAnalysis(),
-    new CBOAnalysis()
+    new TCCAnalysis()
   )
 }
