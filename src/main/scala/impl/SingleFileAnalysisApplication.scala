@@ -6,7 +6,7 @@ import application.SingleFileAnalysisApplication
 import impl.group1.{AverageMaximumNestingAnalysis, DepthOfInheritanceTreeAnalysis, MaximumNestingAnalysis, NumberOfChildrenAnalysis}
 import impl.group2.{AVGFanInAnalysis, AVGFanOutAnalysis, ClassesReferencedAnalysis, LackOfCohesionInMethodsAnalysis, NumberOfFunctionsAnalysis}
 import impl.group3.{CBOAnalysis, LCCAnalysis, LOCproAnalysis, TCCAnalysis}
-import impl.group4.{DACAnalysis, LOCphyAnalysis, MCCCAnalysis, RFCAnalysis}
+import impl.group4.{DACAnalysis, LLOCAnalysis, LOCphyAnalysis, MCCCAnalysis, RFCAnalysis}
 import impl.group5.{NumberOfLoopsAnalysis, NumberOfVariablesDeclaredAnalysis, WeightedMethodsPerClassAnalysis, vrefAnalysis}
 
 
@@ -38,6 +38,7 @@ object SingleFileAnalysisApplication extends SingleFileAnalysisApplication {
     new MCCCAnalysis(),
     new DACAnalysis(),
     new RFCAnalysis(),
+    new LLOCAnalysis(),
 
     //Gruppe 5
     new NumberOfLoopsAnalysis(),
