@@ -1,7 +1,6 @@
 package org.tud.sse.metrics
 package impl.group3
 
-import impl.group3.LOCproAnalysis
 import testutils.AnalysisTestUtils
 
 import org.scalatest.{FlatSpec, Matchers}
@@ -94,6 +93,3 @@ class LOCproAnalysisTest extends FlatSpec with Matchers{
 
 
 }
-
-
-

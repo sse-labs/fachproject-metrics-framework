@@ -10,9 +10,7 @@ import impl.group3.CBOAnalysis
 object DefaultSingleFileAnalysisApplication extends SingleFileAnalysisApplication {
 
   override protected val registeredAnalyses: Seq[SingleFileAnalysis] = Seq(
-//    new NumberOfMethodsAnalysis(),
-//    new MethodSizeAnalysis(),
-      new LCCAnalysis(),
-      new CBOAnalysis()
+      new NumberOfMethodsAnalysis(),
+      new MethodSizeAnalysis()
   )
 }
