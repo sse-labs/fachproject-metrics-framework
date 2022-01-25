@@ -38,9 +38,9 @@ class RFCAnalysisTest extends FreeSpec with Matchers{
 
     "test project classes" in {
       //class with private methods only
-      assert(metricResult1.metricValues.exists(value => value.entityIdent.equals("com/group4/sample/RFCAnalysisTest1") && value.metricValue == 2.0))
+      assert(metricResult1.metricValues.exists(value => value.entityIdent.equals("com/group4/sample/RFCAnalysisTest1") && value.metricValue == 5.0))
       //class with public/private methods
-      assert(metricResult1.metricValues.exists(value => value.entityIdent.equals("com/group4/sample/RFCAnalysisTest2") && value.metricValue == 8.0))
+      assert(metricResult1.metricValues.exists(value => value.entityIdent.equals("com/group4/sample/RFCAnalysisTest2") && value.metricValue == 9.0))
       //class without methods
       assert(metricResult1.metricValues.exists(value => value.entityIdent.equals("com/group4/sample/RFCAnalysisTest3") && value.metricValue == 2.0))
 
@@ -48,7 +48,7 @@ class RFCAnalysisTest extends FreeSpec with Matchers{
 
     "renjin.utils classes" in {
       assert(metricResult2.metricValues.exists(value => value.entityIdent.equals("org/renjin/utils/Interactive") && value.metricValue == 6.0))
-      assert(metricResult2.metricValues.exists(value => value.entityIdent.equals("org/renjin/utils/WriteTable") && value.metricValue == 25.0))
+      assert(metricResult2.metricValues.exists(value => value.entityIdent.equals("org/renjin/utils/WriteTable") && value.metricValue == 27.0))
       assert(metricResult2.metricValues.exists(value => value.entityIdent.equals("org/renjin/utils/Utils") && value.metricValue == 11.0))
     }
   }

@@ -30,7 +30,6 @@ class RFCAnalysis extends ClassFileAnalysis {
   override def analyzeClassFile(classFile: ClassFile, project: Project[URL], customOptions: OptionMap): Try[Iterable[MetricValue]] = Try {
     var methods = new ListBuffer[String]()
     classFile.methodsWithBody.foreach(method=> {
-      if(method.isPublic ){
         methods.append(formatMethodName(method.toString()))
         if(method.body.isDefined) {
           method.body.get.instructions.foreach(instruction => {
@@ -39,7 +38,7 @@ class RFCAnalysis extends ClassFileAnalysis {
             }
           })
         }
-      }
+
     })
     List(MetricValue(classFile.fqn, analysisName, methods.distinct.size.toDouble) )
   }
