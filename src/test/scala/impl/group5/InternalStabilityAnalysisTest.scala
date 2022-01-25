@@ -52,8 +52,15 @@ class InternalStabilityAnalysisTest extends FlatSpec with Matchers{
   val resultGson  = AnalysisTestUtils.runMultiFileAnalysis(_ => analysisToTestGson,filesToTestGson,appConfig,Map.empty[Symbol, Any])
   val metricResultGson = resultGson.head
   assert(metricResultGson.success)
-  assert(metricResultGson.metricValues.exists(value => value.entityIdent.equals("Difference between: gson-1.4.jar and gson-1.5.jar") && value.metricValue == 0.9449349481258368))
-  assert(metricResultGson.metricValues.exists(value => value.entityIdent.equals("Difference between: gson-2.2.jar and gson-2.4.jar") && value.metricValue == 0.91516736266809))
+  val list = metricResultGson.metricValues.toList
+  var ldouble = 0.0
+  val decimal: Double = Math.pow(10, 5)
+  list.foreach(elem => if(elem.entityIdent.equals("Difference between: gson-1.4.jar and gson-1.5.jar")){ldouble = elem.metricValue})
+  val ergebniss =Math.round(ldouble*decimal)/decimal
+  assert(ergebniss == 0.94493)
+  list.foreach(elem => if(elem.entityIdent.equals("Difference between: gson-2.2.jar and gson-2.4.jar")){ldouble = elem.metricValue})
+  val ergebniss2 =Math.round(ldouble*decimal)/decimal
+  assert(ergebniss2 == 0.91517)
 
   println("Bye")
 
