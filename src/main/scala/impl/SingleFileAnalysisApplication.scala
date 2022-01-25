@@ -15,25 +15,30 @@ object SingleFileAnalysisApplication extends SingleFileAnalysisApplication {
 
   override protected val registeredAnalyses: Seq[SingleFileAnalysis] = Seq(
 
+    //Gruppe 1
     new AverageMaximumNestingAnalysis(),
     new DepthOfInheritanceTreeAnalysis(),
     new MaximumNestingAnalysis(),
     new NumberOfChildrenAnalysis(),
 
+    //Gruppe 2
     new AVGFanInAnalysis(),
     new AVGFanOutAnalysis(),
     new ClassesReferencedAnalysis(),
     new LackOfCohesionInMethodsAnalysis(),
     new NumberOfFunctionsAnalysis(),
 
+    //Gruppe 3
     new CBOAnalysis(),
     new LCCAnalysis(),
     new LOCproAnalysis(),
     new TCCAnalysis(),
 
+    // Gruppe 4
     new LOCphyAnalysis(),
     new MCCCAnalysis(),
 
+    //Gruppe 5
     new NumberOfLoopsAnalysis(),
     new NumberOfVariablesDeclaredAnalysis(),
     new WeightedMethodsPerClassAnalysis(),
