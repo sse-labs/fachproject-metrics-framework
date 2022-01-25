@@ -26,13 +26,13 @@ object SingleFileAnalysisApplication extends SingleFileAnalysisApplication {
     new LackOfCohesionInMethodsAnalysis(),
     new NumberOfFunctionsAnalysis(),
 
-    new LOCphyAnalysis(),
-    new MCCCAnalysis(),
-
     new CBOAnalysis(),
     new LCCAnalysis(),
     new LOCproAnalysis(),
     new TCCAnalysis(),
+
+    new LOCphyAnalysis(),
+    new MCCCAnalysis(),
 
     new NumberOfLoopsAnalysis(),
     new NumberOfVariablesDeclaredAnalysis(),
