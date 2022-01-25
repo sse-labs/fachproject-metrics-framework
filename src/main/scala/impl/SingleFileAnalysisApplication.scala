@@ -3,11 +3,10 @@ package impl
 
 import analysis.SingleFileAnalysis
 import application.SingleFileAnalysisApplication
-
 import impl.group1.{AverageMaximumNestingAnalysis, DepthOfInheritanceTreeAnalysis, MaximumNestingAnalysis, NumberOfChildrenAnalysis}
 import impl.group2.{AVGFanInAnalysis, AVGFanOutAnalysis, ClassesReferencedAnalysis, LackOfCohesionInMethodsAnalysis, NumberOfFunctionsAnalysis}
 import impl.group3.{CBOAnalysis, LCCAnalysis, LOCproAnalysis, TCCAnalysis}
-import impl.group4.{LOCphyAnalysis, MCCCAnalysis}
+import impl.group4.{DACAnalysis, LOCphyAnalysis, MCCCAnalysis, RFCAnalysis}
 import impl.group5.{NumberOfLoopsAnalysis, NumberOfVariablesDeclaredAnalysis, WeightedMethodsPerClassAnalysis, vrefAnalysis}
 
 
@@ -37,6 +36,8 @@ object SingleFileAnalysisApplication extends SingleFileAnalysisApplication {
     // Gruppe 4
     new LOCphyAnalysis(),
     new MCCCAnalysis(),
+    new DACAnalysis(),
+    new RFCAnalysis(),
 
     //Gruppe 5
     new NumberOfLoopsAnalysis(),
