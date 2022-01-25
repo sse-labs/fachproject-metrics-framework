@@ -1,7 +1,6 @@
 package org.tud.sse.metrics
-package group3
+package impl.group3
 
-import impl.group3.CBOAnalysis
 import testutils.AnalysisTestUtils
 
 import org.scalatest.{FlatSpec, Matchers}
