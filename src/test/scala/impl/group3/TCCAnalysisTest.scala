@@ -44,7 +44,7 @@ class TCCAnalysisTest extends FlatSpec with Matchers{
     assert(metricResult1.metricValues.nonEmpty)
     assert(metricResult1.metricValues.exists(value => value.metricName.equals("metric.tcc")))
 
-    assert(metricResult1.metricValues.exists(value => value.entityIdent.equals("hello1") && value.metricValue == 0.3))
+    assert(metricResult1.metricValues.exists(value => value.entityIdent.equals("hello1") && value.metricValue == 0.8333333333333334))
 
 
     /** use 3rd file to test, this project has no directly connected methods */
