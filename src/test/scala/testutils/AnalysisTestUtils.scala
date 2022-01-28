@@ -58,7 +58,7 @@ object AnalysisTestUtils {
 
     app.validateApplicationOptions(options) match {
       case Some(appConfig) =>
-        app.calculateResults(appConfig, analysisOptions)
+        app.calculateResults(appConfig, analysisOptions)._1
       case None =>
         fail("Failed to validate application options while running analysis")
     }
@@ -85,7 +85,7 @@ object AnalysisTestUtils {
 
     app.validateApplicationOptions(options) match {
       case Some(appConfig) =>
-        app.calculateResults(appConfig, analysisOptions)
+        app.calculateResults(appConfig, analysisOptions)._1
       case None =>
         fail("Failed to validate application options while running analysis")
     }
@@ -116,7 +116,7 @@ object AnalysisTestUtils {
 
     app.validateApplicationOptions(options) match {
       case Some(appConfig) =>
-        app.calculateResults(appConfig, analysisOptions)
+        app.calculateResults(appConfig, analysisOptions)._1
       case None =>
         fail("Failed to validate application options while running analysis")
     }
@@ -145,7 +145,7 @@ object AnalysisTestUtils {
 
     app.validateApplicationOptions(options) match {
       case Some(appConfig) =>
-        app.calculateResults(appConfig, analysisOptions)
+        app.calculateResults(appConfig, analysisOptions)._1
       case None =>
         fail("Failed to validate application options while running analysis")
     }
