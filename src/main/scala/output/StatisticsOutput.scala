@@ -35,6 +35,13 @@ object StatisticsOutput {
 
   }
 
+  /**
+   * Helper Method to initialize a CSV writer for the given filepath.
+   * @param filePath Path for the CSV File that the writer should be initialized for
+   * @param function The implicit function that is being executed with the CSV writer
+   * @tparam T Function Result Type
+   * @return Result of the function execution wrapped in a Try object
+   */
   private[output] def withCsvWriter[T](filePath: String)
                                       (implicit function: CSVWriter => T): Try[T] =  Try {
 
