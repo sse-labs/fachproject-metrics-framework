@@ -9,7 +9,6 @@ import opal.{OPALLogAdapter, OPALProjectHelper}
 
 import java.io.{File, FileInputStream, FilenameFilter}
 import java.nio.file.Files
-import java.util.jar.JarInputStream
 import scala.util.{Failure, Success, Try}
 
 /**
@@ -97,7 +96,9 @@ trait SingleFileAnalysisApplication extends FileAnalysisApplication {
     }
   }
 
-  override def calculateResults(appConfiguration: ApplicationConfiguration, analysisOptions: OptionMap): List[MetricsResult] = {
+  override def calculateResults(appConfiguration: ApplicationConfiguration,
+                                analysisOptions: OptionMap): (List[MetricsResult], ApplicationPerformanceStatistics) = {
+
     val effectiveAnalysisNames = appConfiguration.getActiveAnalysisNamesFor(registeredAnalyses)
 
     OPALLogAdapter.setOpalLoggingEnabled(appConfiguration.opalLoggingEnabled)
@@ -105,7 +106,8 @@ trait SingleFileAnalysisApplication extends FileAnalysisApplication {
     val analyses = registeredAnalyses
       .filter(a => effectiveAnalysisNames.contains(a.analysisName))
 
-    analyses.foreach(_.initialize())
+    val initTimeMs = measureExecutionTime (() => analyses.foreach(_.initialize()))._1
+    val appStatistics = ApplicationPerformanceStatistics(initTimeMs)
 
     if(!appConfiguration.batchModeEnabled.get){
 
@@ -113,40 +115,54 @@ trait SingleFileAnalysisApplication extends FileAnalysisApplication {
 
       log.debug(s"Initializing OPAL project for input file ${file.getName} ...")
       Try {
-        val projectClasses = OPALProjectHelper.readClassesFromJarStream(new FileInputStream(file), file.toURI.toURL)
-        val additionalClasses = appConfiguration
-          .additionalClassesDir
-          .flatMap(dir => OPALProjectHelper.readClassesFromFileStructure(new File(dir), !appConfiguration.loadAdditionalClassesAsInterface).toOption)
-          .getOrElse(List.empty)
+        measureExecutionTime { () =>
+          val projectClasses = OPALProjectHelper.readClassesFromJarStream(new FileInputStream(file), file.toURI.toURL)
+          val additionalClasses = appConfiguration
+            .additionalClassesDir
+            .flatMap(dir => OPALProjectHelper.readClassesFromFileStructure(new File(dir), !appConfiguration.loadAdditionalClassesAsInterface).toOption)
+            .getOrElse(List.empty)
 
-        OPALProjectHelper.buildOPALProject(projectClasses.get, additionalClasses, appConfiguration.treatFilesAsLibrary, appConfiguration.excludeJreClasses)
+          OPALProjectHelper.buildOPALProject(projectClasses.get, additionalClasses, appConfiguration.treatFilesAsLibrary, appConfiguration.excludeJreClasses)
+        }
       } match {
-        case Success(project) =>
+        case Success((initTime, project)) =>
+
+          val fileStatistics = FilePerformanceStatistics(file.getPath, initTime)
+
           log.info(s"Done initializing OPAL project.")
-          analyses
+          val fileResults = analyses
             .map { analysis =>
-              analysis.analyzeProject(project, analysisOptions) match {
-                case Success(values) =>
+
+              measureExecutionTime { () =>
+                analysis.analyzeProject(project, analysisOptions)
+              } match {
+                case (execTime, Success(values)) =>
+                  fileStatistics.putAnalysisExecutionTime(analysis.analysisName, execTime)
                   MetricsResult(analysis.analysisName, file, success = true, values)
-                case Failure(ex) =>
+                case (_, Failure(ex)) =>
                   log.error(s"Unexpected failure while processing JAR file", ex)
                   MetricsResult.analysisFailed(analysis.analysisName, file)
               }
             }
             .toList
+
+          appStatistics.putFileStatistics(fileStatistics)
+
+          (fileResults, appStatistics)
         case Failure(ex) =>
           log.error(s"Failure while initializing OPAL project for ${file.getName}", ex)
-          List.empty
+          (List.empty, appStatistics)
       }
     } else {
-      handleBatch(analyses, appConfiguration.inputFile, appConfiguration, analysisOptions)
+      handleBatch(analyses, appConfiguration.inputFile, appConfiguration, analysisOptions, appStatistics)
     }
   }
 
   private def handleBatch(analyses: Seq[SingleFileAnalysis],
                           inputDirectory: File,
                           appConfiguration: ApplicationConfiguration,
-                          customOptions: OptionMap): List[MetricsResult] = {
+                          customOptions: OptionMap,
+                          appStats: ApplicationPerformanceStatistics): (List[MetricsResult], ApplicationPerformanceStatistics) = {
 
     log.info(s"Batch mode: Processing all JAR files in ${inputDirectory.getPath}...")
     var count = 0
@@ -159,26 +175,39 @@ trait SingleFileAnalysisApplication extends FileAnalysisApplication {
         count += 1
 
         Try {
-          val projectClasses = OPALProjectHelper.readClassesFromJarStream(new FileInputStream(file), file.toURI.toURL)
-          val additionalClasses = appConfiguration
-            .additionalClassesDir
-            .flatMap(dir => OPALProjectHelper.readClassesFromFileStructure(new File(dir), !appConfiguration.loadAdditionalClassesAsInterface).toOption)
-            .getOrElse(List.empty)
-          OPALProjectHelper.buildOPALProject(projectClasses.get, additionalClasses, appConfiguration.treatFilesAsLibrary, appConfiguration.excludeJreClasses)
+          measureExecutionTime { () =>
+            val projectClasses = OPALProjectHelper.readClassesFromJarStream(new FileInputStream(file), file.toURI.toURL)
+            val additionalClasses = appConfiguration
+              .additionalClassesDir
+              .flatMap(dir => OPALProjectHelper.readClassesFromFileStructure(new File(dir), !appConfiguration.loadAdditionalClassesAsInterface).toOption)
+              .getOrElse(List.empty)
+            OPALProjectHelper.buildOPALProject(projectClasses.get, additionalClasses, appConfiguration.treatFilesAsLibrary, appConfiguration.excludeJreClasses)
+          }
         } match {
-          case Success(project) =>
+          case Success((initTime, project)) =>
+
+            val fileStatistics = FilePerformanceStatistics(file.getPath, initTime)
+
             log.debug(s"Successfully initialized OPAL project for ${file.getName}")
-            analyses
+
+            val fileResults = analyses
               .map { analysis =>
-                analysis.analyzeProject(project, customOptions) match {
-                  case Success(values) =>
+                measureExecutionTime { () =>
+                  analysis.analyzeProject(project, customOptions)
+                } match {
+                  case (execTime, Success(values)) =>
+                    fileStatistics.putAnalysisExecutionTime(analysis.analysisName, execTime)
                     MetricsResult(analysis.analysisName, file, success = true, values)
-                  case Failure(ex) =>
+                  case (_, Failure(ex)) =>
                     log.error(s"Unexpected failure while processing JAR file", ex)
                     MetricsResult.analysisFailed(analysis.analysisName, file)
                 }
               }
               .toList
+
+            appStats.putFileStatistics(fileStatistics)
+
+            fileResults
           case Failure(ex) =>
             log.error(s"Failure while initializing OPAL project for ${file.getName}", ex)
             List.empty
@@ -188,6 +217,6 @@ trait SingleFileAnalysisApplication extends FileAnalysisApplication {
 
     log.info(s"Batch mode: Done processing $count JAR files in ${inputDirectory.getName}")
 
-    results
+    (results, appStats)
   }
 }

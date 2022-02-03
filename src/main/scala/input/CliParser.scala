@@ -82,6 +82,8 @@ abstract class CliParser(usage: String) {
         nextOption(appOptions ++ Map(isLibrarySymbol -> true), analysisOptions, tail)
       case "--opal-logging" :: tail =>
         nextOption(appOptions ++ Map(enableOpalLoggingSymbol -> true), analysisOptions, tail)
+      case "--evaluate-performance" :: tail =>
+        nextOption(appOptions ++ Map(evaluatePerformanceSymbol -> true), analysisOptions, tail)
         // The one unnamed argument is the input file -> Must be last
       case string :: Nil =>
         nextOption(appOptions ++ Map(inFileSymbol -> string), analysisOptions, list.tail)
@@ -117,4 +119,5 @@ object CliParser {
   val noJreClassesSymbol: Symbol = Symbol("no-jre-classes")
   val additionalClassesDirSymbol: Symbol = Symbol("additional-classes-dir")
   val loadAdditionalClassesAsInterfacesSymbol: Symbol = Symbol("load-additional-classes-as-interfaces")
+  val evaluatePerformanceSymbol: Symbol = Symbol("evaluate-performance")
 }

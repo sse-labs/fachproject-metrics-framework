@@ -100,7 +100,8 @@ trait MultiFileAnalysisApplication extends FileAnalysisApplication {
     }
   }
 
-  override final def calculateResults(appConfiguration: ApplicationConfiguration, analysisOptions: OptionMap): List[MetricsResult] = {
+  override final def calculateResults(appConfiguration: ApplicationConfiguration,
+                                      analysisOptions: OptionMap): (List[MetricsResult], ApplicationPerformanceStatistics) = {
     registeredAnalyses = buildAnalyses(appConfiguration.inputFile)
 
     val effectiveAnalysisNames = appConfiguration.getActiveAnalysisNamesFor(registeredAnalyses)
@@ -111,7 +112,8 @@ trait MultiFileAnalysisApplication extends FileAnalysisApplication {
     val analyses = registeredAnalyses
       .filter(a => effectiveAnalysisNames.contains(a.analysisName))
 
-    analyses.foreach(_.initialize())
+    val initTimeMs = measureExecutionTime (() => analyses.foreach(_.initialize()))._1
+    val appStatistics = ApplicationPerformanceStatistics(initTimeMs)
 
     var count = 0
 
@@ -125,23 +127,31 @@ trait MultiFileAnalysisApplication extends FileAnalysisApplication {
         count += 1
 
         Try {
-          val projectClasses = OPALProjectHelper.readClassesFromJarStream(new FileInputStream(file), file.toURI.toURL)
-          val additionalClasses = appConfiguration
-            .additionalClassesDir
-            .flatMap(dir => OPALProjectHelper.readClassesFromFileStructure(new File(dir), !appConfiguration.loadAdditionalClassesAsInterface).toOption)
-            .getOrElse(List.empty)
-          OPALProjectHelper.buildOPALProject(projectClasses.get, additionalClasses, appConfiguration.treatFilesAsLibrary, appConfiguration.excludeJreClasses)
+          measureExecutionTime{ () =>
+            val projectClasses = OPALProjectHelper.readClassesFromJarStream(new FileInputStream(file), file.toURI.toURL)
+            val additionalClasses = appConfiguration
+              .additionalClassesDir
+              .flatMap(dir => OPALProjectHelper.readClassesFromFileStructure(new File(dir), !appConfiguration.loadAdditionalClassesAsInterface).toOption)
+              .getOrElse(List.empty)
+            OPALProjectHelper.buildOPALProject(projectClasses.get, additionalClasses, appConfiguration.treatFilesAsLibrary, appConfiguration.excludeJreClasses)
+          }
         } match {
-          case Success(project) =>
+          case Success((initTime, project)) =>
+
+            val fileStatistics = FilePerformanceStatistics(file.getPath, initTime)
+
             log.debug(s"Successfully initialized OPAL project for ${file.getName}")
 
             analyses.foreach { analysis =>
-              val result: Try[_] = analysis.analyzeNext(project, file, analysisOptions)
+              val (execTime, results) = measureExecutionTime { () => analysis.analyzeNext(project, file, analysisOptions) }
+              fileStatistics.putAnalysisExecutionTime(analysis.analysisName, execTime)
 
-              if (result.isFailure) {
-                log.error(s"Error while processing a JAR file: $file", result.failed.get)
+              if (results.isFailure) {
+                log.error(s"Error while processing a JAR file: $file", results.failed.get)
               }
             }
+
+            appStatistics.putFileStatistics(fileStatistics)
 
           case Failure(ex) =>
             log.error(s"Failure while initializing OPAL project for ${file.getName}", ex)
@@ -150,9 +160,20 @@ trait MultiFileAnalysisApplication extends FileAnalysisApplication {
 
     log.info(s"Done processing $count JAR files in ${appConfiguration.inputFile.getName}")
 
-    analyses
-      .flatMap(_.produceMetricValues())
+    // Use a "dummy" FilePerformanceStatistics object to capture calculation of metric values
+    val metricsCalculationStats = FilePerformanceStatistics("<metric calculation>", 0)
+
+    val metricResults = analyses
+      .flatMap{ analysis =>
+        val (execTime, results) = measureExecutionTime { () => analysis.produceMetricValues() }
+        metricsCalculationStats.putAnalysisExecutionTime(analysis.analysisName, execTime)
+        results
+      }
       .toList
+
+    appStatistics.putFileStatistics(metricsCalculationStats)
+
+    (metricResults, appStatistics)
   }
 
 }
