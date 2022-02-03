@@ -6,6 +6,15 @@ scalaVersion := "2.12.14"
 
 idePackagePrefix := Some("org.tud.sse.metrics")
 
+assembly / mainClass := Some("org.tud.sse.metrics.impl.ApplicationEntryPoint")
+assembly / assemblyJarName := "analysis-application.jar"
+
+assemblyMergeStrategy := {
+  case x: String if x.toLowerCase.contains("manifest.mf") => MergeStrategy.discard
+  case x: String if x.toLowerCase.endsWith(".conf") => MergeStrategy.concat
+  case x => MergeStrategy.first
+}
+
 libraryDependencies += "com.opencsv" % "opencsv" % "5.5"
 
 val opalVersion = "4.0.0"
