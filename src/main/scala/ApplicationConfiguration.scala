@@ -18,7 +18,8 @@ class ApplicationConfiguration(val inputFilePath: String,
                                val includedAnalysesNames: List[String],
                                val excludeJreClasses: Boolean,
                                val additionalClassesDir: Option[String],
-                               val loadAdditionalClassesAsInterface: Boolean) {
+                               val loadAdditionalClassesAsInterface: Boolean,
+                               val performanceEvaluationEnabled: Boolean = false) {
 
   def includeSpecificationsApply(): Boolean = includedAnalysesNames.nonEmpty
 
@@ -48,6 +49,9 @@ class ApplicationConfiguration(val inputFilePath: String,
       log.info(s"\t- Load Additional Classes As Interfaces: $loadAdditionalClassesAsInterface")
     }
 
+
+
+    log.info(s"\t- Performance Evaluation enabled: $performanceEvaluationEnabled")
     log.info(s"\t- Exclude JRE classes: $excludeJreClasses")
     log.info(s"\t- OPAL Logging Enabled: $opalLoggingEnabled")
   }
@@ -95,7 +99,8 @@ object ApplicationConfiguration {
       includedAnalysesNames,
       jreClassesExcluded,
       additionalClassesDir,
-      loadAdditionalClassesAsInterfaces)
+      loadAdditionalClassesAsInterfaces,
+      appOptions.get(CliParser.evaluatePerformanceSymbol).exists(_.asInstanceOf[Boolean]))
   }
 
   def fromOptionsSingleFile(appOptions: OptionMap): ApplicationConfiguration = fromOptions(appOptions, isSingleFile = true)

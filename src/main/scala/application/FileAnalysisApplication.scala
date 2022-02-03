@@ -4,7 +4,7 @@ package application
 import analysis.{MetricsResult, NamedAnalysis}
 import input.CliParser
 import input.CliParser.OptionMap
-import output.CsvFileOutput
+import output.{CsvFileOutput, StatisticsOutput}
 
 import org.slf4j.{Logger, LoggerFactory}
 
@@ -39,9 +39,10 @@ trait FileAnalysisApplication extends CsvFileOutput{
    * Method that executes all analyses on the input file(s) and produces the resulting List of JarFileMetrics.
    * @param appConfiguration ApplicationConfiguration object as produced by "validateApplicationOptions"
    * @param analysisOptions Custom analysis options produced by the CLI parser
-   * @return List of JarFileMetricsResults
+   * @return Tuple containing 1) List of JarFileMetricsResults and 2) the ApplicationPerformanceStatistics
    */
-  def calculateResults(appConfiguration: ApplicationConfiguration, analysisOptions: OptionMap): List[MetricsResult]
+  def calculateResults(appConfiguration: ApplicationConfiguration,
+                       analysisOptions: OptionMap): (List[MetricsResult], ApplicationPerformanceStatistics)
 
   /**
    * Prints results to the CLI and writes them to a CSV report if specified by the
@@ -67,6 +68,21 @@ trait FileAnalysisApplication extends CsvFileOutput{
         }
       }
     }
+  }
+
+  /**
+   * Executes a given operation and measures the corresponding execution time (wall clock). Returns a tuple of the operation's
+   * result and it's execution time.
+   *
+   * @param codeToExecute The function to measure
+   * @tparam T Function return type
+   * @return Tuple of execution time in MS and the function's result
+   */
+  protected def measureExecutionTime[T] (implicit codeToExecute: () => T): (Long, T) = {
+    val startTime = System.nanoTime()
+    val result = codeToExecute.apply()
+    val durationMs: Long = (System.nanoTime() - startTime) / 1000000L
+    (durationMs, result)
   }
 
   /**
@@ -107,17 +123,30 @@ trait FileAnalysisApplication extends CsvFileOutput{
    */
   final def main(arguments: Array[String]): Unit = {
     cliParser.parseArguments(arguments.toList) match {
+
       case Success((appOptions, _))
         if !appOptions.contains(CliParser.inFileSymbol) =>
         log.error("Missing required parameter infile")
+
       case Success((appOptions, analysisOptions)) =>
+
         validateApplicationOptions(appOptions) match {
+
           case Some(appConfig) =>
-            val results = calculateResults(appConfig, analysisOptions)
+            val (results, stats) = calculateResults(appConfig, analysisOptions)
             handleResults(results, appConfig)
+
+            if(appConfig.performanceEvaluationEnabled){
+              val reportFilePath = "performance-report.csv"
+              log.info(s"Writing performance report to: $reportFilePath")
+              StatisticsOutput.writeStatisticsToFile(reportFilePath, stats)
+            }
+
+
           case None =>
             System.exit(1)
         }
+
       case Failure(ex) =>
         log.error(s"Error parsing options: ${ex.getMessage}")
     }

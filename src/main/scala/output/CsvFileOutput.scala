@@ -1,9 +1,9 @@
 package org.tud.sse.metrics
 package output
 
-import java.io.{BufferedWriter, FileWriter}
+import StatisticsOutput.withCsvWriter
 import scala.util.Try
-import com.opencsv.CSVWriter
+
 import analysis.MetricsResult
 
 import scala.collection.mutable
@@ -16,9 +16,7 @@ import scala.collection.mutable
 trait CsvFileOutput {
 
 
-  def writeResultsToFile(outputFilePath: String, results: List[MetricsResult]): Try[Unit] = Try {
-    val fileWriter = new BufferedWriter(new FileWriter(outputFilePath))
-    val csvWriter = new CSVWriter(fileWriter)
+  def writeResultsToFile(outputFilePath: String, results: List[MetricsResult]): Try[Unit] = withCsvWriter(outputFilePath){ csvWriter =>
 
     val metricNames = results.flatMap(_.metricValues.map(_.metricName)).distinct
     val headings = (List("Path", "Entity") ++ metricNames).toArray
@@ -52,11 +50,6 @@ trait CsvFileOutput {
         }).toArray
     }
       .foreach(t => csvWriter.writeNext(t))
-
-    csvWriter.flush()
-    fileWriter.flush()
-    csvWriter.close()
-    fileWriter.close()
   }
 
 }
