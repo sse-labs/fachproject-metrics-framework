@@ -14,7 +14,8 @@ dir_benchmark <-function()
 
 create_dirs <- function()
 {
-  path_dir <- str_c(path_base,"\\jars")
+  path_dir <- str_c(dir_benchmark(),"\\jars")
+  path_dir
   if(!dir.exists(path_dir))
   {
     dir.create(path_dir)
@@ -383,30 +384,5 @@ for(numberOfAnalysis in 1:20)
 
 
 
-
-
-
-setwd("C:\\Users\\p\\DataspellProjects\\fachprojekt-metrik-benchmark")
-getwd()
-file <- file.create(str_glue("{dir_name}\\gson\\{file_name}"), showWarnings = TRUE)
-
-#tmp <- tempfile("gson-2.9.0.jar")
-curl_download("https://repo1.maven.org/maven2/com/google/code/gson/gson/2.9.0/gson-2.9.0.jar", str_glue("{dir_name}\\jars\\gson\\{file_name}"))
-
-setwd("C:\\Users\\p\\IdeaProjects\\fachproject-metrik-benchmark")
-
-system("sbt.bat help") #, stdout = TRUE, stderr = TRUE)
-
-Sys.getenv("PATH")
-
-
-
-
-
-if(.Platform$OS.type == "unix") {
-  system("sbt assembly") #, stdout = TRUE, stderr = TRUE)
-} else {
-  system("sbt.bat assembly") #, stdout = TRUE, stderr = TRUE)
-}
 
 
