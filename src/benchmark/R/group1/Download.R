@@ -2,7 +2,7 @@ library(tidyverse)
 library(cli)
 library(curl)
 
-setwd("C:\\Users\\p\\IdeaProjects\\fachproject-metrics-framework")
+#setwd("C:\\Users\\p\\IdeaProjects\\fachproject-metrics-framework")
 path_base <- str_replace_all(getwd(),"/","\\\\")
 path_base
 
