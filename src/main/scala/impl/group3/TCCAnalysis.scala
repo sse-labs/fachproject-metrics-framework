@@ -34,7 +34,7 @@ class TCCAnalysis extends SingleFileAnalysis {
         /**
          * calculating the number of directly connected method pairs
          */
-        val allPublicMethods= c.methods.filter(_.isPublic)
+        val allPublicMethods= c.methods.filter(_.isPublic).filter(_.isNotAbstract)
 //        println("All public method's body: " + c.methods.filter(_.isPublic).foreach(m => println(m.body + "\n")))
         var directlyConnectedMethodPairs = 0.toDouble
         if(c.fields.nonEmpty && numberOfPossibleConnections!=0){
