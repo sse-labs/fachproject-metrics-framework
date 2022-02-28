@@ -1,0 +1,938 @@
+---
+title: "Metriken Benchmark"
+output: powerpoint_presentation
+---
+
+```{r, include=FALSE}
+library(tidyverse)
+library(here)
+library(knitr)
+path <- here()
+folder_benchmark <- str_c(path,"/src/benchmark/R/group1/benchmark/gson/Evolution/")
+data_metric <- read_csv(str_c(folder_benchmark,"table-Evolution.csv"))
+data_metric <- data_metric %>% add_column("cor(mean,loc)"=cor(data_metric$mean,data_metric$loc))
+```
+
+```{R, echo = FALSE, results = 'hide', message = FALSE, fig.width=12,fig.height=7 }
+
+#png("evolution.png",height=800,width=1024
+#knitr::opts_chunk$set(echo = TRUE, fig.width = 20, fig.height = 10)
+#plot the results
+ggplot(data_metric, aes(x=loc, y=mean, col= filename, label = filename, size=loc/mean )) +   geom_point() +
+  labs(subtitle="lines of Code Vs Duration in ms",
+       y="mean of duartion in ms",
+       x="number of Lines",
+       title="Evolution Metric") +
+  geom_text(nudge_y = 1, size = 2.9,check_overlap = FALSE) +
+  geom_smooth(data= data_metric, aes(x=loc, y=mean), colour = "grey", method = "lm", se = FALSE)
+```
+```{R, echo = FALSE, message = FALSE }
+kable(data_metric, "simple")
+```
+```{r, include=FALSE}
+path <- here()
+folder_benchmark <- str_c(path,"/src/benchmark/R/group1/benchmark/gson/External/")
+data_metric <- read_csv(str_c(folder_benchmark,"table-External.csv")) %>% add_column("cor(mean,loc)"=cor(data_metric$mean,data_metric$loc))
+```
+
+```{R, echo = FALSE, results = 'hide', message = FALSE, fig.width=12,fig.height=7 }
+
+#png("evolution.png",height=800,width=1024
+#knitr::opts_chunk$set(echo = TRUE, fig.width = 20, fig.height = 10)
+#plot the results
+ggplot(data_metric, aes(x=loc, y=mean, col= filename, label = filename, size=loc/mean )) +   geom_point() +
+  labs(subtitle="lines of Code Vs Duration in ms",
+       y="mean of duartion in ms",
+       x="number of Lines",
+       title="External Metric") +
+  geom_text(nudge_y = 1, size = 2.9,check_overlap = FALSE) +
+  geom_smooth(data= data_metric, aes(x=loc, y=mean), colour = "grey", method = "lm", se = FALSE)
+```
+
+```{R, echo = FALSE, message = FALSE }
+kable(data_metric, "simple")
+```
+```{r, include=FALSE}
+path <- here()
+folder_benchmark <- str_c(path,"/src/benchmark/R/group1/benchmark/gson/Internal/")
+data_metric <- read_csv(str_c(folder_benchmark,"table-Internal.csv")) %>% add_column("cor(mean,loc)"=cor(data_metric$mean,data_metric$loc))
+```
+
+```{R, echo = FALSE, results = 'hide', message = FALSE, fig.width=12,fig.height=7 }
+
+#png("evolution.png",height=800,width=1024
+#knitr::opts_chunk$set(echo = TRUE, fig.width = 20, fig.height = 10)
+#plot the results
+ggplot(data_metric, aes(x=loc, y=mean, col= filename, label = filename, size=loc/mean )) +   geom_point() +
+  labs(subtitle="lines of Code Vs Duration in ms",
+       y="mean of duartion in ms",
+       x="number of Lines",
+       title="Internal Metric") +
+  geom_text(nudge_y = 1, size = 2.9,check_overlap = FALSE) +
+  geom_smooth(data= data_metric, aes(x=loc, y=mean), colour = "grey", method = "lm", se = FALSE)
+```
+
+```{R, echo = FALSE, message = FALSE }
+kable(data_metric, "simple")
+```
+```{r, include=FALSE}
+path <- here()
+folder_benchmark <- str_c(path,"/src/benchmark/R/group1/benchmark/jsoup/Evolution/")
+data_metric <- read_csv(str_c(folder_benchmark,"table-Evolution.csv")) %>% add_column("cor(mean,loc)"=cor(data_metric$mean,data_metric$loc))
+```
+
+```{R, echo = FALSE, results = 'hide', message = FALSE, fig.width=12,fig.height=7 }
+
+#png("evolution.png",height=800,width=1024
+#knitr::opts_chunk$set(echo = TRUE, fig.width = 20, fig.height = 10)
+#plot the results
+ggplot(data_metric, aes(x=loc, y=mean, col= filename, label = filename, size=loc/mean )) +   geom_point() +
+  labs(subtitle="lines of Code Vs Duration in ms",
+       y="mean of duartion in ms",
+       x="number of Lines",
+       title="Evolution Metric") +
+  geom_text(nudge_y = 1, size = 2.9,check_overlap = FALSE) +
+  geom_smooth(data= data_metric, aes(x=loc, y=mean), colour = "grey", method = "lm", se = FALSE)
+```
+```{R, echo = FALSE, message = FALSE }
+kable(data_metric, "simple")
+```
+```{r, include=FALSE}
+path <- here()
+folder_benchmark <- str_c(path,"/src/benchmark/R/group1/benchmark/jsoup/External/")
+data_metric <- read_csv(str_c(folder_benchmark,"table-External.csv")) %>% add_column("cor(mean,loc)"=cor(data_metric$mean,data_metric$loc))
+```
+
+```{R, echo = FALSE, results = 'hide', message = FALSE, fig.width=12,fig.height=7 }
+
+#png("evolution.png",height=800,width=1024
+#knitr::opts_chunk$set(echo = TRUE, fig.width = 20, fig.height = 10)
+#plot the results
+ggplot(data_metric, aes(x=loc, y=mean, col= filename, label = filename, size=loc/mean )) +   geom_point() +
+  labs(subtitle="lines of Code Vs Duration in ms",
+       y="mean of duartion in ms",
+       x="number of Lines",
+       title="External Metric") +
+  geom_text(nudge_y = 1, size = 2.9,check_overlap = FALSE) +
+  geom_smooth(data= data_metric, aes(x=loc, y=mean), colour = "grey", method = "lm", se = FALSE)
+```
+
+```{R, echo = FALSE, message = FALSE }
+kable(data_metric, "simple")
+```
+```{r, include=FALSE}
+path <- here()
+folder_benchmark <- str_c(path,"/src/benchmark/R/group1/benchmark/jsoup/Internal/")
+data_metric <- read_csv(str_c(folder_benchmark,"table-Internal.csv")) %>% add_column("cor(mean,loc)"=cor(data_metric$mean,data_metric$loc))
+```
+
+```{R, echo = FALSE, results = 'hide', message = FALSE, fig.width=12,fig.height=7 }
+
+#png("evolution.png",height=800,width=1024
+#knitr::opts_chunk$set(echo = TRUE, fig.width = 20, fig.height = 10)
+#plot the results
+ggplot(data_metric, aes(x=loc, y=mean, col= filename, label = filename, size=loc/mean )) +   geom_point() +
+  labs(subtitle="lines of Code Vs Duration in ms",
+       y="mean of duartion in ms",
+       x="number of Lines",
+       title="Internal Metric") +
+  geom_text(nudge_y = 1, size = 2.9,check_overlap = FALSE) +
+  geom_smooth(data= data_metric, aes(x=loc, y=mean), colour = "grey", method = "lm", se = FALSE)
+```
+
+```{R, echo = FALSE, message = FALSE }
+kable(data_metric, "simple")
+```
+```{r, include=FALSE}
+path <- here()
+folder_benchmark <- str_c(path,"/src/benchmark/R/group1/benchmark/scala-library/Evolution/")
+data_metric <- read_csv(str_c(folder_benchmark,"table-Evolution.csv")) %>% add_column("cor(mean,loc)"=cor(data_metric$mean,data_metric$loc))
+```
+
+```{R, echo = FALSE, results = 'hide', message = FALSE, fig.width=12,fig.height=7 }
+
+#png("evolution.png",height=800,width=1024
+#knitr::opts_chunk$set(echo = TRUE, fig.width = 20, fig.height = 10)
+#plot the results
+ggplot(data_metric, aes(x=loc, y=mean, col= filename, label = filename, size=loc/mean )) +   geom_point() +
+  labs(subtitle="lines of Code Vs Duration in ms",
+       y="mean of duartion in ms",
+       x="number of Lines",
+       title="Evolution Metric") +
+  geom_text(nudge_y = 1, size = 2.9,check_overlap = FALSE) +
+  geom_smooth(data= data_metric, aes(x=loc, y=mean), colour = "grey", method = "lm", se = FALSE)
+```
+```{R, echo = FALSE, message = FALSE }
+kable(data_metric, "simple")
+```
+```{r, include=FALSE}
+path <- here()
+folder_benchmark <- str_c(path,"/src/benchmark/R/group1/benchmark/scala-library/External/")
+data_metric <- read_csv(str_c(folder_benchmark,"table-External.csv")) %>% add_column("cor(mean,loc)"=cor(data_metric$mean,data_metric$loc))
+```
+
+```{R, echo = FALSE, results = 'hide', message = FALSE, fig.width=12,fig.height=7 }
+
+#png("evolution.png",height=800,width=1024
+#knitr::opts_chunk$set(echo = TRUE, fig.width = 20, fig.height = 10)
+#plot the results
+ggplot(data_metric, aes(x=loc, y=mean, col= filename, label = filename, size=loc/mean )) +   geom_point() +
+  labs(subtitle="lines of Code Vs Duration in ms",
+       y="mean of duartion in ms",
+       x="number of Lines",
+       title="External Metric") +
+  geom_text(nudge_y = 1, size = 2.9,check_overlap = FALSE) +
+  geom_smooth(data= data_metric, aes(x=loc, y=mean), colour = "grey", method = "lm", se = FALSE)
+```
+
+```{R, echo = FALSE, message = FALSE }
+kable(data_metric, "simple")
+```
+```{r, include=FALSE}
+path <- here()
+folder_benchmark <- str_c(path,"/src/benchmark/R/group1/benchmark/scala-library/Internal/")
+data_metric <- read_csv(str_c(folder_benchmark,"table-Internal.csv")) %>% add_column("cor(mean,loc)"=cor(data_metric$mean,data_metric$loc))
+```
+
+```{R, echo = FALSE, results = 'hide', message = FALSE, fig.width=12,fig.height=7 }
+
+#png("evolution.png",height=800,width=1024
+#knitr::opts_chunk$set(echo = TRUE, fig.width = 20, fig.height = 10)
+#plot the results
+ggplot(data_metric, aes(x=loc, y=mean, col= filename, label = filename, size=loc/mean )) +   geom_point() +
+  labs(subtitle="lines of Code Vs Duration in ms",
+       y="mean of duartion in ms",
+       x="number of Lines",
+       title="Internal Metric") +
+  geom_text(nudge_y = 1, size = 2.9,check_overlap = FALSE) +
+  geom_smooth(data= data_metric, aes(x=loc, y=mean), colour = "grey", method = "lm", se = FALSE)
+```
+
+```{R, echo = FALSE, message = FALSE }
+kable(data_metric, "simple")
+```
+```{r, include=FALSE}
+path <- here()
+folder_benchmark <- str_c(path,"/src/benchmark/R/group1/benchmark/kotlin-stdlib/Evolution/")
+data_metric <- read_csv(str_c(folder_benchmark,"table-Evolution.csv")) %>% add_column("cor(mean,loc)"=cor(data_metric$mean,data_metric$loc))
+```
+
+```{R, echo = FALSE, results = 'hide', message = FALSE, fig.width=12,fig.height=7 }
+
+#png("evolution.png",height=800,width=1024
+#knitr::opts_chunk$set(echo = TRUE, fig.width = 20, fig.height = 10)
+#plot the results
+ggplot(data_metric, aes(x=loc, y=mean, col= filename, label = filename, size=loc/mean )) +   geom_point() +
+  labs(subtitle="lines of Code Vs Duration in ms",
+       y="mean of duartion in ms",
+       x="number of Lines",
+       title="Evolution Metric") +
+  geom_text(nudge_y = 1, size = 2.9,check_overlap = FALSE) +
+  geom_smooth(data= data_metric, aes(x=loc, y=mean), colour = "grey", method = "lm", se = FALSE)
+```
+```{R, echo = FALSE, message = FALSE }
+kable(data_metric, "simple")
+```
+```{r, include=FALSE}
+path <- here()
+folder_benchmark <- str_c(path,"/src/benchmark/R/group1/benchmark/kotlin-stdlib/External/")
+data_metric <- read_csv(str_c(folder_benchmark,"table-External.csv")) %>% add_column("cor(mean,loc)"=cor(data_metric$mean,data_metric$loc))
+```
+
+```{R, echo = FALSE, results = 'hide', message = FALSE, fig.width=12,fig.height=7 }
+
+#png("evolution.png",height=800,width=1024
+#knitr::opts_chunk$set(echo = TRUE, fig.width = 20, fig.height = 10)
+#plot the results
+ggplot(data_metric, aes(x=loc, y=mean, col= filename, label = filename, size=loc/mean )) +   geom_point() +
+  labs(subtitle="lines of Code Vs Duration in ms",
+       y="mean of duartion in ms",
+       x="number of Lines",
+       title="External Metric") +
+  geom_text(nudge_y = 1, size = 2.9,check_overlap = FALSE) +
+  geom_smooth(data= data_metric, aes(x=loc, y=mean), colour = "grey", method = "lm", se = FALSE)
+```
+
+```{R, echo = FALSE, message = FALSE }
+kable(data_metric, "simple")
+```
+```{r, include=FALSE}
+path <- here()
+folder_benchmark <- str_c(path,"/src/benchmark/R/group1/benchmark/kotlin-stdlib/Internal/")
+data_metric <- read_csv(str_c(folder_benchmark,"table-Internal.csv"))%>% add_column("cor(mean,loc)"=cor(data_metric$mean,data_metric$loc))
+```
+
+```{R, echo = FALSE, results = 'hide', message = FALSE, fig.width=12,fig.height=7 }
+
+#png("evolution.png",height=800,width=1024
+#knitr::opts_chunk$set(echo = TRUE, fig.width = 20, fig.height = 10)
+#plot the results
+ggplot(data_metric, aes(x=loc, y=mean, col= filename, label = filename, size=loc/mean )) +   geom_point() +
+  labs(subtitle="lines of Code Vs Duration in ms",
+       y="mean of duartion in ms",
+       x="number of Lines",
+       title="Internal Metric") +
+  geom_text(nudge_y = 1, size = 2.9,check_overlap = FALSE) +
+  geom_smooth(data= data_metric, aes(x=loc, y=mean), colour = "grey", method = "lm", se = FALSE)
+```
+
+```{R, echo = FALSE, message = FALSE }
+kable(data_metric, "simple")
+```
+```{r, include=FALSE}
+path <- here()
+folder_benchmark <- str_c(path,"/src/benchmark/R/group1/benchmark/postgresql/Evolution/")
+data_metric <- read_csv(str_c(folder_benchmark,"table-Evolution.csv")) %>% add_column("cor(mean,loc)"=cor(data_metric$mean,data_metric$loc))
+```
+
+```{R, echo = FALSE, results = 'hide', message = FALSE, fig.width=12,fig.height=7 }
+
+#png("evolution.png",height=800,width=1024
+#knitr::opts_chunk$set(echo = TRUE, fig.width = 20, fig.height = 10)
+#plot the results
+ggplot(data_metric, aes(x=loc, y=mean, col= filename, label = filename, size=loc/mean )) +   geom_point() +
+  labs(subtitle="lines of Code Vs Duration in ms",
+       y="mean of duartion in ms",
+       x="number of Lines",
+       title="Evolution Metric") +
+  geom_text(nudge_y = 1, size = 2.9,check_overlap = FALSE) +
+  geom_smooth(data= data_metric, aes(x=loc, y=mean), colour = "grey", method = "lm", se = FALSE)
+```
+```{R, echo = FALSE, message = FALSE }
+kable(data_metric, "simple")
+```
+```{r, include=FALSE}
+path <- here()
+folder_benchmark <- str_c(path,"/src/benchmark/R/group1/benchmark/postgresql/External/")
+data_metric <- read_csv(str_c(folder_benchmark,"table-External.csv")) %>% add_column("cor(mean,loc)"=cor(data_metric$mean,data_metric$loc))
+```
+
+```{R, echo = FALSE, results = 'hide', message = FALSE, fig.width=12,fig.height=7 }
+
+#png("evolution.png",height=800,width=1024
+#knitr::opts_chunk$set(echo = TRUE, fig.width = 20, fig.height = 10)
+#plot the results
+ggplot(data_metric, aes(x=loc, y=mean, col= filename, label = filename, size=loc/mean )) +   geom_point() +
+  labs(subtitle="lines of Code Vs Duration in ms",
+       y="mean of duartion in ms",
+       x="number of Lines",
+       title="External Metric") +
+  geom_text(nudge_y = 1, size = 2.9,check_overlap = FALSE) +
+  geom_smooth(data= data_metric, aes(x=loc, y=mean), colour = "grey", method = "lm", se = FALSE)
+```
+
+```{R, echo = FALSE, message = FALSE }
+kable(data_metric, "simple")
+```
+```{r, include=FALSE}
+path <- here()
+folder_benchmark <- str_c(path,"/src/benchmark/R/group1/benchmark/postgresql/Internal/")
+data_metric <- read_csv(str_c(folder_benchmark,"table-Internal.csv")) %>% add_column("cor(mean,loc)"=cor(data_metric$mean,data_metric$loc))
+```
+
+```{R, echo = FALSE, results = 'hide', message = FALSE, fig.width=12,fig.height=7 }
+
+#png("evolution.png",height=800,width=1024
+#knitr::opts_chunk$set(echo = TRUE, fig.width = 20, fig.height = 10)
+#plot the results
+ggplot(data_metric, aes(x=loc, y=mean, col= filename, label = filename, size=loc/mean )) +   geom_point() +
+  labs(subtitle="lines of Code Vs Duration in ms",
+       y="mean of duartion in ms",
+       x="number of Lines",
+       title="Internal Metric") +
+  geom_text(nudge_y = 1, size = 2.9,check_overlap = FALSE) +
+  geom_smooth(data= data_metric, aes(x=loc, y=mean), colour = "grey", method = "lm", se = FALSE)
+```
+
+```{R, echo = FALSE, message = FALSE }
+kable(data_metric, "simple")
+```
+```{R echo = FALSE, results = 'hide', message = FALSE }
+path <- here()
+analysis_name <- "class.dit"
+folder_benchmark <- str_c(path,"/src/benchmark/R/group1/benchmark/single_benchmark/", analysis_name)
+
+myData <- tibble()
+
+jarNames <- list.files(folder_benchmark,"performance5")
+jarNames
+print(jarNames)
+for(jarNumber in seq_along(jarNames))
+{
+
+  myData_temp <-   read_csv(str_c(folder_benchmark,"/",jarNames[jarNumber]))
+  myData_temp <- myData_temp %>% filter(File != "<framework init>") %>% pivot_longer(analysis_name, names_to = "metric", values_to = "duration")
+  if(jarNumber == 1)
+  {
+    myData <- myData_temp
+  }else{
+    myData <- myData %>% full_join(myData_temp)
+  }
+}
+myData
+myNiceData <- myData %>% group_by(File, metric)  %>% summarise(mean = mean(duration), var = var(duration), sd = sd(duration)) #%>% arrange(mean,metric, File)
+myNiceData
+
+linesOfCode <- tibble()
+
+path_loc <- str_c(path,"/src/benchmark/R/group1/benchmark/single_benchmark/loc.pro")
+jarNames <- list.files(path_loc,"analysis")
+jarNames
+for(jarNumber in seq_along(jarNames))
+{
+  linesOfCode_temp <-   read_csv(str_c(path_loc,"/",jarNames[jarNumber]))
+  if(jarNumber == 1 )
+  {
+    linesOfCode <- linesOfCode_temp
+  }else {
+    linesOfCode <- linesOfCode %>% full_join(linesOfCode_temp)
+  }
+}
+
+linesOfCode <- linesOfCode %>% select(Path,loc.pro) %>% rename(File = Path) %>% rename(loc = loc.pro)
+linesOfCode
+
+data_metric <- full_join(myNiceData,linesOfCode)
+data_metric <- mutate(data_metric,File = gsub("^.*\\\\","",File)) %>% add_column("cor(mean,loc)"=cor(data_metric$mean,data_metric$loc)) %>% rename(filename = File)
+data_metric
+```
+```{R, echo = FALSE, results = 'hide', message = FALSE, fig.width=12,fig.height=7 }
+
+#png("evolution.png",height=800,width=1024
+#knitr::opts_chunk$set(echo = TRUE, fig.width = 20, fig.height = 10)
+#plot the results
+ggplot(data_metric, aes(x=loc, y=mean, col= filename, label = filename, size=loc/mean )) +   geom_point() +
+  labs(subtitle="lines of Code Vs Duration in ms",
+       y="mean of duartion in ms",
+       x="number of Lines",
+       title="Depth of Inheritence Tree") +
+        theme(legend.text = element_text(size = 12)) +
+geom_text(nudge_y = 5.5, size = 2.9,check_overlap = TRUE) +
+  geom_smooth(data= data_metric, aes(x=loc, y=mean), colour = "grey", method = "lm", se = FALSE)
+```
+
+```{R, echo = FALSE, message = FALSE }
+kable(data_metric[1:10,], "simple")
+```
+```{R, echo = FALSE, message = FALSE }
+kable(data_metric[11:20,], "simple")
+```
+
+```{R echo = FALSE, results = 'hide', message = FALSE }
+path <- here()
+analysis_name <- "class.NumberOfChildren"
+folder_benchmark <- str_c(path,"/src/benchmark/R/group1/benchmark/single_benchmark/", analysis_name)
+
+myData <- tibble()
+
+jarNames <- list.files(folder_benchmark,"performance5")
+jarNames
+print(jarNames)
+for(jarNumber in seq_along(jarNames))
+{
+
+  myData_temp <-   read_csv(str_c(folder_benchmark,"/",jarNames[jarNumber]))
+  myData_temp <- myData_temp %>% filter(File != "<framework init>") %>% pivot_longer(analysis_name, names_to = "metric", values_to = "duration")
+  if(jarNumber == 1)
+  {
+    myData <- myData_temp
+  }else{
+    myData <- myData %>% full_join(myData_temp)
+  }
+}
+myData
+myNiceData <- myData %>% group_by(File, metric)  %>% summarise(mean = mean(duration), var = var(duration), sd = sd(duration)) #%>% arrange(mean,metric, File)
+myNiceData
+
+linesOfCode <- tibble()
+
+path_loc <- str_c(path,"/src/benchmark/R/group1/benchmark/single_benchmark/loc.pro")
+jarNames <- list.files(path_loc,"analysis")
+jarNames
+for(jarNumber in seq_along(jarNames))
+{
+  linesOfCode_temp <-   read_csv(str_c(path_loc,"/",jarNames[jarNumber]))
+  if(jarNumber == 1 )
+  {
+    linesOfCode <- linesOfCode_temp
+  }else {
+    linesOfCode <- linesOfCode %>% full_join(linesOfCode_temp)
+  }
+}
+
+linesOfCode <- linesOfCode %>% select(Path,loc.pro) %>% rename(File = Path) %>% rename(loc = loc.pro)
+linesOfCode
+
+data_metric <- full_join(myNiceData,linesOfCode)
+data_metric <- mutate(data_metric,File = gsub("^.*\\\\","",File)) %>% add_column("cor(mean,loc)"=cor(data_metric$mean,data_metric$loc)) %>% rename(filename = File)
+data_metric
+```
+```{R, echo = FALSE, results = 'hide', message = FALSE, fig.width=12,fig.height=7 }
+
+#png("evolution.png",height=800,width=1024
+#knitr::opts_chunk$set(echo = TRUE, fig.width = 20, fig.height = 10)
+#plot the results
+ggplot(data_metric, aes(x=loc, y=mean, col= filename, label = filename, size=loc/mean )) +   geom_point() +
+        labs(subtitle="lines of Code Vs Duration in ms",
+             y="mean of duartion in ms",
+             x="number of Lines",
+             title="Number of Children") +
+        theme(legend.text = element_text(size = 12)) +
+        geom_text(nudge_y = 5.5, size = 2.9,check_overlap = TRUE) +
+        geom_smooth(data= data_metric, aes(x=loc, y=mean), colour = "grey", method = "lm", se = FALSE)
+```
+
+```{R, echo = FALSE, message = FALSE }
+kable(data_metric[1:10,], "simple")
+```
+```{R, echo = FALSE, message = FALSE }
+kable(data_metric[11:20,], "simple")
+```
+```{R echo = FALSE, results = 'hide', message = FALSE }
+single_file_data<- function(analysis_name)
+{}
+path <- here()
+analysis_name <- "MaximumNesting"
+folder_benchmark <- str_c(path,"/src/benchmark/R/group1/benchmark/single_benchmark/", analysis_name)
+
+myData <- tibble()
+
+jarNames <- list.files(folder_benchmark,"performance5")
+jarNames
+print(jarNames)
+for(jarNumber in seq_along(jarNames))
+{
+
+  myData_temp <-   read_csv(str_c(folder_benchmark,"/",jarNames[jarNumber]))
+  myData_temp <- myData_temp %>% filter(File != "<framework init>") %>% pivot_longer(analysis_name, names_to = "metric", values_to = "duration")
+  if(jarNumber == 1)
+  {
+    myData <- myData_temp
+  }else{
+    myData <- myData %>% full_join(myData_temp)
+  }
+}
+myData
+myNiceData <- myData %>% group_by(File, metric)  %>% summarise(mean = mean(duration), var = var(duration), sd = sd(duration)) #%>% arrange(mean,metric, File)
+myNiceData
+
+linesOfCode <- tibble()
+
+path_loc <- str_c(path,"/src/benchmark/R/group1/benchmark/single_benchmark/loc.pro")
+jarNames <- list.files(path_loc,"analysis")
+jarNames
+for(jarNumber in seq_along(jarNames))
+{
+  linesOfCode_temp <-   read_csv(str_c(path_loc,"/",jarNames[jarNumber]))
+  if(jarNumber == 1 )
+  {
+    linesOfCode <- linesOfCode_temp
+  }else {
+    linesOfCode <- linesOfCode %>% full_join(linesOfCode_temp)
+  }
+}
+
+linesOfCode <- linesOfCode %>% select(Path,loc.pro) %>% rename(File = Path) %>% rename(loc = loc.pro)
+linesOfCode
+
+data_metric <- full_join(myNiceData,linesOfCode)
+data_metric <- mutate(data_metric,File = gsub("^.*\\\\","",File)) %>% add_column("cor(mean,loc)"=cor(data_metric$mean,data_metric$loc)) %>% rename(filename = File)
+data_metric
+```
+```{R, echo = FALSE, results = 'hide', message = FALSE, fig.width=12,fig.height=7 }
+
+#png("evolution.png",height=800,width=1024
+#knitr::opts_chunk$set(echo = TRUE, fig.width = 20, fig.height = 10)
+#plot the results
+ggplot(data_metric, aes(x=loc, y=mean, col= filename, label = filename, size=loc/mean )) +   geom_point() +
+        labs(subtitle="lines of Code Vs Duration in ms",
+             y="mean of duartion in ms",
+             x="number of Lines",
+             title="Maximum Nesting") +
+        theme(legend.text = element_text(size = 12)) +
+        geom_text(nudge_y = 5.5, size = 2.9,check_overlap = TRUE) +
+        geom_smooth(data= data_metric, aes(x=loc, y=mean), colour = "grey", method = "lm", se = FALSE)
+```
+
+```{R, echo = FALSE, message = FALSE }
+kable(data_metric[1:10,], "simple")
+```
+```{R, echo = FALSE, message = FALSE }
+kable(data_metric[11:20,], "simple")
+```
+```{R echo = FALSE, results = 'hide', message = FALSE }
+path <- here()
+analysis_name <- "AverageNesting"
+folder_benchmark <- str_c(path,"/src/benchmark/R/group1/benchmark/single_benchmark/", analysis_name)
+
+myData <- tibble()
+
+jarNames <- list.files(folder_benchmark,"performance5")
+jarNames
+print(jarNames)
+for(jarNumber in seq_along(jarNames))
+{
+
+  myData_temp <-   read_csv(str_c(folder_benchmark,"/",jarNames[jarNumber]))
+  myData_temp <- myData_temp %>% filter(File != "<framework init>") %>% pivot_longer(analysis_name, names_to = "metric", values_to = "duration")
+  if(jarNumber == 1)
+  {
+    myData <- myData_temp
+  }else{
+    myData <- myData %>% full_join(myData_temp)
+  }
+}
+myData
+myNiceData <- myData %>% group_by(File, metric)  %>% summarise(mean = mean(duration), var = var(duration), sd = sd(duration)) #%>% arrange(mean,metric, File)
+myNiceData
+
+linesOfCode <- tibble()
+
+path_loc <- str_c(path,"/src/benchmark/R/group1/benchmark/single_benchmark/loc.pro")
+jarNames <- list.files(path_loc,"analysis")
+jarNames
+for(jarNumber in seq_along(jarNames))
+{
+  linesOfCode_temp <-   read_csv(str_c(path_loc,"/",jarNames[jarNumber]))
+  if(jarNumber == 1 )
+  {
+    linesOfCode <- linesOfCode_temp
+  }else {
+    linesOfCode <- linesOfCode %>% full_join(linesOfCode_temp)
+  }
+}
+
+linesOfCode <- linesOfCode %>% select(Path,loc.pro) %>% rename(File = Path) %>% rename(loc = loc.pro)
+linesOfCode
+
+data_metric <- full_join(myNiceData,linesOfCode)
+data_metric <- mutate(data_metric,File = gsub("^.*\\\\","",File)) %>% add_column("cor(mean,loc)"=cor(data_metric$mean,data_metric$loc)) %>% rename(filename = File)
+data_metric
+```
+```{R, echo = FALSE, results = 'hide', message = FALSE, fig.width=12,fig.height=7 }
+
+#png("evolution.png",height=800,width=1024
+#knitr::opts_chunk$set(echo = TRUE, fig.width = 20, fig.height = 10)
+#plot the results
+ggplot(data_metric, aes(x=loc, y=mean, col= filename, label = filename, size=loc/mean )) +   geom_point() +
+        labs(subtitle="lines of Code Vs Duration in ms",
+             y="mean of duartion in ms",
+             x="number of Lines",
+             title="Average Nesting") +
+        theme(legend.text = element_text(size = 12)) +
+        geom_text(nudge_y = 5.5, size = 2.9,check_overlap = TRUE) +
+        geom_smooth(data= data_metric, aes(x=loc, y=mean), colour = "grey", method = "lm", se = FALSE)
+```
+
+```{R, echo = FALSE, message = FALSE }
+kable(data_metric[1:10,], "simple")
+```
+```{R, echo = FALSE, message = FALSE }
+kable(data_metric[11:20,], "simple")
+```
+```{R, echo = FALSE, message = FALSE }
+data <- tibble(Eigenschaft="Auswahl Jars nach",Parameter="Popularität") %>%
+         add_row(Eigenschaft="Auswahl Jars nach", Parameter="Aktualität") %>%
+         add_row(Eigenschaft="OS",Parameter="Windows 10 21H2 (Build 19044.1566") %>%
+         add_row(Eigenschaft="CPU",Parameter="Intel 4770K") %>%
+         add_row(Eigenschaft="RAM",Parameter="32GB") %>%
+         add_row(Eigenschaft="VM",Parameter="GraalVM openjdk version \"17.0.2\" 2022-01-18") %>%
+         add_row(Eigenschaft="VM-Einstellungen",Parameter="Standardeinstellungen ohne Änderungen") %>%
+         add_row(Eigenschaft="Anzahl Benchmarkdurchläufe",Parameter="5")
+kable(data, "simple")
+```
+
+```{R echo = FALSE, results = 'hide', message = FALSE }
+path <- here()
+analysis_name <- "class.dit"
+folder_benchmark <- str_c(path,"/src/benchmark/R/group1/benchmark/allgemeiner_benchmark/", analysis_name)
+
+myData <- tibble()
+
+jarNames <- list.files(folder_benchmark,"performance5")
+jarNames
+print(jarNames)
+for(jarNumber in seq_along(jarNames))
+{
+
+  myData_temp <-   read_csv(str_c(folder_benchmark,"/",jarNames[jarNumber]))
+  myData_temp <- myData_temp %>% filter(File != "<framework init>") %>% pivot_longer(analysis_name, names_to = "metric", values_to = "duration")
+  if(jarNumber == 1)
+  {
+    myData <- myData_temp
+  }else{
+    myData <- myData %>% full_join(myData_temp)
+  }
+}
+myData
+myNiceData <- myData %>% group_by(File, metric)  %>% summarise(mean = mean(duration), var = var(duration), sd = sd(duration)) #%>% arrange(mean,metric, File)
+myNiceData
+
+linesOfCode <- tibble()
+
+path_loc <- str_c(path,"/src/benchmark/R/group1/benchmark/allgemeiner_benchmark/loc.pro")
+jarNames <- list.files(path_loc,"analysis")
+jarNames
+for(jarNumber in seq_along(jarNames))
+{
+  linesOfCode_temp <-   read_csv(str_c(path_loc,"/",jarNames[jarNumber]))
+  if(jarNumber == 1 )
+  {
+    linesOfCode <- linesOfCode_temp
+  }else {
+    linesOfCode <- linesOfCode %>% full_join(linesOfCode_temp)
+  }
+}
+
+linesOfCode <- linesOfCode %>% select(Path,loc.pro) %>% rename(File = Path) %>% rename(loc = loc.pro)
+linesOfCode
+
+data_metric <- full_join(myNiceData,linesOfCode)
+data_metric <- mutate(data_metric,File = gsub("^.*\\\\","",File)) %>% add_column("cor(mean,loc)"=cor(data_metric$mean,data_metric$loc)) %>% rename(filename = File)
+data_metric
+```
+```{R, echo = FALSE, results = 'hide', message = FALSE, fig.width=12,fig.height=7 }
+
+#png("evolution.png",height=800,width=1024
+#knitr::opts_chunk$set(echo = TRUE, fig.width = 20, fig.height = 10)
+#plot the results
+ggplot(data_metric, aes(x=loc, y=mean, col= filename, label = filename, size=loc/mean )) +   geom_point() +
+        labs(subtitle="lines of Code Vs Duration in ms",
+             y="mean of duartion in ms",
+             x="number of Lines",
+             title="Depth of Inheritence Tree") +
+        theme(legend.text = element_text(size = 12)) +
+        geom_text(nudge_y = 5.5, size = 2.9,check_overlap = TRUE) +
+        geom_smooth(data= data_metric, aes(x=loc, y=mean), colour = "grey", method = "lm", se = FALSE)
+```
+
+```{R, echo = FALSE, message = FALSE }
+kable(data_metric[1:10,], "simple")
+```
+```{R, echo = FALSE, message = FALSE }
+kable(data_metric[11:20,], "simple")
+```
+
+```{R echo = FALSE, results = 'hide', message = FALSE }
+path <- here()
+analysis_name <- "class.NumberOfChildren"
+folder_benchmark <- str_c(path,"/src/benchmark/R/group1/benchmark/allgemeiner_benchmark/", analysis_name)
+
+myData <- tibble()
+
+jarNames <- list.files(folder_benchmark,"performance5")
+jarNames
+print(jarNames)
+for(jarNumber in seq_along(jarNames))
+{
+
+  myData_temp <-   read_csv(str_c(folder_benchmark,"/",jarNames[jarNumber]))
+  myData_temp <- myData_temp %>% filter(File != "<framework init>") %>% pivot_longer(analysis_name, names_to = "metric", values_to = "duration")
+  if(jarNumber == 1)
+  {
+    myData <- myData_temp
+  }else{
+    myData <- myData %>% full_join(myData_temp)
+  }
+}
+myData
+myNiceData <- myData %>% group_by(File, metric)  %>% summarise(mean = mean(duration), var = var(duration), sd = sd(duration)) #%>% arrange(mean,metric, File)
+myNiceData
+
+linesOfCode <- tibble()
+
+path_loc <- str_c(path,"/src/benchmark/R/group1/benchmark/allgemeiner_benchmark/loc.pro")
+jarNames <- list.files(path_loc,"analysis")
+jarNames
+for(jarNumber in seq_along(jarNames))
+{
+  linesOfCode_temp <-   read_csv(str_c(path_loc,"/",jarNames[jarNumber]))
+  if(jarNumber == 1 )
+  {
+    linesOfCode <- linesOfCode_temp
+  }else {
+    linesOfCode <- linesOfCode %>% full_join(linesOfCode_temp)
+  }
+}
+
+linesOfCode <- linesOfCode %>% select(Path,loc.pro) %>% rename(File = Path) %>% rename(loc = loc.pro)
+linesOfCode
+
+data_metric <- full_join(myNiceData,linesOfCode)
+data_metric <- mutate(data_metric,File = gsub("^.*\\\\","",File)) %>% add_column("cor(mean,loc)"=cor(data_metric$mean,data_metric$loc)) %>% rename(filename = File)
+data_metric
+```
+```{R, echo = FALSE, results = 'hide', message = FALSE, fig.width=12,fig.height=7 }
+
+#png("evolution.png",height=800,width=1024
+#knitr::opts_chunk$set(echo = TRUE, fig.width = 20, fig.height = 10)
+#plot the results
+ggplot(data_metric, aes(x=loc, y=mean, col= filename, label = filename, size=loc/mean )) +   geom_point() +
+        labs(subtitle="lines of Code Vs Duration in ms",
+             y="mean of duartion in ms",
+             x="number of Lines",
+             title="Number of Children") +
+        theme(legend.text = element_text(size = 12)) +
+        geom_text(nudge_y = 5.5, size = 2.9,check_overlap = TRUE) +
+        geom_smooth(data= data_metric, aes(x=loc, y=mean), colour = "grey", method = "lm", se = FALSE)
+```
+
+```{R, echo = FALSE, message = FALSE }
+kable(data_metric[1:10,], "simple")
+```
+```{R, echo = FALSE, message = FALSE }
+kable(data_metric[11:20,], "simple")
+```
+```{R echo = FALSE, results = 'hide', message = FALSE }
+single_file_data<- function(analysis_name)
+{}
+path <- here()
+analysis_name <- "MaximumNesting"
+folder_benchmark <- str_c(path,"/src/benchmark/R/group1/benchmark/allgemeiner_benchmark/", analysis_name)
+
+myData <- tibble()
+
+jarNames <- list.files(folder_benchmark,"performance5")
+jarNames
+print(jarNames)
+for(jarNumber in seq_along(jarNames))
+{
+
+  myData_temp <-   read_csv(str_c(folder_benchmark,"/",jarNames[jarNumber]))
+  myData_temp <- myData_temp %>% filter(File != "<framework init>") %>% pivot_longer(analysis_name, names_to = "metric", values_to = "duration")
+  if(jarNumber == 1)
+  {
+    myData <- myData_temp
+  }else{
+    myData <- myData %>% full_join(myData_temp)
+  }
+}
+myData
+myNiceData <- myData %>% group_by(File, metric)  %>% summarise(mean = mean(duration), var = var(duration), sd = sd(duration)) #%>% arrange(mean,metric, File)
+myNiceData
+
+linesOfCode <- tibble()
+
+path_loc <- str_c(path,"/src/benchmark/R/group1/benchmark/allgemeiner_benchmark/loc.pro")
+jarNames <- list.files(path_loc,"analysis")
+jarNames
+for(jarNumber in seq_along(jarNames))
+{
+  linesOfCode_temp <-   read_csv(str_c(path_loc,"/",jarNames[jarNumber]))
+  if(jarNumber == 1 )
+  {
+    linesOfCode <- linesOfCode_temp
+  }else {
+    linesOfCode <- linesOfCode %>% full_join(linesOfCode_temp)
+  }
+}
+
+linesOfCode <- linesOfCode %>% select(Path,loc.pro) %>% rename(File = Path) %>% rename(loc = loc.pro)
+linesOfCode
+
+data_metric <- full_join(myNiceData,linesOfCode)
+data_metric <- mutate(data_metric,File = gsub("^.*\\\\","",File)) %>% add_column("cor(mean,loc)"=cor(data_metric$mean,data_metric$loc)) %>% rename(filename = File)
+data_metric
+```
+```{R, echo = FALSE, results = 'hide', message = FALSE, fig.width=12,fig.height=7 }
+
+#png("evolution.png",height=800,width=1024
+#knitr::opts_chunk$set(echo = TRUE, fig.width = 20, fig.height = 10)
+#plot the results
+ggplot(data_metric, aes(x=loc, y=mean, col= filename, label = filename, size=loc/mean )) +   geom_point() +
+        labs(subtitle="lines of Code Vs Duration in ms",
+             y="mean of duartion in ms",
+             x="number of Lines",
+             title="Maximum Nesting") +
+        theme(legend.text = element_text(size = 12)) +
+        geom_text(nudge_y = 5.5, size = 2.9,check_overlap = TRUE) +
+        geom_smooth(data= data_metric, aes(x=loc, y=mean), colour = "grey", method = "lm", se = FALSE)
+```
+
+```{R, echo = FALSE, message = FALSE }
+kable(data_metric[1:10,], "simple")
+```
+```{R, echo = FALSE, message = FALSE }
+kable(data_metric[11:20,], "simple")
+```
+```{R echo = FALSE, results = 'hide', message = FALSE }
+path <- here()
+analysis_name <- "AverageNesting"
+folder_benchmark <- str_c(path,"/src/benchmark/R/group1/benchmark/allgemeiner_benchmark/", analysis_name)
+
+myData <- tibble()
+
+jarNames <- list.files(folder_benchmark,"performance5")
+jarNames
+print(jarNames)
+for(jarNumber in seq_along(jarNames))
+{
+
+  myData_temp <-   read_csv(str_c(folder_benchmark,"/",jarNames[jarNumber]))
+  myData_temp <- myData_temp %>% filter(File != "<framework init>") %>% pivot_longer(analysis_name, names_to = "metric", values_to = "duration")
+  if(jarNumber == 1)
+  {
+    myData <- myData_temp
+  }else{
+    myData <- myData %>% full_join(myData_temp)
+  }
+}
+myData
+myNiceData <- myData %>% group_by(File, metric)  %>% summarise(mean = mean(duration), var = var(duration), sd = sd(duration)) #%>% arrange(mean,metric, File)
+myNiceData
+
+linesOfCode <- tibble()
+
+path_loc <- str_c(path,"/src/benchmark/R/group1/benchmark/allgemeiner_benchmark/loc.pro")
+jarNames <- list.files(path_loc,"analysis")
+jarNames
+for(jarNumber in seq_along(jarNames))
+{
+  linesOfCode_temp <-   read_csv(str_c(path_loc,"/",jarNames[jarNumber]))
+  if(jarNumber == 1 )
+  {
+    linesOfCode <- linesOfCode_temp
+  }else {
+    linesOfCode <- linesOfCode %>% full_join(linesOfCode_temp)
+  }
+}
+
+linesOfCode <- linesOfCode %>% select(Path,loc.pro) %>% rename(File = Path) %>% rename(loc = loc.pro)
+linesOfCode
+
+data_metric <- full_join(myNiceData,linesOfCode)
+data_metric <- mutate(data_metric,File = gsub("^.*\\\\","",File)) %>% add_column("cor(mean,loc)"=cor(data_metric$mean,data_metric$loc)) %>% rename(filename = File)
+data_metric
+```
+```{R, echo = FALSE, results = 'hide', message = FALSE, fig.width=12,fig.height=7 }
+
+#png("evolution.png",height=800,width=1024
+#knitr::opts_chunk$set(echo = TRUE, fig.width = 20, fig.height = 10)
+#plot the results
+ggplot(data_metric, aes(x=loc, y=mean, col= filename, label = filename, size=loc/mean )) +   geom_point() +
+        labs(subtitle="lines of Code Vs Duration in ms",
+             y="mean of duartion in ms",
+             x="number of Lines",
+             title="Average Nesting") +
+        theme(legend.text = element_text(size = 12)) +
+        geom_text(nudge_y = 5.5, size = 2.9,check_overlap = TRUE) +
+        geom_smooth(data= data_metric, aes(x=loc, y=mean), colour = "grey", method = "lm", se = FALSE)
+```
+
+```{R, echo = FALSE, message = FALSE }
+kable(data_metric[1:10,], "simple")
+```
+```{R, echo = FALSE, message = FALSE }
+kable(data_metric[11:20,], "simple")
+```
+```{R, echo = FALSE, message = FALSE }
+data <- tibble(Eigenschaft="Auswahl Jars nach",Parameter="Popularität") %>%
+        add_row(Eigenschaft="Auswahl Jars nach", Parameter="Aktualität") %>%
+        add_row(Eigenschaft="OS",Parameter="Windows 10 21H2 (Build 19044.1566") %>%
+        add_row(Eigenschaft="CPU",Parameter="Intel 4770K") %>%
+        add_row(Eigenschaft="RAM",Parameter="32GB") %>%
+        add_row(Eigenschaft="VM",Parameter="GraalVM openjdk version \"17.0.2\" 2022-01-18") %>%
+        add_row(Eigenschaft="VM-Einstellungen",Parameter="Standardeinstellungen ohne Änderungen") %>%
+        add_row(Eigenschaft="Anzahl Benchmarkdurchläufe",Parameter="5")
+kable(data, "simple")
+```
