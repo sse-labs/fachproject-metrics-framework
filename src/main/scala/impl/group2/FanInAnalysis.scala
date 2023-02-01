@@ -72,5 +72,5 @@ class FanInAnalysis extends SingleFileAnalysis {
    * this needs to return the same as Method.fullyQualifiedSignature()
    */
   private def fqs(invc: MethodInvocationInstruction): String =
-    invc.methodDescriptor.toJava(s"${invc.declaringClass.asObjectType.toJava}.${invc.name}")
+    invc.methodDescriptor.toJava(s"${invc.declaringClass.toJava}.${invc.name}")
 }

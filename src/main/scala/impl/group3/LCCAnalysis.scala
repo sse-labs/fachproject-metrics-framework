@@ -33,7 +33,7 @@ class LCCAnalysis extends SingleFileAnalysis {
         val numberOfPossibleConnections = (publicMethodsCount * (publicMethodsCount-1) / 2).toDouble
 
         //calculating the direct connections and save all of them in the map in order to find the indirect connections in the next step
-        val allPublicMethods= c.methods.filter(_.isPublic)
+        val allPublicMethods= c.methods.filter(_.isPublic).filter(_.isNotAbstract)
         var directlyConnectedMethodPairs = 0.toDouble
         val map = scala.collection.mutable.Map[String, List[String]]()
         if(c.fields.nonEmpty && numberOfPossibleConnections!=0){
