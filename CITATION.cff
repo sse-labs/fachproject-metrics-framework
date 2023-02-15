@@ -1,0 +1,19 @@
+# This CITATION.cff file was generated with cffinit.
+# Visit https://bit.ly/cffinit to generate yours today!
+
+cff-version: 1.2.0
+title: OPAL Based Software Metrics Framework
+message: >-
+  If you use this software, please cite it using the
+  metadata from this file.
+type: software
+authors:
+  - given-names: Johannes
+    family-names: Düsing
+    email: johannes.duesing@tu-dortmund.de
+    affiliation: TU Dortmund
+    orcid: 'https://orcid.org/0000-0002-9367-2206'
+repository-code: 'https://github.com/sse-labs/fachproject-metrics-framework'
+abstract: >-
+  A simple framework using OPAL to provide interfaces for
+  calculating numerical software metrics.
